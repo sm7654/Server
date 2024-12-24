@@ -49,10 +49,10 @@ namespace ServerSide
 
                 ServerSock.Bind(Ep); /*  */
 
-                //new Thread(() => portProvider(ServerSock)).Start();
+                //new Thread(() => portProvider(ServerSock)).Start);
 
-                
 
+                Encryption.GenerateKeys();
                 ServerConnectedForm OnlineServerForm = new ServerConnectedForm(ServerSock);
 
                 OnlineServerForm.Show();

@@ -52,12 +52,26 @@ namespace ServerSide
 
         public static void CloseConnection()
         {
+            //hell
 
             //Send To all Sessions to close connection
-
+            foreach (var session in sessionsList)
+            {
+                session.disconnect();
+            }
 
             serverSocket.Close();
             ClosingController.btnExit_Click();
+        }
+
+        public static void CloseAllConnection()
+        {
+            foreach (var session in sessionsList)
+            {
+                session.disconnect();
+            }
+            sessionsList = null;
+            sessionsList = new List<session>();
         }
     }
 }

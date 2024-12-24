@@ -10,6 +10,25 @@ namespace ServerSide
     static class Encryption
     {
         private static RSA Service;
+        private static string publicKey;
+        private static string privateKey;
+
+        public static byte[] GenerateKeys()
+        {
+            Service = RSA.Create();
+            publicKey = Service.ToXmlString(false);
+            privateKey = Service.ToXmlString(true);
+            return Encoding.UTF8.GetBytes(publicKey);
+        }
+
+        public static byte[] getpublickey()
+        {
+            return Encoding.UTF8.GetBytes(publicKey);
+        }
+
+
+
+
 
         public static byte[] Encrypt(string data, string Key)
         {
@@ -18,12 +37,12 @@ namespace ServerSide
 
             return Service.Encrypt(Encoding.UTF8.GetBytes(data), RSAEncryptionPadding.Pkcs1);
         }
-        public static byte[] Decrypt(string data, string Key)
+        public static string Decrypt(byte[] data)//
         {
             Service = RSA.Create();
-            Service.FromXmlString(Key);
+            Service.FromXmlString(privateKey);
 
-            return Service.Decrypt(Encoding.UTF8.GetBytes(data), RSAEncryptionPadding.Pkcs1);
+            return Encoding.UTF8.GetString(Service.Decrypt(data, RSAEncryptionPadding.Pkcs1));
         }
     }
 }

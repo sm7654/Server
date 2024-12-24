@@ -38,7 +38,6 @@
             this.RegisterButton = new System.Windows.Forms.Button();
             this.loginButton = new System.Windows.Forms.Button();
             this.RegisterStatus = new System.Windows.Forms.Label();
-            this.CloseButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // usernameTextbox
@@ -106,32 +105,17 @@
             // RegisterStatus
             // 
             this.RegisterStatus.AutoSize = true;
+            this.RegisterStatus.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.RegisterStatus.Location = new System.Drawing.Point(396, 318);
             this.RegisterStatus.Name = "RegisterStatus";
-            this.RegisterStatus.Size = new System.Drawing.Size(0, 13);
+            this.RegisterStatus.Size = new System.Drawing.Size(2, 15);
             this.RegisterStatus.TabIndex = 7;
-            // 
-            // CloseButton
-            // 
-            this.CloseButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.CloseButton.FlatAppearance.BorderSize = 0;
-            this.CloseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.CloseButton.Font = new System.Drawing.Font("Gisha", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.CloseButton.ForeColor = System.Drawing.Color.FloralWhite;
-            this.CloseButton.Location = new System.Drawing.Point(775, -1);
-            this.CloseButton.Margin = new System.Windows.Forms.Padding(0);
-            this.CloseButton.Name = "CloseButton";
-            this.CloseButton.Size = new System.Drawing.Size(57, 18);
-            this.CloseButton.TabIndex = 8;
-            this.CloseButton.UseVisualStyleBackColor = false;
-            this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
             // 
             // LoginRegisterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(832, 450);
-            this.Controls.Add(this.CloseButton);
             this.Controls.Add(this.RegisterStatus);
             this.Controls.Add(this.loginButton);
             this.Controls.Add(this.RegisterButton);
@@ -139,7 +123,6 @@
             this.Controls.Add(this.username);
             this.Controls.Add(this.passwordTextbox);
             this.Controls.Add(this.usernameTextbox);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "LoginRegisterForm";
             this.Text = "LoginRegisterForm";
@@ -159,6 +142,5 @@
         private System.Windows.Forms.Button RegisterButton;
         private System.Windows.Forms.Button loginButton;
         private System.Windows.Forms.Label RegisterStatus;
-        private System.Windows.Forms.Button CloseButton;
     }
 }

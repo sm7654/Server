@@ -1,18 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 namespace ServerSide
 {
 
-    internal class session
+    public class session
     {
         private string Code;
+        
         private Socket Controller;
+        private string ControllerKnickname;
         private string ControllerPublicKey;
+
         private Socket ClientConn = null;
+        private string ClientKnickname;
         private string ClientPublicKey;
         
 
@@ -28,18 +34,22 @@ namespace ServerSide
             
 
             byte[] EncryptedCode = Encryption.Encrypt($"CDR: {Code}", ControllerPublicKey);
-
+            byte[] g = Encoding.UTF8.GetBytes(EncryptedCode.Length.ToString());
             Controller.Send(Encoding.UTF8.GetBytes(EncryptedCode.Length.ToString()));
             Controller.Send(EncryptedCode);
 
         }
-        public bool AddClient(Socket Client, string PublicKey)
+        public bool AddClient(Socket Client, string PublicKey, string name)
         {
             if (Client == null)
                 return false;
             this.ClientConn = Client;
             this.ClientPublicKey = PublicKey;
-            byte[] ConnectedMassege = Encoding.UTF8.GetBytes(200.ToString());
+            this.ClientKnickname = name;
+
+            byte[] ConnectedMassege = Encryption.Encrypt($"200;{this.ClientConn.RemoteEndPoint.ToString()}", this.ControllerPublicKey);
+            Controller.Send(Encoding.UTF8.GetBytes(ConnectedMassege.Length.ToString()));
+            Thread.Sleep(200);
             Controller.Send(ConnectedMassege);
 
 
@@ -50,15 +60,65 @@ namespace ServerSide
         {
             return this.Code;
         }
-
+        public void SetControllerKnickname(string knickname)
+        {
+            this.ControllerKnickname = knickname;
+        }
+        public string GetControllerKnickname()
+        {
+            return this.ControllerKnickname;
+        }
 
         public void SetControllerKey(string publicKey)
         {
             this.ControllerPublicKey = publicKey;
         }
+        public (string, string) GetControllerEndPoint()
+        {
+            return (  ((IPEndPoint)this.Controller.RemoteEndPoint).Address.ToString(), ((IPEndPoint)this.Controller.RemoteEndPoint).Port.ToString()  );
+        }
 
 
 
+        public (string, string) GetCLientEndPoint()
+        {
+            if (ClientConn == null)
+                return ("Not Connected", "Not Connected");
+            return (((IPEndPoint)this.Controller.RemoteEndPoint).Address.ToString(), ((IPEndPoint)this.Controller.RemoteEndPoint).Port.ToString());
+        }
+        public string GetClienKnickname()
+        {
+            if (this.ClientKnickname == null)
+                return "Oops...";
+            return this.ClientKnickname;
+        }
+
+
+        public bool disconnect()
+        {
+            try
+            {
+                if (ClientConn != null)
+                    ClientConn.Close();
+
+
+                Controller.Send(Encoding.UTF8.GetBytes("Shut;"));
+                Controller.Close();
+                ClientPublicKey = null;
+                ControllerPublicKey = null;
+                ClientConn = null;
+                Controller = null;
+
+                Code = null;
+                GC.SuppressFinalize(this);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
 
 
 
