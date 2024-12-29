@@ -197,19 +197,10 @@ namespace ServerSide
         {
             string Code = SessionSearch.Text;
 
-            /*
-            if (Code == "")
-            {
-                foreach (var Control in SessionViewPanel.Controls)
-                {
-                    ((sessionLayot)Control).Show();
-                }
-            }
-            */
 
             foreach (var Control in SessionViewPanel.Controls)
             {
-                if ( !( (sessionLayot)Control ).GetSession().GetCode().StartsWith(Code) )
+                if ( !( (sessionLayot)Control ).GetSession().GetCode().Contains(Code) )
                 {
                     ((sessionLayot)Control).Hide();
                 } else

@@ -102,7 +102,11 @@ namespace ServerSide
                     ClientConn.Close();
 
 
-                Controller.Send(Encoding.UTF8.GetBytes("Shut;"));
+                byte[] EncryptedBytes = Encryption.Encrypt("Shut;", ControllerPublicKey);
+                Controller.Send(Encoding.UTF8.GetBytes(EncryptedBytes.Length.ToString()));
+                Thread.Sleep(200);
+                Controller.Send(EncryptedBytes);
+                
                 Controller.Close();
                 ClientPublicKey = null;
                 ControllerPublicKey = null;
@@ -127,6 +131,7 @@ namespace ServerSide
 
         private void ReadDataFromMicroConntroller()
         {
+            //ignore*****************
             while (true)
             {
                 try
@@ -142,7 +147,7 @@ namespace ServerSide
 
                     // send message to controller
                 }
-                catch (FormatException e) { Console.WriteLine("Did not recived a number....."); }
+                catch (FormatException e) { }
             }
         }
 
