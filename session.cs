@@ -7,8 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-
-using OpenSource.UPnP;
+ 
 namespace ServerSide
 {
 
@@ -21,8 +20,10 @@ namespace ServerSide
         private string ControllerPublicKey;
 
         private Socket ClientConn = null;
+        private Socket UdpClientConn = null;
         private string ClientKnickname;
         private string ClientPublicKey;
+        private EndPoint ClientUDP_endpoint;
         
 
 
@@ -54,6 +55,7 @@ namespace ServerSide
             Controller.Send(Encoding.UTF8.GetBytes(ConnectedMassege.Length.ToString()));
             Thread.Sleep(200);
             Controller.Send(ConnectedMassege);
+            
 
 
             return true;
@@ -75,6 +77,14 @@ namespace ServerSide
         public void SetControllerKey(string publicKey)
         {
             this.ControllerPublicKey = publicKey;
+        }
+        public void SetClientUdpEndPoint(EndPoint En)
+        {
+            this.ClientUDP_endpoint = En;
+        }
+        public string GetClientUdpEndPoint()
+        {
+            return this.ClientUDP_endpoint.ToString();
         }
         public (string, string) GetControllerEndPoint()
         {
@@ -98,40 +108,16 @@ namespace ServerSide
 
 
 
-
-
-
-        public bool disconnect()
+        public void sendVideoBytesToClient(byte[] bytes)
         {
-            try
-            {
-                if (ClientConn != null)
-                    ClientConn.Close();
-
-
-                byte[] EncryptedBytes = Encryption.Encrypt("Shut;", ControllerPublicKey);
-                Controller.Send(Encoding.UTF8.GetBytes(EncryptedBytes.Length.ToString()));
-                Thread.Sleep(200);
-                Controller.Send(EncryptedBytes);
-                
-                Controller.Close();
-                ClientPublicKey = null;
-                ControllerPublicKey = null;
-                ClientConn = null;
-                Controller = null;
-
-                Code = null;
-                GC.SuppressFinalize(this);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
+            /*
+             * try {
+             *  udpConnection.SendTo(bytes, ClientUDP_endpoint);
+             * } 
+             * catch (Exception e) {   } 
+             *
+             */
         }
-
-
 
 
 
@@ -157,6 +143,45 @@ namespace ServerSide
                 catch (FormatException e) { }
             }
         }
+
+        public bool disconnect()
+        {
+            try
+            {
+                if (ClientConn != null)
+                    ClientConn.Close();
+
+                if (UdpClientConn != null)
+                    UdpClientConn.Close();
+                byte[] EncryptedBytes = Encryption.Encrypt("Shut;", ControllerPublicKey);
+                Controller.Send(Encoding.UTF8.GetBytes(EncryptedBytes.Length.ToString()));
+                Thread.Sleep(200);
+                Controller.Send(EncryptedBytes);
+                Controller.Close();
+
+
+                ClientPublicKey = null;
+                ControllerPublicKey = null;
+
+
+                ClientConn = null;
+                Controller = null;
+                UdpClientConn = null;
+
+
+                Code = null;
+
+                ClientUDP_endpoint = null;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+
 
 
 

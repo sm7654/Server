@@ -42,12 +42,18 @@ namespace ServerSide
 
         public static session GetSession(string x)
         {
-            foreach (var session in sessionsList)
+            try
             {
-                if (session.GetCode().Equals(x))
-                    return session;
+                foreach (var session in sessionsList)
+                {
+                    if (session.GetCode().Equals(x))
+                        return session;
+                }
             }
+            catch (Exception e)
+            {}
             return null;
+
         }
 
         public static void CloseConnection()
