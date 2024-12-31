@@ -6,6 +6,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+
+using OpenSource.UPnP;
 namespace ServerSide
 {
 
@@ -92,6 +95,10 @@ namespace ServerSide
                 return "Oops...";
             return this.ClientKnickname;
         }
+
+
+
+
 
 
         public bool disconnect()

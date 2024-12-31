@@ -53,6 +53,31 @@ namespace ServerSide
         }
         private void ServerConnectedForm_Load(object sender, EventArgs e)
         {
+            /*
+            byte[] buffer = new byte[1024];  // Buffer size can be adjusted as needed
+            EndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0); // To store client details
+
+            EndPoint endPoint = new IPEndPoint(IPAddress.Loopback, 3000);
+
+            // Create a UDP socket
+            Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+            // Bind the socket to the endpoint
+            serverSocket.Bind(endPoint);
+
+            int receivedLength = serverSocket.ReceiveFrom(buffer, ref clientEndPoint);
+            string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedLength);
+
+            Console.WriteLine($"Received from {clientEndPoint}: {receivedMessage}");
+            Speedometer.Text = $"{receivedMessage} from {clientEndPoint}";
+            serverSocket.SendTo(Encoding.UTF8.GetBytes("hello back!") ,clientEndPoint);
+            */
+
+
+
+
+
+
             new Thread(() => ServerHandler()).Start();
         }
 
@@ -68,7 +93,13 @@ namespace ServerSide
 
             while (true)
             {
+                
+
+
+
                 Socket Conn = ServerSock.Accept();
+
+                
 
 
 
@@ -83,6 +114,7 @@ namespace ServerSide
 
             try
             {
+
 
                 byte[] PublicKeyBytes = new byte[1024];
                 int Keylength = Conn.Receive(PublicKeyBytes);
