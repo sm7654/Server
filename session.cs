@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -39,6 +40,10 @@ namespace ServerSide
 
             byte[] EncryptedCode = Encryption.Encrypt($"CDR: {Code}", ControllerPublicKey);
             byte[] g = Encoding.UTF8.GetBytes(EncryptedCode.Length.ToString());
+
+
+
+
             Controller.Send(Encoding.UTF8.GetBytes(EncryptedCode.Length.ToString()));
             Controller.Send(EncryptedCode);
 
@@ -55,6 +60,23 @@ namespace ServerSide
             Controller.Send(Encoding.UTF8.GetBytes(ConnectedMassege.Length.ToString()));
             Thread.Sleep(200);
             Controller.Send(ConnectedMassege);
+
+
+            Client.Send(Encoding.UTF8.GetBytes( Encoding.UTF8.GetBytes(ControllerPublicKey).Length.ToString() ));
+            Thread.Sleep(200);
+            Client.Send(Encoding.UTF8.GetBytes(ControllerPublicKey));
+
+
+
+            byte[] AESkey = new byte[128];
+            int bytesread = Client.Receive(AESkey);
+
+            byte[] AESIv = new byte[1024];
+            bytesread = Client.Receive(AESIv);
+
+            Controller.Send(AESkey);
+            Thread.Sleep(200);
+            Controller.Send(AESIv);
             
 
 

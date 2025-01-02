@@ -129,6 +129,7 @@
             // 
             // SessionViewPanel
             // 
+            this.SessionViewPanel.AutoScroll = true;
             this.SessionViewPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.SessionViewPanel.Location = new System.Drawing.Point(5, 43);
             this.SessionViewPanel.Name = "SessionViewPanel";

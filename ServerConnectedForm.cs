@@ -142,6 +142,7 @@ namespace ServerSide
                 }
                 else
                 {
+
                     session DesiredSession = ServerServices.GetSession(Identifier);
                     if (DesiredSession == null)
                     {
@@ -220,7 +221,6 @@ namespace ServerSide
 
         private void ControllCliked(object sender, EventArgs e)
         {
-            Speedometer.Text = "clicked";
             this.Layout = (sessionLayot)sender;
             this.Layout.BorderStyle = BorderStyle.Fixed3D;
         }
