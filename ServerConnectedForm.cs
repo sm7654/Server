@@ -111,19 +111,11 @@ namespace ServerSide
 
 
 
-                byte[] BufferSizeRecive = new byte[1024];
-                int bytesRead = Conn.Receive(BufferSizeRecive);
-
-                int IdentifierLength = int.Parse(Encoding.UTF8.GetString(BufferSizeRecive, 0, bytesRead));
-                byte[] IdentifierBuffer = new byte[IdentifierLength];
-
-                Conn.Receive(IdentifierBuffer);
-
                 
-                string[] CodeAndKnickname = Encryption.Decrypt(IdentifierBuffer).Split(';');
-                string Identifier = CodeAndKnickname[0];
+                string[] CodeAndKnickname = reciveIdentifiers(Conn);
+                string username = CodeAndKnickname[0];
 
-                if (Identifier == "Esp")
+                if (username == "Esp")
                 {
                     
                     session session = new session(Conn, GenerateRandomString(5), PublicKey);
@@ -142,18 +134,41 @@ namespace ServerSide
                 }
                 else
                 {
+                    bool Exist;
+                    do
+                    {
 
-                    session DesiredSession = ServerServices.GetSession(Identifier);
+                        if (CodeAndKnickname.Length > 2)
+                            Exist = SqlService.LoginSql(username, CodeAndKnickname[1], false);
+                        else
+                            Exist = SqlService.Register(username, CodeAndKnickname[1], false);
+                        username = CodeAndKnickname[0];
+                        if (Exist)
+                        {
+                            Conn.Send(Encoding.UTF8.GetBytes("200"));
+                            break;
+                        }
+                        else
+                        {
+                            CodeAndKnickname = reciveIdentifiers(Conn);
+                            Conn.Send(Encoding.UTF8.GetBytes("400"));
+                        }
+
+                    }
+
+                    while (!Exist);
+                    session DesiredSession = ServerServices.GetSession(CodeAndKnickname[2]);
                     if (DesiredSession == null)
                     {
                         Conn.Send(Encoding.UTF8.GetBytes("400"));
                     }
                     else
                     {
+                        Conn.Send(Encoding.UTF8.GetBytes("200"));
                         DesiredSession.AddClient(Conn, PublicKey, CodeAndKnickname[1]);
                         foreach (var Control in SessionViewPanel.Controls)
                         {
-                            if ( ((sessionLayot)Control).GetSession().GetCode() == Identifier ) {
+                            if ( ((sessionLayot)Control).GetSession().GetCode() == username ) {
 
                                 ((sessionLayot)Control).SetClientInLayout(DesiredSession);
 
@@ -169,6 +184,18 @@ namespace ServerSide
                 
             }
             catch (Exception e) { }
+        }
+        private string[] reciveIdentifiers(Socket Conn)
+        {
+
+            byte[] BufferSizeRecive = new byte[1024];
+            int bytesRead = Conn.Receive(BufferSizeRecive);
+
+            int IdentifierLength = int.Parse(Encoding.UTF8.GetString(BufferSizeRecive, 0, bytesRead));
+            byte[] IdentifierBuffer = new byte[IdentifierLength];
+
+            Conn.Receive(IdentifierBuffer);
+            return Encryption.Decrypt(IdentifierBuffer).Split(';');
         }
 
         private void ListenToUdpClientConnections()
@@ -221,6 +248,8 @@ namespace ServerSide
 
         private void ControllCliked(object sender, EventArgs e)
         {
+            if (this.Layout != null)
+                this.Layout.BorderStyle = BorderStyle.None;
             this.Layout = (sessionLayot)sender;
             this.Layout.BorderStyle = BorderStyle.Fixed3D;
         }

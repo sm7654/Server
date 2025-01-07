@@ -56,17 +56,22 @@ namespace ServerSide
             this.ClientPublicKey = PublicKey;
             this.ClientKnickname = name;
 
+            // send to conrolller client connected
             byte[] ConnectedMassege = Encryption.Encrypt($"200;{this.ClientConn.RemoteEndPoint.ToString()}", this.ControllerPublicKey);
             Controller.Send(Encoding.UTF8.GetBytes(ConnectedMassege.Length.ToString()));
             Thread.Sleep(200);
             Controller.Send(ConnectedMassege);
 
 
+            
+           
+            // send clien the controller's public key
             Client.Send(Encoding.UTF8.GetBytes( Encoding.UTF8.GetBytes(ControllerPublicKey).Length.ToString() ));
             Thread.Sleep(200);
             Client.Send(Encoding.UTF8.GetBytes(ControllerPublicKey));
 
 
+            // recive from to client the AES keys and send it to controller
 
             byte[] AESkey = new byte[128];
             int bytesread = Client.Receive(AESkey);

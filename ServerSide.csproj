@@ -107,6 +107,7 @@
     <Compile Include="sessionLayot.Designer.cs">
       <DependentUpon>sessionLayot.cs</DependentUpon>
     </Compile>
+    <Compile Include="SqlService.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
