@@ -7,6 +7,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +16,7 @@ using System.Web;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace ServerSide
 {
@@ -22,6 +25,11 @@ namespace ServerSide
         Socket ServerSock;
         Socket UdpClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         sessionLayot Layout;
+
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool consoleRun();
 
         public static string GenerateRandomString(int length)
         {
@@ -54,6 +62,7 @@ namespace ServerSide
         public ServerConnectedForm()
         {
             InitializeComponent();
+            consoleRun();
         }
         private void ServerConnectedForm_Load(object sender, EventArgs e)
         {
@@ -109,78 +118,73 @@ namespace ServerSide
                 Conn.Send(Encryption.getpublickey());
 
 
-
-
                 
-                string[] CodeAndKnickname = reciveIdentifiers(Conn);
-                string username = CodeAndKnickname[0];
 
-                if (username == "Esp")
+                string[] CodeAndKnickname = reciveIdentifiers(Conn);
+                
+
+                if (CodeAndKnickname[0] == "Esp")
                 {
-                    
+
                     session session = new session(Conn, GenerateRandomString(5), PublicKey);
                     session.SetControllerKnickname(CodeAndKnickname[1]);
                     ServerServices.addSession(session);
 
-                    this.BeginInvoke(new Action(() => {
-                        
+                    this.BeginInvoke(new Action(() =>
+                    {
+
                         sessionLayot test = new sessionLayot(session);
                         test.Click += ControllCliked;
                         SessionViewPanel.Controls.Add(test);
-                        
-                    }));
 
+                    }));
                     return;
                 }
                 else
                 {
-                    bool Exist;
+                    
                     do
                     {
-
+                        string username = CodeAndKnickname[0];
+                        bool success = false;
+                        bool LoginRequest = false;
                         if (CodeAndKnickname.Length > 2)
-                            Exist = SqlService.LoginSql(username, CodeAndKnickname[1], false);
-                        else
-                            Exist = SqlService.Register(username, CodeAndKnickname[1], false);
-                        username = CodeAndKnickname[0];
-                        if (Exist)
                         {
-                            Conn.Send(Encoding.UTF8.GetBytes("200"));
-                            break;
+                            success = SqlService.LoginSql(username, CodeAndKnickname[1], false);
+                            LoginRequest = true;
                         }
                         else
+                            success = SqlService.Register(username, CodeAndKnickname[1], false);
+
+
+                        if (success)
                         {
-                            CodeAndKnickname = reciveIdentifiers(Conn);
-                            Conn.Send(Encoding.UTF8.GetBytes("400"));
-                        }
-
-                    }
-
-                    while (!Exist);
-                    session DesiredSession = ServerServices.GetSession(CodeAndKnickname[2]);
-                    if (DesiredSession == null)
-                    {
-                        Conn.Send(Encoding.UTF8.GetBytes("400"));
-                    }
-                    else
-                    {
-                        Conn.Send(Encoding.UTF8.GetBytes("200"));
-                        DesiredSession.AddClient(Conn, PublicKey, CodeAndKnickname[1]);
-                        foreach (var Control in SessionViewPanel.Controls)
-                        {
-                            if ( ((sessionLayot)Control).GetSession().GetCode() == username ) {
-
-                                ((sessionLayot)Control).SetClientInLayout(DesiredSession);
-
-                                break;
+                            if (LoginRequest)
+                            {
+                                if (sessoinSearch(Conn, PublicKey, CodeAndKnickname))
+                                {
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                Conn.Send(Encoding.UTF8.GetBytes("201"));
                             }
                         }
-
-                        //IPAddress CLientIP = ((IPEndPoint)Conn.RemoteEndPoint).Address;
+                        else
+                        {
+                            Conn.Send(Encoding.UTF8.GetBytes("400"));
+                        }
                         
+                        CodeAndKnickname = reciveIdentifiers(Conn);
+
                     }
-                    return;
+
+                    while (true);
+                    Console.WriteLine();
+
                 }
+                
                 
             }
             catch (Exception e) { }
@@ -197,6 +201,38 @@ namespace ServerSide
             Conn.Receive(IdentifierBuffer);
             return Encryption.Decrypt(IdentifierBuffer).Split(';');
         }
+
+
+
+        private bool sessoinSearch(Socket Conn, string PublicKey, string[] CodeAndKnickname)
+        {
+            string username = CodeAndKnickname[0];
+            
+           
+            session DesiredSession = ServerServices.GetSession(CodeAndKnickname[2]);
+            if (DesiredSession == null)
+            {
+                Conn.Send(Encoding.UTF8.GetBytes("400"));
+                return false;
+            }
+            else
+            {
+                Conn.Send(Encoding.UTF8.GetBytes("200"));
+                DesiredSession.AddClient(Conn, PublicKey, CodeAndKnickname[1]);
+                foreach (var Control in SessionViewPanel.Controls)
+                {
+                    if (((sessionLayot)Control).GetSession().GetCode() == CodeAndKnickname[2])
+                        ((sessionLayot)Control).SetClientInLayout(DesiredSession);
+                }
+                return true;
+
+            }
+
+            
+        }
+
+
+
 
         private void ListenToUdpClientConnections()
         {

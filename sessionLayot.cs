@@ -62,5 +62,10 @@ namespace ServerSide
         {
 
         }
+
+        private void sessionLayot_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
