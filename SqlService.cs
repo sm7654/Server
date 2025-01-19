@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -56,7 +57,9 @@ namespace ServerSide
         public static bool Register(string User, string pass, bool Ismaneger)
         {
             string command;
-            if (LoginSql(User, pass, false))
+
+            pass = Hash(pass);
+            if (LoginSql(User, pass, Ismaneger))
                 return false;
             try
             {
@@ -84,6 +87,16 @@ namespace ServerSide
             return SqlConnection.Equals(null);
         }
 
+
+        private static string Hash(string pass)
+        {
+            SHA1 sHA1 = SHA1.Create();
+            byte[] hashedPass = sHA1.ComputeHash(Encoding.UTF8.GetBytes(pass));
+
+            string gg = Convert.ToBase64String(hashedPass);
+
+            return gg;
+        }
 
     }
 }

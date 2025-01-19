@@ -38,13 +38,8 @@ namespace ServerSide
             this.ControllerPublicKey = publicKey;
             
 
-            byte[] EncryptedCode = Encryption.Encrypt($"CDR: {Code}", ControllerPublicKey);
-            byte[] g = Encoding.UTF8.GetBytes(EncryptedCode.Length.ToString());
-
-
-
-
-            Controller.Send(Encoding.UTF8.GetBytes(EncryptedCode.Length.ToString()));
+            byte[] EncryptedCode = Encryption.Encrypt($"{Code}", ControllerPublicKey);
+            
             Controller.Send(EncryptedCode);
 
         }

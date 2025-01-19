@@ -42,7 +42,7 @@
             // 
             // usernameTextbox
             // 
-            this.usernameTextbox.Location = new System.Drawing.Point(337, 129);
+            this.usernameTextbox.Location = new System.Drawing.Point(319, 147);
             this.usernameTextbox.Name = "usernameTextbox";
             this.usernameTextbox.Size = new System.Drawing.Size(182, 20);
             this.usernameTextbox.TabIndex = 0;
@@ -57,7 +57,7 @@
             // 
             this.passwordTextbox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.passwordTextbox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.passwordTextbox.Location = new System.Drawing.Point(337, 183);
+            this.passwordTextbox.Location = new System.Drawing.Point(319, 201);
             this.passwordTextbox.Name = "passwordTextbox";
             this.passwordTextbox.PasswordChar = '#';
             this.passwordTextbox.Size = new System.Drawing.Size(182, 20);
@@ -66,40 +66,45 @@
             // username
             // 
             this.username.AutoSize = true;
-            this.username.Location = new System.Drawing.Point(334, 113);
+            this.username.Font = new System.Drawing.Font("Microsoft Tai Le", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.username.Location = new System.Drawing.Point(315, 125);
             this.username.Name = "username";
-            this.username.Size = new System.Drawing.Size(56, 13);
+            this.username.Size = new System.Drawing.Size(67, 16);
             this.username.TabIndex = 3;
             this.username.Text = "username:";
             // 
             // password
             // 
             this.password.AutoSize = true;
-            this.password.Location = new System.Drawing.Point(334, 167);
+            this.password.Font = new System.Drawing.Font("Microsoft Tai Le", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.password.Location = new System.Drawing.Point(315, 182);
             this.password.Name = "password";
-            this.password.Size = new System.Drawing.Size(52, 13);
+            this.password.Size = new System.Drawing.Size(64, 16);
             this.password.TabIndex = 4;
             this.password.Text = "password";
             // 
             // RegisterButton
             // 
-            this.RegisterButton.Location = new System.Drawing.Point(292, 256);
+            this.RegisterButton.BackColor = System.Drawing.Color.White;
+            this.RegisterButton.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("RegisterButton.BackgroundImage")));
+            this.RegisterButton.Location = new System.Drawing.Point(431, 262);
             this.RegisterButton.Name = "RegisterButton";
-            this.RegisterButton.Size = new System.Drawing.Size(98, 35);
+            this.RegisterButton.Size = new System.Drawing.Size(70, 23);
             this.RegisterButton.TabIndex = 5;
             this.RegisterButton.Text = "AddUser";
             this.RegisterButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.RegisterButton.UseVisualStyleBackColor = true;
+            this.RegisterButton.UseVisualStyleBackColor = false;
             this.RegisterButton.Click += new System.EventHandler(this.RegisterButton_Click);
             // 
             // loginButton
             // 
-            this.loginButton.Location = new System.Drawing.Point(458, 256);
+            this.loginButton.BackColor = System.Drawing.Color.White;
+            this.loginButton.Location = new System.Drawing.Point(318, 261);
             this.loginButton.Name = "loginButton";
-            this.loginButton.Size = new System.Drawing.Size(98, 35);
+            this.loginButton.Size = new System.Drawing.Size(72, 24);
             this.loginButton.TabIndex = 6;
             this.loginButton.Text = "Login";
-            this.loginButton.UseVisualStyleBackColor = true;
+            this.loginButton.UseVisualStyleBackColor = false;
             this.loginButton.Click += new System.EventHandler(this.loginButton_Click);
             // 
             // RegisterStatus
@@ -115,6 +120,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(832, 450);
             this.Controls.Add(this.RegisterStatus);
             this.Controls.Add(this.loginButton);

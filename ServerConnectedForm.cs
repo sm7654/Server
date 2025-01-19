@@ -88,12 +88,7 @@ namespace ServerSide
             {
                 
 
-
-
                 Socket Conn = ServerSock.Accept();
-
-
-
 
 
                 new Thread(() => SelectionOfConnections(Conn)).Start();
@@ -125,6 +120,12 @@ namespace ServerSide
 
                 if (CodeAndKnickname[0] == "Esp")
                 {
+
+                    if (!IsMicroNameExist(CodeAndKnickname[1]))
+                    {
+                        Conn.Send(Encryption.Encrypt("500", PublicKey));
+                        return;
+                    }
 
                     session session = new session(Conn, GenerateRandomString(5), PublicKey);
                     session.SetControllerKnickname(CodeAndKnickname[1]);
@@ -218,7 +219,7 @@ namespace ServerSide
             else
             {
                 Conn.Send(Encoding.UTF8.GetBytes("200"));
-                DesiredSession.AddClient(Conn, PublicKey, CodeAndKnickname[1]);
+                DesiredSession.AddClient(Conn, PublicKey, CodeAndKnickname[0]);
                 foreach (var Control in SessionViewPanel.Controls)
                 {
                     if (((sessionLayot)Control).GetSession().GetCode() == CodeAndKnickname[2])
@@ -230,7 +231,18 @@ namespace ServerSide
 
             
         }
+        private bool IsMicroNameExist(string name)
+        {
+            foreach (var sessionOb in SessionViewPanel.Controls)
+            {
+                sessionLayot CurrentSession = (sessionLayot)sessionOb;
 
+                if (((sessionLayot)sessionOb).GetSession().GetControllerKnickname() == name)
+                    return false;
+            }
+
+            return true;
+        }
 
 
 

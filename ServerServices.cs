@@ -15,14 +15,43 @@ namespace ServerSide
     {
         private static Socket serverSocket;
         private static List<session> sessionsList = new List<session>();
-        private static int clientsCount = 0;
+
+
+
+
+        public void SendServerRelatedMassage(string msg, bool ToClient, string Key)
+        {
+            if (ToClient)
+            {
+                byte[] encryptedMsg = Encoding.UTF8.GetBytes("Server;").Concat(Encryption.Encrypt(msg, Key)).ToArray();
+                
+
+
+                byte[] gg = Encoding.UTF8.GetBytes("Server;");
+                bool contains = encryptedMsg.Take(gg.Length).SequenceEqual(gg);
+
+                if (contains)
+                {
+                    Console.WriteLine("The encrypted data contains - 'Server;'");
+                }
+
+
+
+                if (encryptedMsg.Contains(byte.Parse("Server;")))
+                {
+
+                }
+            } else
+            {
+
+            }
+        }
 
         public static void AddServerSock(Socket ServerSock) { serverSocket = ServerSock; }
 
         public static void addSession(session session)
         {
             sessionsList.Add(session);
-            clientsCount++;
         }
 
         public static void removeSession(session session) 
