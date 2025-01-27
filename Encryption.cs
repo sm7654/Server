@@ -38,12 +38,28 @@ namespace ServerSide
 
             return Service.Encrypt(Encoding.UTF8.GetBytes(data), RSAEncryptionPadding.Pkcs1);
         }
+        public static byte[] EncryptBytes(byte[] data, string Key)
+        {
+            Service = RSA.Create();
+            Service.FromXmlString(Key);
+
+            return Service.Encrypt(data, RSAEncryptionPadding.Pkcs1);
+        }
+
         public static string Decrypt(byte[] data)//
         {
             Service = RSA.Create();
             Service.FromXmlString(privateKey);
 
             return Encoding.UTF8.GetString(Service.Decrypt(data, RSAEncryptionPadding.Pkcs1));
+        }
+
+        public static byte[] DecryptToBytes(byte[] data)//
+        {
+            Service = RSA.Create();
+            Service.FromXmlString(privateKey);
+
+            return Service.Decrypt(data, RSAEncryptionPadding.Pkcs1);
         }
     }
 }

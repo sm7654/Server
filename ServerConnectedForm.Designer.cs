@@ -1,4 +1,6 @@
-﻿namespace ServerSide
+﻿using System.Runtime.CompilerServices;
+
+namespace ServerSide
 {
     partial class ServerConnectedForm
     {
@@ -197,5 +199,10 @@
         private System.Windows.Forms.FlowLayoutPanel SessionViewPanel;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.TextBox SessionSearch;
+
+        public System.Windows.Forms.FlowLayoutPanel.ControlCollection getSessionLayoutControls()
+        {
+            return SessionViewPanel.Controls;
+        }
     }
 }

@@ -195,7 +195,6 @@
             this.Name = "sessionLayot";
             this.Size = new System.Drawing.Size(354, 103);
             this.Load += new System.EventHandler(this.sessionLayot_Load);
-            this.DoubleClick += new System.EventHandler(this.Test_DoubleClick);
             this.ConectionTable.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

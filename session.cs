@@ -42,7 +42,66 @@ namespace ServerSide
             
             Controller.Send(EncryptedCode);
 
+
         }
+
+        private void MicroStream()
+        {
+            try
+            {
+                while (Controller.Connected && ClientConn.Connected)
+                {
+                    byte[] buffer = new byte[1024];
+                    int byterec = Controller.Receive(buffer);
+                    int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
+                    buffer = new byte[bufferSize];
+                    Controller.Receive(buffer);
+
+                    if (ServerServices.IsServerMassage(buffer))
+                    {
+                        ServerServices.HandleServerMessages(buffer, this);
+
+                    }
+
+                    ClientConn.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
+                    Thread.Sleep(200);
+                    ClientConn.Send(buffer);
+                }
+            }
+            catch (Exception e) { }
+        }
+        private void ClientStream()
+        {
+            try
+            {
+                while (Controller.Connected && ClientConn.Connected)
+                {
+                    byte[] buffer = new byte[1024];
+                    int byterec = ClientConn.Receive(buffer);
+                    int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
+                    buffer = new byte[bufferSize];
+                    ClientConn.Receive(buffer);
+
+                    if (ServerServices.IsServerMassage(buffer))
+                    {
+                        ServerServices.HandleServerMessages(buffer, this);
+                    } else
+                    {
+
+                        Controller.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
+                        Thread.Sleep(300);
+                        Controller.Send(buffer);
+                    }
+
+                }
+            }
+            catch (Exception e) { }
+
+        }
+
+
+
+
         public bool AddClient(Socket Client, string PublicKey, string name)
         {
             if (Client == null)
@@ -77,49 +136,20 @@ namespace ServerSide
             Controller.Send(AESkey);
             Thread.Sleep(200);
             Controller.Send(AESIv);
-            
 
 
+            new Thread(() => MicroStream()).Start();
+            new Thread(() => ClientStream()).Start();
             return true;
         }
 
-        public string GetCode()
-        {
-            return this.Code;
-        }
-        public void SetControllerKnickname(string knickname)
-        {
-            this.ControllerKnickname = knickname;
-        }
-        public string GetControllerKnickname()
-        {
-            return this.ControllerKnickname;
-        }
-
-        public void SetControllerKey(string publicKey)
-        {
-            this.ControllerPublicKey = publicKey;
-        }
-        public void SetClientUdpEndPoint(EndPoint En)
-        {
-            this.ClientUDP_endpoint = En;
-        }
-        public string GetClientUdpEndPoint()
-        {
-            return this.ClientUDP_endpoint.ToString();
-        }
-        public (string, string) GetControllerEndPoint()
-        {
-            return (  ((IPEndPoint)this.Controller.RemoteEndPoint).Address.ToString(), ((IPEndPoint)this.Controller.RemoteEndPoint).Port.ToString()  );
-        }
-
-
+        
 
         public (string, string) GetCLientEndPoint()
         {
             if (ClientConn == null)
                 return ("Not Connected", "Not Connected");
-            return (((IPEndPoint)this.Controller.RemoteEndPoint).Address.ToString(), ((IPEndPoint)this.Controller.RemoteEndPoint).Port.ToString());
+            return (((IPEndPoint)this.ClientConn.RemoteEndPoint).Address.ToString(), ((IPEndPoint)this.ClientConn.RemoteEndPoint).Port.ToString());
         }
         public string GetClienKnickname()
         {
@@ -128,6 +158,25 @@ namespace ServerSide
             return this.ClientKnickname;
         }
 
+
+        public void disconnectClient()
+        {
+            ClientConn = null;
+            UdpClientConn = null;
+            ClientKnickname = null;
+            ClientPublicKey = null;
+            ClientUDP_endpoint = null;
+            byte[] bytes = 
+                Encryption.EncryptBytes(
+                    ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes(";cDis")).ToArray()
+                    , ControllerPublicKey
+                );
+
+            Controller.Send(Encoding.UTF8.GetBytes(bytes.Length.ToString()));
+            Thread.Sleep(200);
+            Controller.Send(bytes);
+
+        }
 
 
         public void sendVideoBytesToClient(byte[] bytes)
@@ -206,6 +255,36 @@ namespace ServerSide
 
 
 
+
+        public string GetCode()
+        {
+            return this.Code;
+        }
+        public void SetControllerKnickname(string knickname)
+        {
+            this.ControllerKnickname = knickname;
+        }
+        public string GetControllerKnickname()
+        {
+            return this.ControllerKnickname;
+        }
+
+        public void SetControllerKey(string publicKey)
+        {
+            this.ControllerPublicKey = publicKey;
+        }
+        public void SetClientUdpEndPoint(EndPoint En)
+        {
+            this.ClientUDP_endpoint = En;
+        }
+        public string GetClientUdpEndPoint()
+        {
+            return this.ClientUDP_endpoint.ToString();
+        }
+        public (string, string) GetControllerEndPoint()
+        {
+            return (((IPEndPoint)this.Controller.RemoteEndPoint).Address.ToString(), ((IPEndPoint)this.Controller.RemoteEndPoint).Port.ToString());
+        }
 
 
     }

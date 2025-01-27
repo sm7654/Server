@@ -15,10 +15,41 @@ namespace ServerSide
     {
         private static Socket serverSocket;
         private static List<session> sessionsList = new List<session>();
+        private static byte[] ServerRole = Encoding.UTF8.GetBytes("%%ServerRelatedMessage%%");
 
 
 
 
+        public static bool IsServerMassage(byte[] data)
+        {
+            try
+            {
+                data = Encryption.DecryptToBytes(data);
+                if (data.Take(ServerRole.Length).SequenceEqual(ServerRole))
+                {
+                    return true;
+                }
+            }
+            catch (Exception e){ 
+                Console.Write(e.Message);
+            }
+            return false;
+        }
+        public static void HandleServerMessages(byte[] buffer, session currentSession)
+        {
+
+            buffer = Encryption.DecryptToBytes(buffer);
+            string[] message = Encoding.UTF8.GetString(buffer).Split(';');
+            if (message[1] == "disconnect")
+            {
+                FormController.disconnectClient(currentSession);
+                currentSession.disconnectClient();
+            }
+        }
+
+
+
+/*
         public void SendServerRelatedMassage(string msg, bool ToClient, string Key)
         {
             if (ToClient)
@@ -45,7 +76,7 @@ namespace ServerSide
             {
 
             }
-        }
+        }*/
 
         public static void AddServerSock(Socket ServerSock) { serverSocket = ServerSock; }
 
@@ -83,6 +114,10 @@ namespace ServerSide
             {}
             return null;
 
+        }
+        public static byte[] GetServerRole()
+        {
+            return ServerRole;
         }
 
         public static void CloseConnection()

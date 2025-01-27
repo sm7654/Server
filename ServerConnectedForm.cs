@@ -57,6 +57,7 @@ namespace ServerSide
             ServerServices.AddServerSock(serverSock);
             UdpClientSocket.Bind(new IPEndPoint(IPAddress.Any, 65000));
             InitializeComponent();
+            FormController.SetForm(this);
         }
 
         public ServerConnectedForm()
@@ -121,7 +122,7 @@ namespace ServerSide
                 if (CodeAndKnickname[0] == "Esp")
                 {
 
-                    if (!IsMicroNameExist(CodeAndKnickname[1]))
+                    if (IsMicroNameExist(CodeAndKnickname[1]))
                     {
                         Conn.Send(Encryption.Encrypt("500", PublicKey));
                         return;
@@ -182,7 +183,6 @@ namespace ServerSide
                     }
 
                     while (true);
-                    Console.WriteLine();
 
                 }
                 
@@ -213,13 +213,13 @@ namespace ServerSide
             session DesiredSession = ServerServices.GetSession(CodeAndKnickname[2]);
             if (DesiredSession == null)
             {
-                Conn.Send(Encoding.UTF8.GetBytes("400"));
+                Conn.Send(Encoding.UTF8.GetBytes("403"));
                 return false;
             }
             else
             {
                 Conn.Send(Encoding.UTF8.GetBytes("200"));
-                DesiredSession.AddClient(Conn, PublicKey, CodeAndKnickname[0]);
+                DesiredSession.AddClient(Conn, PublicKey, username);
                 foreach (var Control in SessionViewPanel.Controls)
                 {
                     if (((sessionLayot)Control).GetSession().GetCode() == CodeAndKnickname[2])
@@ -237,11 +237,11 @@ namespace ServerSide
             {
                 sessionLayot CurrentSession = (sessionLayot)sessionOb;
 
-                if (((sessionLayot)sessionOb).GetSession().GetControllerKnickname() == name)
-                    return false;
+                if (CurrentSession.GetSession().GetControllerKnickname() == name)
+                    return true;
             }
 
-            return true;
+            return false;
         }
 
 
@@ -261,8 +261,7 @@ namespace ServerSide
                     new Thread(() =>
                     {
                         session DesiredSession = ServerServices.GetSession(roomCode);
-                        
-                        DesiredSession?.SetClientUdpEndPoint(En);
+                        DesiredSession.SetClientUdpEndPoint(En);
                     }).Start();
                 }
                 catch (Exception e) { }

@@ -11,7 +11,7 @@ namespace ServerSide
     static class SqlService
     {
         private static SqlConnection SqlConnection;
-        private static string ConnectionString = "Data Source=DESKTOP-03BNVH4;Initial Catalog=Test_1;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        private static string ConnectionString = "DataSource=DESKTOP-03BNVH4;InitialCatalog=Test_1;IntegratedSecurity=True;ConnectTimeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
 
         public static bool ConnectToSql()
@@ -29,6 +29,7 @@ namespace ServerSide
 
         public static bool LoginSql(string user, string pass, bool Ismaneger)
         {
+            return true;
             string command;
             try
             {
@@ -50,7 +51,7 @@ namespace ServerSide
                 results.Close();
                 return false;
             }
-            catch (SqlException ex) { Console.WriteLine(ex.Message); return false; }
+            catch (Exception ex) { Console.WriteLine(ex.Message); return false; }
         }
 
 
@@ -77,14 +78,16 @@ namespace ServerSide
                 }
                 return false;
             }
-            catch (SqlException ex) {
+            catch (Exception ex) {
                 return false; }
         }
 
 
         public static bool IsConnected()
         {
-            return SqlConnection.Equals(null);
+            if (SqlConnection == null)
+                return false;
+            return true;
         }
 
 

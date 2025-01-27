@@ -32,10 +32,16 @@ namespace ServerSide
             this.ConnectedSession = session;//
         }
 
-        private void Test_DoubleClick(object sender, EventArgs e)
+
+        public void UpdateClientStatus_dis()
         {
-            
+            (ClientIp.Text, ClientPort.Text) = ("____", "____");
+            ClientKickname.Text = ("disconnected");
+
         }
+
+
+
         public session GetSession()
         {
             return ConnectedSession;
