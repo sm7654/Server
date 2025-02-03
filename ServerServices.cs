@@ -38,45 +38,30 @@ namespace ServerSide
         public static void HandleServerMessages(byte[] buffer, session currentSession)
         {
 
-            buffer = Encryption.DecryptToBytes(buffer);
-            string[] message = Encoding.UTF8.GetString(buffer).Split(';');
-            if (message[1] == "disconnect")
+            string[] message = Encryption.Decrypt(buffer).Split(';');
+            
+            switch (message[1])
             {
-                FormController.disconnectClient(currentSession);
-                currentSession.disconnectClient();
+                case "302":
+
+                    FormController.disconnectClient(currentSession);
+                    currentSession.disconnectClient();
+                    break;
+
+                case "303":
+                    
+                    FormController.disconnectController(currentSession);
+                    currentSession.disconnect();
+                    break;
+
+
+                default: break;
             }
+ 
         }
 
 
 
-/*
-        public void SendServerRelatedMassage(string msg, bool ToClient, string Key)
-        {
-            if (ToClient)
-            {
-                byte[] encryptedMsg = Encoding.UTF8.GetBytes("Server;").Concat(Encryption.Encrypt(msg, Key)).ToArray();
-                
-
-
-                byte[] gg = Encoding.UTF8.GetBytes("Server;");
-                bool contains = encryptedMsg.Take(gg.Length).SequenceEqual(gg);
-
-                if (contains)
-                {
-                    Console.WriteLine("The encrypted data contains - 'Server;'");
-                }
-
-
-
-                if (encryptedMsg.Contains(byte.Parse("Server;")))
-                {
-
-                }
-            } else
-            {
-
-            }
-        }*/
 
         public static void AddServerSock(Socket ServerSock) { serverSocket = ServerSock; }
 

@@ -39,7 +39,12 @@ namespace ServerSide
             ClientKickname.Text = ("disconnected");
 
         }
+        public void UpdateControllerStatus_dis()
+        {
+            (MicroIp.Text, MicroPort.Text) = ("____", "____");
+            MicroName.Text = ("disconnected");
 
+        }
 
 
         public session GetSession()

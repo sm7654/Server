@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,6 +43,9 @@ namespace ServerSide
             
             Controller.Send(EncryptedCode);
 
+            new Thread(() => MicroStream()).Start();
+
+
 
         }
 
@@ -49,7 +53,7 @@ namespace ServerSide
         {
             try
             {
-                while (Controller.Connected && ClientConn.Connected)
+                while (Controller.Connected)
                 {
                     byte[] buffer = new byte[1024];
                     int byterec = Controller.Receive(buffer);
@@ -62,10 +66,12 @@ namespace ServerSide
                         ServerServices.HandleServerMessages(buffer, this);
 
                     }
-
-                    ClientConn.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
-                    Thread.Sleep(200);
-                    ClientConn.Send(buffer);
+                    if (ClientConn != null)
+                    {
+                        ClientConn.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
+                        Thread.Sleep(200);
+                        ClientConn.Send(buffer);
+                    }
                 }
             }
             catch (Exception e) { }
@@ -138,7 +144,6 @@ namespace ServerSide
             Controller.Send(AESIv);
 
 
-            new Thread(() => MicroStream()).Start();
             new Thread(() => ClientStream()).Start();
             return true;
         }
@@ -168,7 +173,7 @@ namespace ServerSide
             ClientUDP_endpoint = null;
             byte[] bytes = 
                 Encryption.EncryptBytes(
-                    ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes(";cDis")).ToArray()
+                    ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes(";302")).ToArray()
                     , ControllerPublicKey
                 );
 
@@ -177,6 +182,9 @@ namespace ServerSide
             Controller.Send(bytes);
 
         }
+
+
+        
 
 
         public void sendVideoBytesToClient(byte[] bytes)
@@ -217,6 +225,9 @@ namespace ServerSide
 
         public bool disconnect()
         {
+
+            ServerServices.removeSession(this);
+            FormController.RemoveSession(this);
             try
             {
                 if (ClientConn != null)
@@ -225,10 +236,13 @@ namespace ServerSide
                 if (UdpClientConn != null)
                     UdpClientConn.Close();
                 byte[] EncryptedBytes = Encryption.Encrypt("Shut;", ControllerPublicKey);
-                Controller.Send(Encoding.UTF8.GetBytes(EncryptedBytes.Length.ToString()));
-                Thread.Sleep(200);
-                Controller.Send(EncryptedBytes);
-                Controller.Close();
+                if (Controller != null)
+                {
+                    Controller.Send(Encoding.UTF8.GetBytes(EncryptedBytes.Length.ToString()));
+                    Thread.Sleep(200);
+                    Controller.Send(EncryptedBytes);
+                    Controller.Close();
+                }
 
 
                 ClientPublicKey = null;
@@ -285,7 +299,7 @@ namespace ServerSide
         {
             return (((IPEndPoint)this.Controller.RemoteEndPoint).Address.ToString(), ((IPEndPoint)this.Controller.RemoteEndPoint).Port.ToString());
         }
-
+        
 
     }
 }
