@@ -43,7 +43,6 @@ namespace ServerSide
         {
             (MicroIp.Text, MicroPort.Text) = ("____", "____");
             MicroName.Text = ("disconnected");
-
         }
 
 

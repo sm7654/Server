@@ -26,6 +26,7 @@ namespace ServerSide
         private string ClientKnickname;
         private string ClientPublicKey;
         private EndPoint ClientUDP_endpoint;
+        private bool IsClientConnected = false;
         
 
 
@@ -144,6 +145,7 @@ namespace ServerSide
             Controller.Send(AESIv);
 
 
+            IsClientConnected = true;
             new Thread(() => ClientStream()).Start();
             return true;
         }
@@ -244,6 +246,8 @@ namespace ServerSide
                     Controller.Close();
                 }
 
+                if (!IsClientConnected)
+                    return true;
 
                 ClientPublicKey = null;
                 ControllerPublicKey = null;
