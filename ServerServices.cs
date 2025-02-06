@@ -19,12 +19,27 @@ namespace ServerSide
 
 
 
-
-        public static bool IsServerMassage(byte[] data)
+        public static bool IsServerMassageRSA(byte[] data)
         {
             try
             {
-                data = Encryption.DecryptToBytes(data);
+                data = RsaEncryption.DecryptToBytes(data);
+                if (data.Take(ServerRole.Length).SequenceEqual(ServerRole))
+                {
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message);
+            }
+            return false;
+        }
+        public static bool IsServerMassageAES(byte[] data)
+        {
+            try
+            {
+                data = AesEncryption.DecryptData(data);
                 if (data.Take(ServerRole.Length).SequenceEqual(ServerRole))
                 {
                     return true;
@@ -38,13 +53,13 @@ namespace ServerSide
         public static void HandleServerMessages(byte[] buffer, session currentSession)
         {
 
-            string[] message = Encryption.Decrypt(buffer).Split(';');
+            string[] message = RsaEncryption.Decrypt(buffer).Split(';');
             
             switch (message[1])
             {
-                case "SAVEX":
-                    
-
+                case "EXPERIMENT_RESULTS":
+                    //SqlService.AddExperimentToDatabase(message);
+                    currentSession.disconnectClient();
                     break;
                 case "302":
 

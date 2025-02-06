@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Security.Cryptography;
@@ -11,7 +12,7 @@ namespace ServerSide
     static class SqlService
     {
         private static SqlConnection SqlConnection;
-        private static string ConnectionString = "DataSource=DESKTOP-03BNVH4;InitialCatalog=Test_1;IntegratedSecurity=True;ConnectTimeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        private static string ConnectionString = "DataSource=DESKTOP-03BNVH4;InitialCatalog=WindTunnel_Users;IntegratedSecurity=True;ConnectTimeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
 
         public static bool ConnectToSql()
@@ -82,6 +83,22 @@ namespace ServerSide
                 return false; }
         }
 
+
+        public static void AddExperimentToDatabase(string[] resultsData)
+        {
+            try
+            {
+                string ExperName = resultsData[2]; 
+                string timestamp = resultsData[3]; 
+                string deltaSpeed = resultsData[4];
+                string temp = resultsData[5];
+                string cameraSpeed = resultsData[6];
+                string innerPressure = resultsData[7];
+                string humidity = resultsData[8];
+
+            }
+            catch (Exception e) { }
+        }
 
         public static bool IsConnected()
         {

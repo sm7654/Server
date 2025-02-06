@@ -111,7 +111,7 @@ namespace ServerSide
                 byte[] PublicKeyBytes = new byte[1024];
                 int Keylength = Conn.Receive(PublicKeyBytes);
                 string PublicKey = Encoding.UTF8.GetString(PublicKeyBytes, 0, Keylength);
-                Conn.Send(Encryption.getpublickey());
+                Conn.Send(RsaEncryption.getpublickey());
 
 
                 
@@ -124,7 +124,7 @@ namespace ServerSide
 
                     if (IsMicroNameExist(CodeAndKnickname[1]))
                     {
-                        Conn.Send(Encryption.Encrypt("500", PublicKey));
+                        Conn.Send(RsaEncryption.Encrypt("500", PublicKey));
                         return;
                     }
 
@@ -163,7 +163,7 @@ namespace ServerSide
                         {
                             if (LoginRequest)
                             {
-                                if (sessoinSearch(Conn, PublicKey, CodeAndKnickname))
+                                if (sessoinSearch(Conn, CodeAndKnickname))
                                 {
                                     break;
                                 }
@@ -200,12 +200,12 @@ namespace ServerSide
             byte[] IdentifierBuffer = new byte[IdentifierLength];
 
             Conn.Receive(IdentifierBuffer);
-            return Encryption.Decrypt(IdentifierBuffer).Split(';');
+            return RsaEncryption.Decrypt(IdentifierBuffer).Split(';');
         }
 
 
 
-        private bool sessoinSearch(Socket Conn, string PublicKey, string[] CodeAndKnickname)
+        private bool sessoinSearch(Socket Conn,  string[] CodeAndKnickname)
         {
             string username = CodeAndKnickname[0];
             
@@ -219,7 +219,12 @@ namespace ServerSide
             else
             {
                 Conn.Send(Encoding.UTF8.GetBytes("200"));
-                DesiredSession.AddClient(Conn, PublicKey, username);
+
+                
+
+
+
+                DesiredSession.AddClient(Conn, username);
                 foreach (var Control in SessionViewPanel.Controls)
                 {
                     if (((sessionLayot)Control).GetSession().GetCode() == CodeAndKnickname[2])
@@ -256,7 +261,7 @@ namespace ServerSide
                     byte[] bytes = new byte[1024];
                     EndPoint En = new IPEndPoint(IPAddress.Any, 0);
                     int bytesRead = UdpClientSocket.ReceiveFrom(bytes, ref En);
-                    string roomCode = Encryption.Decrypt(bytes.Take(bytesRead).ToArray());
+                    string roomCode = RsaEncryption.Decrypt(bytes.Take(bytesRead).ToArray());
 
                     new Thread(() =>
                     {
@@ -286,7 +291,7 @@ namespace ServerSide
         private void sendVideoBytesToSession(byte[] bytes)
         {
 
-            string sessionCode = Encryption.Decrypt(bytes.Take(1024).ToArray());
+            string sessionCode = RsaEncryption.Decrypt(bytes.Take(1024).ToArray());
 
             ServerServices.GetSession(sessionCode).sendVideoBytesToClient(bytes);
 

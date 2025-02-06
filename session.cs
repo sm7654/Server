@@ -24,7 +24,6 @@ namespace ServerSide
         private Socket ClientConn = null;
         private Socket UdpClientConn = null;
         private string ClientKnickname;
-        private string ClientPublicKey;
         private EndPoint ClientUDP_endpoint;
         private bool IsClientConnected = false;
         
@@ -40,7 +39,7 @@ namespace ServerSide
             this.ControllerPublicKey = publicKey;
             
 
-            byte[] EncryptedCode = Encryption.Encrypt($"{Code}", ControllerPublicKey);
+            byte[] EncryptedCode = RsaEncryption.Encrypt($"{Code}", ControllerPublicKey);
             
             Controller.Send(EncryptedCode);
 
@@ -62,7 +61,7 @@ namespace ServerSide
                     buffer = new byte[bufferSize];
                     Controller.Receive(buffer);
 
-                    if (ServerServices.IsServerMassage(buffer))
+                    if (ServerServices.IsServerMassageRSA(buffer))
                     {
                         ServerServices.HandleServerMessages(buffer, this);
 
@@ -89,7 +88,7 @@ namespace ServerSide
                     buffer = new byte[bufferSize];
                     ClientConn.Receive(buffer);
 
-                    if (ServerServices.IsServerMassage(buffer))
+                    if (ServerServices.IsServerMassageAES(buffer))
                     {
                         ServerServices.HandleServerMessages(buffer, this);
                     } else
@@ -109,16 +108,25 @@ namespace ServerSide
 
 
 
-        public bool AddClient(Socket Client, string PublicKey, string name)
+        public bool AddClient(Socket Client, string name)
         {
             if (Client == null)
                 return false;
             this.ClientConn = Client;
-            this.ClientPublicKey = PublicKey;
             this.ClientKnickname = name;
 
+
+            //////////////////////////////////////////////////////
+            byte[] AESkey = new byte[128];
+            int bytesread = Client.Receive(AESkey);
+            byte[] AESIv = new byte[128];
+            bytesread = Client.Receive(AESIv);
+            AesEncryption.Addkeys(AESkey, AESIv);
+            //////////////////////////////////////////////////////
+
+
             // send to conrolller client connected
-            byte[] ConnectedMassege = Encryption.Encrypt($"200;{this.ClientConn.RemoteEndPoint.ToString()}", this.ControllerPublicKey);
+            byte[] ConnectedMassege = RsaEncryption.Encrypt($"200;{this.ClientConn.RemoteEndPoint.ToString()}", this.ControllerPublicKey);
             Controller.Send(Encoding.UTF8.GetBytes(ConnectedMassege.Length.ToString()));
             Thread.Sleep(200);
             Controller.Send(ConnectedMassege);
@@ -134,10 +142,10 @@ namespace ServerSide
 
             // recive from to client the AES keys and send it to controller
 
-            byte[] AESkey = new byte[128];
-            int bytesread = Client.Receive(AESkey);
+            AESIv = new byte[128];
+            bytesread = Client.Receive(AESkey);
 
-            byte[] AESIv = new byte[1024];
+            AESIv = new byte[1024];
             bytesread = Client.Receive(AESIv);
 
             Controller.Send(AESkey);
@@ -146,6 +154,7 @@ namespace ServerSide
 
 
             IsClientConnected = true;
+
             new Thread(() => ClientStream()).Start();
             return true;
         }
@@ -171,10 +180,9 @@ namespace ServerSide
             ClientConn = null;
             UdpClientConn = null;
             ClientKnickname = null;
-            ClientPublicKey = null;
             ClientUDP_endpoint = null;
             byte[] bytes = 
-                Encryption.EncryptBytes(
+                RsaEncryption.EncryptBytes(
                     ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes(";302")).ToArray()
                     , ControllerPublicKey
                 );
@@ -228,16 +236,17 @@ namespace ServerSide
         public bool disconnect()
         {
 
-            ServerServices.removeSession(this);
-            FormController.RemoveSession(this);
+
             try
             {
+                ServerServices.removeSession(this);
+                FormController.RemoveSession(this);
                 if (ClientConn != null)
                     ClientConn.Close();
 
                 if (UdpClientConn != null)
                     UdpClientConn.Close();
-                byte[] EncryptedBytes = Encryption.Encrypt("Shut;", ControllerPublicKey);
+                byte[] EncryptedBytes = RsaEncryption.Encrypt("Shut;", ControllerPublicKey);
                 if (Controller != null)
                 {
                     Controller.Send(Encoding.UTF8.GetBytes(EncryptedBytes.Length.ToString()));
@@ -249,7 +258,6 @@ namespace ServerSide
                 if (!IsClientConnected)
                     return true;
 
-                ClientPublicKey = null;
                 ControllerPublicKey = null;
 
 

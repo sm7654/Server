@@ -52,7 +52,7 @@ namespace ServerSide
                 //new Thread(() => portProvider(ServerSock)).Start);
 
 
-                Encryption.GenerateKeys();
+                RsaEncryption.GenerateKeys();
                 ServerConnectedForm OnlineServerForm = new ServerConnectedForm(ServerSock);
 
                 OnlineServerForm.Show();
