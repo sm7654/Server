@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -31,6 +32,7 @@ namespace ServerSide
             }
             catch (Exception e)
             {
+                
                 Console.Write(e.Message);
             }
             return false;
@@ -50,33 +52,55 @@ namespace ServerSide
             }
             return false;
         }
-        public static void HandleServerMessages(byte[] buffer, session currentSession)
+        public static void HandleServerMessages(byte[] buffer, session curentSession, bool IsCLient)
         {
+            string message = "";
+            if (!IsCLient)
+                message = RsaEncryption.Decrypt(buffer);
+            else
+                message = AesEncryption.DecryptDataToString(buffer);
+            string tempString = message;
 
-            string[] message = RsaEncryption.Decrypt(buffer).Split(';');
-            
-            switch (message[1])
+            switch (message.Split(';')[1])
             {
                 case "EXPERIMENT_RESULTS":
-                    //SqlService.AddExperimentToDatabase(message);
-                    currentSession.disconnectClient();
+
+                    SqlService.AddExperimentToDatabase(tempString, curentSession.GetClienKnickname(), message.Split(';')[message.Split(';').Length - 3]);
+                    
+                    break;
+                case "REQSTHISTORY":
+                    // get send from sql 
+                    List<string> CS =  SqlService.GetAllUserHistoryAndSendToClient(message.Split(';')[2]);
+                    if (CS != null)
+                        sendCreationStringsToClient(CS, curentSession);
+
                     break;
                 case "302":
 
-                    FormController.disconnectClient(currentSession);
-                    currentSession.disconnectClient();
+                    curentSession.disconnectClient(); 
+                    FormController.disconnectClient(curentSession);
+                    
                     break;
 
                 case "303":
+                    curentSession.disconnect();
+                    FormController.disconnectController(curentSession);
                     
-                    FormController.disconnectController(currentSession);
-                    currentSession.disconnect();
                     break;
 
 
                 default: break;
             }
  
+        }
+        private static void sendCreationStringsToClient(List<string> CS, session curentSession)
+        {
+            foreach (string CreationString in CS)
+            {
+                byte[] CreationByteArray = AesEncryption.EncryptedData(ServerRole.Concat( Encoding.UTF8.GetBytes($";{CreationString}") ).ToArray());
+                curentSession.SendToClient(CreationByteArray);
+
+            }
         }
 
 

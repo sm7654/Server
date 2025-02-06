@@ -6,14 +6,15 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace ServerSide
 {
     static class SqlService
     {
         private static SqlConnection SqlConnection;
-        private static string ConnectionString = "DataSource=DESKTOP-03BNVH4;InitialCatalog=WindTunnel_Users;IntegratedSecurity=True;ConnectTimeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-
+        private static string ConnectionString = @"Server=DESKTOP-RJMPR2D;Database=DataBase_Windtunnel;Trusted_Connection=True;";
+        
 
         public static bool ConnectToSql()
         {
@@ -25,18 +26,21 @@ namespace ServerSide
                 SqlConnection.Open();
                 return true;
             }
-            catch (SqlException ex) { return false; }
+            catch (SqlException ex) {
+                return false; }
         }
 
         public static bool LoginSql(string user, string pass, bool Ismaneger)
         {
-            return true;
+            //return true;
             string command;
+            user = Hash(user);
+            pass = Hash(pass);
             try
             {
                 if (Ismaneger)
                 {
-                    command = $"SELECT * FROM Users WHERE password = '{pass}' OR username = '{user}';";
+                    command = $"SELECT * FROM ManagementUsers WHERE password = '{pass}' OR username = '{user}';";
                 } else
                 {
                     command = $"SELECT * FROM ClientUsers WHERE clientPassword = '{pass}' OR clientName = '{user}';";
@@ -52,7 +56,8 @@ namespace ServerSide
                 results.Close();
                 return false;
             }
-            catch (Exception ex) { Console.WriteLine(ex.Message); return false; }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message); return false; }
         }
 
 
@@ -61,12 +66,13 @@ namespace ServerSide
             string command;
 
             pass = Hash(pass);
+            User = Hash(User);
             if (LoginSql(User, pass, Ismaneger))
                 return false;
             try
             {
                 if (Ismaneger)
-                    command = $"INSERT INTO Users (username, password) VALUES ('{User}', '{pass}')";
+                    command = $"INSERT INTO ManagementUsers (username, password) VALUES ('{User}', '{pass}')";
                 else
                     command = $"INSERT INTO ClientUsers (clientName, clientPassword) VALUES ('{User}', '{pass}')";
 
@@ -84,27 +90,60 @@ namespace ServerSide
         }
 
 
-        public static void AddExperimentToDatabase(string[] resultsData)
+        public static void AddExperimentToDatabase(string resultsData, string username, string Time)
         {
             try
             {
-                string ExperName = resultsData[2]; 
-                string timestamp = resultsData[3]; 
-                string deltaSpeed = resultsData[4];
-                string temp = resultsData[5];
-                string cameraSpeed = resultsData[6];
-                string innerPressure = resultsData[7];
-                string humidity = resultsData[8];
-
+                string CreationString = resultsData.Substring(ServerServices.GetServerRole().Length + 1);
+                string command = $"INSERT INTO Experiments (username, CreationString, TimeCreated) VALUES ('{Hash(username)}','{CreationString}', '{Time}')";
+                SqlCommand builder = new SqlCommand(command, SqlConnection);
+                int rowsEffected = builder.ExecuteNonQuery();
             }
-            catch (Exception e) { }
+            catch (Exception e) {
+                return;
+            }
         }
+
+
+        public static List<string> GetAllUserHistoryAndSendToClient(string username)
+        {
+            try
+            {
+
+                if (username == "")
+                    return null;
+
+                List<string> CreationStrings = new List<string>();
+                username = Hash(username);
+                string command = $"SELECT * FROM Experiments WHERE username = '{username}';";
+
+                SqlCommand sqlCommand = new SqlCommand(command, SqlConnection);
+                using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        CreationStrings.Add(reader.GetString(2));
+                    }
+                }
+
+                return CreationStrings;
+            } catch (Exception e) { 
+                return null; }
+
+        }
+
+
+
+
+
+
+
 
         public static bool IsConnected()
         {
             if (SqlConnection == null)
-                return false;
-            return true;
+                return true;
+            return false;
         }
 
 

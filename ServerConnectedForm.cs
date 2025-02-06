@@ -240,9 +240,9 @@ namespace ServerSide
         {
             foreach (var sessionOb in SessionViewPanel.Controls)
             {
-                sessionLayot CurrentSession = (sessionLayot)sessionOb;
+                sessionLayot CurentSession = (sessionLayot)sessionOb;
 
-                if (CurrentSession.GetSession().GetControllerKnickname() == name)
+                if (CurentSession.GetSession().GetControllerKnickname() == name)
                     return true;
             }
 

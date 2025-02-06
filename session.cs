@@ -55,53 +55,69 @@ namespace ServerSide
             {
                 while (Controller.Connected)
                 {
-                    byte[] buffer = new byte[1024];
-                    int byterec = Controller.Receive(buffer);
-                    int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
-                    buffer = new byte[bufferSize];
-                    Controller.Receive(buffer);
-
-                    if (ServerServices.IsServerMassageRSA(buffer))
+                    try
                     {
-                        ServerServices.HandleServerMessages(buffer, this);
+                        Controller.ReceiveTimeout = 0;
+                        byte[] buffer = new byte[1024];
+                        int byterec = Controller.Receive(buffer);
+                        int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
+                        buffer = new byte[bufferSize];
+                        Controller.ReceiveTimeout = 2000;
+                        Controller.Receive(buffer);
 
+                        if (ServerServices.IsServerMassageRSA(buffer))
+                        {
+                            ServerServices.HandleServerMessages(buffer, this, false);
+
+                        }
+                        if (ClientConn != null)
+                        {
+                            ClientConn.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
+                            Thread.Sleep(200);
+                            ClientConn.Send(buffer);
+                        }
                     }
-                    if (ClientConn != null)
-                    {
-                        ClientConn.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
-                        Thread.Sleep(200);
-                        ClientConn.Send(buffer);
-                    }
+                    catch (Exception e) { }
                 }
-            }
-            catch (Exception e) { }
+            } catch (Exception e) { }
+            
         }
         private void ClientStream()
         {
             try
             {
+
                 while (Controller.Connected && ClientConn.Connected)
                 {
-                    byte[] buffer = new byte[1024];
-                    int byterec = ClientConn.Receive(buffer);
-                    int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
-                    buffer = new byte[bufferSize];
-                    ClientConn.Receive(buffer);
-
-                    if (ServerServices.IsServerMassageAES(buffer))
-                    {
-                        ServerServices.HandleServerMessages(buffer, this);
-                    } else
+                    try
                     {
 
-                        Controller.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
-                        Thread.Sleep(300);
-                        Controller.Send(buffer);
+                        ClientConn.ReceiveTimeout = 0;
+                        byte[] buffer = new byte[1024];
+                        int byterec = ClientConn.Receive(buffer);
+                        int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
+                        buffer = new byte[bufferSize];
+                        ClientConn.ReceiveTimeout = 2000;
+                        ClientConn.Receive(buffer);
+
+                        if (ServerServices.IsServerMassageAES(buffer))
+                        {
+                            ServerServices.HandleServerMessages(buffer, this, true);
+                        }
+                        else
+                        {
+
+                            Controller.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
+                            Thread.Sleep(300);
+                            Controller.Send(buffer);
+                        }
                     }
-
+                    catch (Exception e) { }
                 }
             }
             catch (Exception e) { }
+            
+            
 
         }
 
@@ -160,6 +176,16 @@ namespace ServerSide
         }
 
         
+
+        public void SendToClient(byte[] data)
+        {
+            ClientConn.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));
+            Thread.Sleep(200);
+            ClientConn.Send(data);
+        }
+
+
+
 
         public (string, string) GetCLientEndPoint()
         {

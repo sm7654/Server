@@ -76,7 +76,11 @@ namespace ServerSide
 
             return null;
         }
+        public static string DecryptDataToString(byte[] data)
+        {
+            return Encoding.UTF8.GetString(DecryptData(data));
+        }
 
-       
+
     }
 }
