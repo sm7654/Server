@@ -26,9 +26,6 @@ namespace ServerSide
         private string ClientKnickname;
         private EndPoint ClientUDP_endpoint;
         private bool IsClientConnected = false;
-        
-
-
 
 
         public session(Socket Controller, string Code, string publicKey)
@@ -72,6 +69,7 @@ namespace ServerSide
                         }
                         if (ClientConn != null)
                         {
+                            
                             ClientConn.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
                             Thread.Sleep(200);
                             ClientConn.Send(buffer);

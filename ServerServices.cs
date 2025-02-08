@@ -95,12 +95,13 @@ namespace ServerSide
         }
         private static void sendCreationStringsToClient(List<string> CS, session curentSession)
         {
+            byte[] Experiments = ServerRole.Concat(Encoding.UTF8.GetBytes("&EXPERIMENTS")).ToArray();
             foreach (string CreationString in CS)
             {
-                byte[] CreationByteArray = AesEncryption.EncryptedData(ServerRole.Concat( Encoding.UTF8.GetBytes($";{CreationString}") ).ToArray());
-                curentSession.SendToClient(CreationByteArray);
-
+                Experiments = Experiments.Concat(Encoding.UTF8.GetBytes($"&{CreationString}")).ToArray();
             }
+            byte[] CreationByteArray = AesEncryption.EncryptedData(Experiments);
+            curentSession.SendToClient(CreationByteArray);
         }
 
 
