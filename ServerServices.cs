@@ -63,6 +63,15 @@ namespace ServerSide
 
             switch (message.Split(';')[1])
             {
+                case "EXPERREQUSTBYNAME":
+                    
+                    string experimentString = SqlService.GetExpererimentOfUser(message);
+                    if (experimentString == "")
+                        return;
+                    byte[] bytes = ServerRole.Concat(Encoding.UTF8.GetBytes("&EXPERIMENT_RESULTS" + experimentString)).ToArray();
+                    curentSession.SendToClient(AesEncryption.EncryptedData(bytes));
+
+                    break;
                 case "EXPERIMENT_RESULTS":
 
                     SqlService.AddExperimentToDatabase(tempString, curentSession.GetClienKnickname(), message.Split(';')[message.Split(';').Length - 3]);
@@ -76,7 +85,6 @@ namespace ServerSide
 
                     break;
                 case "302":
-
                     curentSession.disconnectClient(); 
                     FormController.disconnectClient(curentSession);
                     
@@ -95,7 +103,7 @@ namespace ServerSide
         }
         private static void sendCreationStringsToClient(List<string> CS, session curentSession)
         {
-            byte[] Experiments = ServerRole.Concat(Encoding.UTF8.GetBytes("&EXPERIMENTS")).ToArray();
+            byte[] Experiments = ServerRole.Concat(Encoding.UTF8.GetBytes("&EXPERIMENT_RESULTS")).ToArray();
             foreach (string CreationString in CS)
             {
                 Experiments = Experiments.Concat(Encoding.UTF8.GetBytes($"&{CreationString}")).ToArray();

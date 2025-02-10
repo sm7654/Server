@@ -140,7 +140,8 @@ namespace ServerSide
 
 
             // send to conrolller client connected
-            byte[] ConnectedMassege = RsaEncryption.Encrypt($"200;{this.ClientConn.RemoteEndPoint.ToString()}", this.ControllerPublicKey);
+            byte[] hh = ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes($";200;{this.ClientConn.RemoteEndPoint.ToString()}")).ToArray();
+            byte[] ConnectedMassege = RsaEncryption.Encrypt(Encoding.UTF8.GetString(hh), this.ControllerPublicKey);
             Controller.Send(Encoding.UTF8.GetBytes(ConnectedMassege.Length.ToString()));
             Thread.Sleep(200);
             Controller.Send(ConnectedMassege);

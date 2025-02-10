@@ -95,7 +95,7 @@ namespace ServerSide
             try
             {
                 string CreationString = resultsData.Substring(ServerServices.GetServerRole().Length + 1);
-                string command = $"INSERT INTO Experiments (username, CreationString, TimeCreated) VALUES ('{Hash(username)}','{CreationString}', '{Time}')";
+                string command = $"INSERT INTO Experiments (username, CreationString, TimeCreated, expername) VALUES ('{Hash(username)}','{CreationString}', '{Time}', '{resultsData.Split(';')[resultsData.Split(';').Length - 1]}')";
                 SqlCommand builder = new SqlCommand(command, SqlConnection);
                 int rowsEffected = builder.ExecuteNonQuery();
             }
@@ -105,6 +105,33 @@ namespace ServerSide
         }
 
 
+        public static string GetExpererimentOfUser(string request)
+        {
+            try
+            {
+
+                string username = Hash(request.Split(';')[2]);
+                string experName = request.Split(';')[3];
+
+                string command = $"SELECT * FROM Experiments WHERE username = '{username}';";
+
+                string hh = "";
+                SqlCommand sqlCommand = new SqlCommand(command, SqlConnection);
+                using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.GetString(4).StartsWith(experName))
+                            hh +=  $"&{reader.GetString(2)}";
+                    }
+                    return hh;
+                }
+
+            }
+            catch (Exception ex) { }
+
+            return "";
+        }
         public static List<string> GetAllUserHistoryAndSendToClient(string username)
         {
             try
