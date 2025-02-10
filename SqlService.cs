@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.SqlServer.Server;
 
 namespace ServerSide
 {
@@ -111,7 +113,7 @@ namespace ServerSide
             {
 
                 string username = Hash(request.Split(';')[2]);
-                string experName = request.Split(';')[3];
+                string[] Filtters = request.Split(';')[3].Split(',');
 
                 string command = $"SELECT * FROM Experiments WHERE username = '{username}';";
 
@@ -121,17 +123,136 @@ namespace ServerSide
                 {
                     while (reader.Read())
                     {
-                        if (reader.GetString(4).StartsWith(experName))
-                            hh +=  $"&{reader.GetString(2)}";
+                        string CreationString = GetCreationStringIfExperStandConditions(Filtters, reader.GetString(2));
+                        if (CreationString != "")
+                            hh += $"&{CreationString}";
                     }
                     return hh;
                 }
 
             }
-            catch (Exception ex) { }
+            catch (Exception ex) 
+            { }
 
             return "";
         }
+
+        private static string GetCreationStringIfExperStandConditions(string[] Filtters, string CreationString)
+        {
+            try
+            {
+
+                foreach (string item in Filtters)
+                {
+                    if (item.Contains("expername"))
+                    {
+                        if (item.Split('=')[1] != CreationString.Split(';')[CreationString.Split(';').Length - 1])
+                            return "";
+                    }
+                    else if (item.Contains(">="))
+                    {
+                        if (!DoesExperStandConditions(">=", item, CreationString))
+                            return "";
+                    }
+                    else if (item.Contains("<="))
+                    {
+                        if (!DoesExperStandConditions("<=", item, CreationString))
+                            return "";
+                    }
+                    else if (item.Contains("="))
+                    {
+                        if (!DoesExperStandConditions("=", item, CreationString))
+                            return "";
+                    }
+                    else if (item.Contains(">"))
+                    {
+                        if (!DoesExperStandConditions(">", item, CreationString))
+                            return "";
+                    }
+                    else if (item.Contains("<"))
+                    {
+                        if (!DoesExperStandConditions("<", item, CreationString))
+                            return "";
+                    }
+                    else if (item.Contains("!="))
+                    {
+                        if (!DoesExperStandConditions("!=", item, CreationString))
+                            return "";
+                    }
+
+                }
+
+                return CreationString;
+
+            }
+            catch (Exception e) { 
+                return ""; }
+
+
+        }
+        private static bool DoesExperStandConditions(string Oparation, string item, string CreationString)
+        {
+            string Result = item.Replace($"{Oparation}", " ").Split(' ')[0];
+            string Val = item.Replace($"{Oparation}", " ").Split(' ')[1];
+
+            foreach (string ExperResult in CreationString.Split(';'))
+            {
+                if (ExperResult.Contains(Result))
+                {
+                    try
+                    {
+                        double ExperVal = double.Parse(ExperResult.Split(':')[1].Split('|')[0]);
+                        double UserFillter = double.Parse(Val);
+
+                        switch (Oparation)
+                        {
+                            case "<=":
+                                if (ExperVal > UserFillter)
+                                    return false;
+                                break;
+
+                            case "<":
+                                if (ExperVal > UserFillter || ExperVal == UserFillter)
+                                    return false;
+                                break;
+                            case ">=":
+                                if (ExperVal < UserFillter)
+                                    return false;
+                                break;
+                            case ">":
+                                if (ExperVal < UserFillter || ExperVal == UserFillter)
+                                    return false;
+                                break;
+                            case "=":
+                                if (ExperVal != UserFillter)
+                                    return false;
+                                break;
+
+                            case "!=":
+                                if (ExperVal == UserFillter)
+                                    return false;
+                                break;
+
+                            default: return false;
+                        }
+
+
+
+                    }
+                    catch (Exception e)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+
+
+
+
+
         public static List<string> GetAllUserHistoryAndSendToClient(string username)
         {
             try

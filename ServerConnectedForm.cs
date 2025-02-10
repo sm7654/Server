@@ -321,10 +321,10 @@ namespace ServerSide
         {
             try
             {
-
+                SessionViewPanel.Controls.Remove(this.Layout);   
                 ServerServices.removeSession(this.Layout.GetSession());
                 this.Layout.GetSession().disconnect();
-                SessionViewPanel.Controls.Remove(this.Layout);
+                
 
             } catch (Exception t)
             {

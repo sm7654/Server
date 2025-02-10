@@ -63,7 +63,7 @@ namespace ServerSide
 
             switch (message.Split(';')[1])
             {
-                case "EXPERREQUSTBYNAME":
+                case "EXPERREQUST":
                     
                     string experimentString = SqlService.GetExpererimentOfUser(message);
                     if (experimentString == "")
