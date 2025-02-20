@@ -200,7 +200,7 @@ namespace ServerSide
             byte[] IdentifierBuffer = new byte[IdentifierLength];
 
             Conn.Receive(IdentifierBuffer);
-            return RsaEncryption.Decrypt(IdentifierBuffer).Split(';');
+            return RsaEncryption.Decrypt(IdentifierBuffer).Split('&');
         }
 
 
@@ -288,16 +288,7 @@ namespace ServerSide
             */
         }
 
-        private void sendVideoBytesToSession(byte[] bytes)
-        {
-
-            string sessionCode = RsaEncryption.Decrypt(bytes.Take(1024).ToArray());
-
-            ServerServices.GetSession(sessionCode).sendVideoBytesToClient(bytes);
-
-            return;
-        }
-
+    
         private void ControllCliked(object sender, EventArgs e)
         {
             if (this.Layout != null)

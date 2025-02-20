@@ -15,7 +15,7 @@ namespace ServerSide
     static class SqlService
     {
         private static SqlConnection SqlConnection;
-        private static string ConnectionString = $@"Server={Environment.MachineName};Database=ProductData;Trusted_Connection=True;";
+        private static string ConnectionString = $@"Server={Environment.MachineName};Database=DataBase_Windtunnel;Trusted_Connection=True;";
         
 
         public static bool ConnectToSql()

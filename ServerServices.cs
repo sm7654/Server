@@ -20,7 +20,7 @@ namespace ServerSide
 
 
 
-        public static bool IsServerMassageRSA(byte[] data)
+        public static bool IsServerMassageFromMicro(byte[] data)
         {
             try
             {
@@ -33,11 +33,11 @@ namespace ServerSide
             catch (Exception e)
             {
                 
-                Console.Write(e.Message);
+                
             }
             return false;
         }
-        public static bool IsServerMassageAES(byte[] data)
+        public static bool IsServerMassageFromClient(byte[] data)
         {
             try
             {
@@ -48,10 +48,17 @@ namespace ServerSide
                 }
             }
             catch (Exception e){ 
-                Console.Write(e.Message);
+                
             }
             return false;
         }
+
+
+
+
+
+
+
         public static void HandleServerMessages(byte[] buffer, session curentSession, bool IsCLient)
         {
             string message = "";
@@ -61,7 +68,7 @@ namespace ServerSide
                 message = AesEncryption.DecryptDataToString(buffer);
             string tempString = message;
 
-            switch (message.Split(';')[1])
+            switch (message.Split('&')[1])
             {
                 case "EXPERREQUST":
                     

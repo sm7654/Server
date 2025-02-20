@@ -54,15 +54,13 @@ namespace ServerSide
                 {
                     try
                     {
-                        Controller.ReceiveTimeout = 0;
                         byte[] buffer = new byte[1024];
                         int byterec = Controller.Receive(buffer);
                         int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
                         buffer = new byte[bufferSize];
-                        Controller.ReceiveTimeout = 2000;
                         Controller.Receive(buffer);
 
-                        if (ServerServices.IsServerMassageRSA(buffer))
+                        if (ServerServices.IsServerMassageFromMicro(buffer))
                         {
                             ServerServices.HandleServerMessages(buffer, this, false);
 
@@ -77,7 +75,9 @@ namespace ServerSide
                     }
                     catch (Exception e) { }
                 }
-            } catch (Exception e) { }
+            } 
+            catch 
+            (Exception e) { }
             
         }
         private void ClientStream()
@@ -90,15 +90,13 @@ namespace ServerSide
                     try
                     {
 
-                        ClientConn.ReceiveTimeout = 0;
                         byte[] buffer = new byte[1024];
                         int byterec = ClientConn.Receive(buffer);
                         int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
                         buffer = new byte[bufferSize];
-                        ClientConn.ReceiveTimeout = 2000;
                         ClientConn.Receive(buffer);
 
-                        if (ServerServices.IsServerMassageAES(buffer))
+                        if (ServerServices.IsServerMassageFromClient(buffer))
                         {
                             ServerServices.HandleServerMessages(buffer, this, true);
                         }
@@ -106,7 +104,7 @@ namespace ServerSide
                         {
 
                             Controller.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
-                            Thread.Sleep(300);
+                            Thread.Sleep(200);
                             Controller.Send(buffer);
                         }
                     }
@@ -140,7 +138,7 @@ namespace ServerSide
 
 
             // send to conrolller client connected
-            byte[] hh = ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes($";200;{this.ClientConn.RemoteEndPoint.ToString()}")).ToArray();
+            byte[] hh = ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes($"&200&{this.ClientConn.RemoteEndPoint.ToString()}")).ToArray();
             byte[] ConnectedMassege = RsaEncryption.Encrypt(Encoding.UTF8.GetString(hh), this.ControllerPublicKey);
             Controller.Send(Encoding.UTF8.GetBytes(ConnectedMassege.Length.ToString()));
             Thread.Sleep(200);
@@ -208,7 +206,7 @@ namespace ServerSide
             ClientUDP_endpoint = null;
             byte[] bytes = 
                 RsaEncryption.EncryptBytes(
-                    ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes(";302")).ToArray()
+                    ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes("&302")).ToArray()
                     , ControllerPublicKey
                 );
 
@@ -220,19 +218,6 @@ namespace ServerSide
 
 
         
-
-
-        public void sendVideoBytesToClient(byte[] bytes)
-        {
-            /*
-             * try {
-             *  udpConnection.SendTo(bytes, ClientUDP_endpoint);
-             * } 
-             * catch (Exception e) {   } 
-             *
-             */
-        }
-
 
 
 
