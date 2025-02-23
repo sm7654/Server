@@ -15,7 +15,7 @@ namespace ServerSide
     static class SqlService
     {
         private static SqlConnection SqlConnection;
-        private static string ConnectionString = $@"Server={Environment.MachineName};Database=DataBase_Windtunnel;Trusted_Connection=True;";
+        private static string ConnectionString = $@"Server={Environment.MachineName};Database=ProductData;Trusted_Connection=True;";
         
 
         public static bool ConnectToSql()
@@ -111,8 +111,8 @@ namespace ServerSide
             try
             {
 
-                string username = Hash(request.Split(';')[2]);
-                string[] Filtters = request.Split(';')[3].Split(',');
+                string username = Hash(request.Split('&')[2]);
+                string[] Filtters = request.Split('&')[3].Split(',');
 
                 string command = $"SELECT * FROM Experiments WHERE username = '{username}';";
 
@@ -196,7 +196,7 @@ namespace ServerSide
 
             foreach (string ExperResult in CreationString.Split(';'))
             {
-                if (ExperResult.Contains(Result))
+                -if (ExperResult.Contains(Result))
                 {
                     try
                     {

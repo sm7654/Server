@@ -81,12 +81,12 @@ namespace ServerSide
                     break;
                 case "EXPERIMENT_RESULTS":
 
-                    SqlService.AddExperimentToDatabase(tempString, curentSession.GetClienKnickname(), message.Split(';')[message.Split(';').Length - 3]);
+                    SqlService.AddExperimentToDatabase(tempString, curentSession.GetClienKnickname(), message.Split('&')[message.Split('&').Length - 3]);
                     
                     break;
                 case "REQSTHISTORY":
                     // get send from sql 
-                    List<string> CS =  SqlService.GetAllUserHistoryAndSendToClient(message.Split(';')[2]);
+                    List<string> CS =  SqlService.GetAllUserHistoryAndSendToClient(message.Split('&')[2]);
                     if (CS != null)
                         sendCreationStringsToClient(CS, curentSession);
 
