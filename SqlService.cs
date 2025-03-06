@@ -4,11 +4,13 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.SqlServer.Server;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace ServerSide
 {
@@ -16,7 +18,31 @@ namespace ServerSide
     {
         private static SqlConnection SqlConnection;
         private static string ConnectionString = $@"Server={Environment.MachineName};Database=ProductData;Trusted_Connection=True;";
-        
+
+
+
+        public static string GenerateRandomString(int length)
+        {
+            string code;
+            do
+            {
+                Random _random = new Random();
+                const string chars = "a2QjWz3n0v1p7Gm5kI9oXebVd4yHcL6f8sT";
+                char[] stringChars = new char[length];
+
+                for (int i = 0; i < length; i++)
+                {
+                    stringChars[i] = chars[_random.Next(chars.Length)];
+                }
+                code = new string(stringChars);
+            } while (!ServerServices.Avalible(code));
+
+            return code;
+        }
+
+
+
+
 
         public static bool ConnectToSql()
         {
@@ -41,10 +67,10 @@ namespace ServerSide
             {
                 if (Ismaneger)
                 {
-                    command = $"SELECT * FROM ManagementUsers WHERE password = '{pass}' OR username = '{user}';";
+                    command = $"SELECT * FROM ManagementUsers WHERE password = '{pass}' AND username = '{user}';";
                 } else
                 {
-                    command = $"SELECT * FROM ClientUsers WHERE clientPassword = '{pass}' OR clientName = '{user}';";
+                    command = $"SELECT * FROM ClientUsers WHERE clientPassword = '{pass}' AND clientName = '{user}';";
                 }
                 SqlCommand builder = new SqlCommand(command, SqlConnection);
                 SqlDataReader results = builder.ExecuteReader();
@@ -61,33 +87,73 @@ namespace ServerSide
                 Console.WriteLine(ex.Message); return false; }
         }
 
+        public static bool RestPass(string User, string newPass, string personalCode,  bool Ismaneger)
+        {
+            try
+            {
+                newPass = Hash(newPass);
+                User = Hash(User);
+                personalCode = Hash(personalCode);
+                string CheckCommand = $"SELECT * FROM ClientUsers WHERE clientPassword = '{newPass}';";
 
-        public static bool Register(string User, string pass, bool Ismaneger)
+                SqlCommand builder = new SqlCommand(CheckCommand, SqlConnection);
+                SqlDataReader results = builder.ExecuteReader();
+                if (results.Read())
+                    return false;
+                results.Close();
+                string command = $"UPDATE ClientUsers SET clientPassword = '{newPass}' WHERE clientName = '{User}' AND personalCode = '{personalCode}'";
+                builder.CommandText = command;
+                int rowsEffected = builder.ExecuteNonQuery();
+                if (rowsEffected > 0)
+                    return true;
+                return false;
+
+            } catch (Exception ex)
+            { return false;
+            }
+
+        }
+
+
+        public static (bool, string) Register(string User, string pass, bool Ismaneger)
         {
             string command;
 
             pass = Hash(pass);
             User = Hash(User);
+            string personalCode = "";
             if (LoginSql(User, pass, Ismaneger))
-                return false;
+                return (false, "");
             try
             {
+                SqlDataReader results;
+                SqlCommand builder;
+                do
+                {
+
+                    personalCode = GenerateRandomString(5);
+                    string CheckCommand = $"SELECT * FROM ClientUsers WHERE personalCode = '{Hash(personalCode)}';";
+                    builder = new SqlCommand(CheckCommand, SqlConnection);
+                    results = builder.ExecuteReader();
+                } while (results.Read());
+                results.Close();
+
                 if (Ismaneger)
                     command = $"INSERT INTO ManagementUsers (username, password) VALUES ('{User}', '{pass}')";
                 else
-                    command = $"INSERT INTO ClientUsers (clientName, clientPassword) VALUES ('{User}', '{pass}')";
+                    command = $"INSERT INTO ClientUsers (clientName, clientPassword, personalCode) VALUES ('{User}', '{pass}', '{Hash(personalCode)}')";
 
 
-                SqlCommand builder = new SqlCommand(command, SqlConnection);
+                builder = new SqlCommand(command, SqlConnection);
                 int rowsEffected = builder.ExecuteNonQuery();
                 if (rowsEffected > 0)
                 {
-                    return true;
+                    return (true, personalCode);
                 }
-                return false;
+                return (false, "");
             }
             catch (Exception ex) {
-                return false; }
+                return (false, ""); }
         }
 
 
@@ -95,8 +161,7 @@ namespace ServerSide
         {
             try
             {
-                string CreationString = resultsData.Substring(ServerServices.GetServerRole().Length + 1);
-                string command = $"INSERT INTO Experiments (username, CreationString, TimeCreated, expername) VALUES ('{Hash(username)}','{CreationString}', '{Time}', '{resultsData.Split(';')[resultsData.Split(';').Length - 1]}')";
+                string command = $"INSERT INTO Experiments (username, CreationString, TimeCreated, expername) VALUES ('{Hash(username)}','{resultsData}', '{Time}', '{resultsData.Split(';')[resultsData.Split(';').Length - 1]}')";
                 SqlCommand builder = new SqlCommand(command, SqlConnection);
                 int rowsEffected = builder.ExecuteNonQuery();
             }
@@ -130,7 +195,7 @@ namespace ServerSide
                 }
 
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             { }
 
             return "";
@@ -141,14 +206,13 @@ namespace ServerSide
             try
             {
 
+
+
+
                 foreach (string item in Filtters)
                 {
-                    if (item.Contains("expername"))
-                    {
-                        if (item.Split('=')[1] != CreationString.Split(';')[CreationString.Split(';').Length - 1])
-                            return "";
-                    }
-                    else if (item.Contains(">="))
+
+                    if (item.Contains(">="))
                     {
                         if (!DoesExperStandConditions(">=", item, CreationString))
                             return "";
@@ -184,7 +248,7 @@ namespace ServerSide
                 return CreationString;
 
             }
-            catch (Exception e) { 
+            catch (Exception e) {
                 return ""; }
 
 
@@ -192,16 +256,25 @@ namespace ServerSide
         private static bool DoesExperStandConditions(string Oparation, string item, string CreationString)
         {
             string Result = item.Replace($"{Oparation}", " ").Split(' ')[0];
-            string Val = item.Replace($"{Oparation}", " ").Split(' ')[1];
+            string UserFillterVal = item.Replace($"{Oparation}", " ").Split(' ')[1];
 
             foreach (string ExperResult in CreationString.Split(';'))
             {
-                -if (ExperResult.Contains(Result))
+                try
                 {
-                    try
+                    string ExperResultVal = ExperResult.Split(':')[1].Split('|')[0];
+                    if (Result == "Name" && ExperResult.Contains("Name"))
                     {
-                        double ExperVal = double.Parse(ExperResult.Split(':')[1].Split('|')[0]);
-                        double UserFillter = double.Parse(Val);
+                        if (UserFillterVal == ExperResultVal)
+                            return true;
+                        return false;
+                    }
+
+                    if (ExperResult.Contains(Result))
+                    {
+
+                        double ExperVal = double.Parse(ExperResultVal);
+                        double UserFillter = double.Parse(UserFillterVal);
 
                         switch (Oparation)
                         {
@@ -236,16 +309,16 @@ namespace ServerSide
                         }
 
 
-
                     }
-                    catch (Exception e)
-                    {
-                        return false;
-                    }
+                }
+                catch (Exception e)
+                {
                 }
             }
             return true;
         }
+
+    
 
 
 

@@ -27,9 +27,6 @@ namespace ServerSide
         sessionLayot Layout;
 
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool consoleRun();
 
         public static string GenerateRandomString(int length)
         {
@@ -63,7 +60,7 @@ namespace ServerSide
         public ServerConnectedForm()
         {
             InitializeComponent();
-            consoleRun();
+
         }
         private void ServerConnectedForm_Load(object sender, EventArgs e)
         {
@@ -114,11 +111,21 @@ namespace ServerSide
                 Conn.Send(RsaEncryption.getpublickey());
 
 
+                //////////////////////////////
                 
+                (byte[] AesKey, byte[] AesIV) = AesEncryption.GetAesEncryptedKeys(PublicKey);
+                Conn.Send(AesKey);
+                Thread.Sleep(200);
+                Conn.Send(AesIV);
+
+                //////////////////////////////
+
+
+
+
 
                 string[] CodeAndKnickname = reciveIdentifiers(Conn);
                 
-
                 if (CodeAndKnickname[0] == "Esp")
                 {
 
@@ -137,49 +144,103 @@ namespace ServerSide
 
                         sessionLayot test = new sessionLayot(session);
                         test.Click += ControllCliked;
-                        SessionViewPanel.Controls.Add(test);
+                        SessionsViewPanel.Controls.Add(test);
 
                     }));
                     return;
                 }
                 else
                 {
-                    
+                    Guest TempG = null;
+                    string ConnIp = ((IPEndPoint)Conn.RemoteEndPoint).Address.ToString();
+                    (bool HasBennHere, Guest g) = ServerServices.HasBennHere(ConnIp);
+                    if (!HasBennHere)
+                        ServerServices.AddGuest(g);
+
+                    TempG = (Guest)g;
+                     if (g is BlackGuest)
+                    {
+                        SendToClient(Conn, $"999&");
+                        return;
+                    }
                     do
                     {
-                        string username = CodeAndKnickname[0];
-                        bool success = false;
-                        bool LoginRequest = false;
-                        if (CodeAndKnickname.Length > 2)
+                        try
                         {
-                            success = SqlService.LoginSql(username, CodeAndKnickname[1], false);
-                            LoginRequest = true;
-                        }
-                        else
-                            success = SqlService.Register(username, CodeAndKnickname[1], false);
-
-
-                        if (success)
-                        {
-                            if (LoginRequest)
+                            string username = CodeAndKnickname[0];
+                            bool success = false;
+                            bool LoginRequest = false;
+                            string personalCode = "";
+                            if (CodeAndKnickname.Length > 2)
                             {
-                                if (sessoinSearch(Conn, CodeAndKnickname))
+
+                                if (CodeAndKnickname[CodeAndKnickname.Length - 1] == "RESETPASS")
+                                    success = SqlService.RestPass(username, CodeAndKnickname[1], CodeAndKnickname[2], false);
+                                else
                                 {
-                                    break;
+                                    success = SqlService.LoginSql(username, CodeAndKnickname[1], false);
+                                    LoginRequest = true;
                                 }
                             }
                             else
                             {
-                                Conn.Send(Encoding.UTF8.GetBytes("201"));
+
+                                (success, personalCode) = SqlService.Register(username, CodeAndKnickname[1], false);
+                            }
+
+                            if (success)
+                            {
+                                if (LoginRequest)
+                                {
+                                    if (sessoinSearch(Conn, CodeAndKnickname, PublicKey))
+                                    {
+                                        break;
+                                    }
+                                    else
+                                    {
+
+                                        TempG.Log();
+                                    }
+                                }
+                                else
+                                {
+                                    SendToClient(Conn, $"201&{personalCode}");
+                                }
+                            }
+                            else
+                            {
+                                if (LoginRequest && TempG != null)
+                                {
+                                    TempG.Log();
+                                    SendToClient(Conn, $"400&");
+                                }
+                            }
+
+                            CodeAndKnickname = reciveIdentifiers(Conn);
+
+                        
+                        
+                            
+
+                        }
+                        catch (Exception ex) {
+                            SendToClient(Conn, $"400&");
+                        }
+                        if (TempG.GetLogs() > 8)
+                        {
+                            if (g is Guest && !(g is BlackGuest))
+                            {
+                                if ((TempG.AvrageLogTime() < 10
+
+                                    || TempG.IsConssistent())
+                                    && TempG.GetLogs() > 8)
+                                {
+                                    ServerServices.MakeGuestBlack(TempG);
+                                    SendToClient(Conn, $"999&");
+                                    return;
+                                }
                             }
                         }
-                        else
-                        {
-                            Conn.Send(Encoding.UTF8.GetBytes("400"));
-                        }
-                        
-                        CodeAndKnickname = reciveIdentifiers(Conn);
-
                     }
 
                     while (true);
@@ -190,22 +251,42 @@ namespace ServerSide
             }
             catch (Exception e) { }
         }
+        private void SendToClient(Socket Conn, string message)
+        {
+            byte[] EncryptedMessage = AesEncryption.EncryptedData(Encoding.UTF8.GetBytes(message));
+            Conn.Send(Encoding.UTF8.GetBytes(EncryptedMessage.Length.ToString()));
+            Thread.Sleep(250);
+            Conn.Send(EncryptedMessage);
+
+
+        }
         private string[] reciveIdentifiers(Socket Conn)
         {
-
-            byte[] BufferSizeRecive = new byte[1024];
-            int bytesRead = Conn.Receive(BufferSizeRecive);
-
-            int IdentifierLength = int.Parse(Encoding.UTF8.GetString(BufferSizeRecive, 0, bytesRead));
-            byte[] IdentifierBuffer = new byte[IdentifierLength];
-
-            Conn.Receive(IdentifierBuffer);
-            return RsaEncryption.Decrypt(IdentifierBuffer).Split('&');
+            try
+            {
+                byte[] BufferSizeRecive = new byte[1024];
+                Conn.ReceiveTimeout = 0;
+                int bytesRead = Conn.Receive(BufferSizeRecive);
+                BufferSizeRecive = new byte[int.Parse(Encoding.UTF8.GetString(BufferSizeRecive, 0, bytesRead))];
+                Conn.Receive(BufferSizeRecive);
+                try
+                {
+                    return RsaEncryption.Decrypt(BufferSizeRecive).Split('&');
+                } catch (Exception e)
+                {
+                    string[] ff = AesEncryption.DecryptDataToString(BufferSizeRecive).Split('&');
+                    return ff;
+                }
+                
+            }
+            catch (Exception e) {
+                MessageBox.Show($"{e.Message} From Reciever");
+                return new string[7]; }
         }
 
 
 
-        private bool sessoinSearch(Socket Conn,  string[] CodeAndKnickname)
+        private bool sessoinSearch(Socket Conn,  string[] CodeAndKnickname, string publickey)
         {
             string username = CodeAndKnickname[0];
             
@@ -213,19 +294,15 @@ namespace ServerSide
             session DesiredSession = ServerServices.GetSession(CodeAndKnickname[2]);
             if (DesiredSession == null)
             {
-                Conn.Send(Encoding.UTF8.GetBytes("403"));
+                SendToClient(Conn, "400&");
                 return false;
             }
             else
             {
-                Conn.Send(Encoding.UTF8.GetBytes("200"));
-
-                
-
-
+                SendToClient(Conn, "200&");
 
                 DesiredSession.AddClient(Conn, username);
-                foreach (var Control in SessionViewPanel.Controls)
+                foreach (var Control in SessionsViewPanel.Controls)
                 {
                     if (((sessionLayot)Control).GetSession().GetCode() == CodeAndKnickname[2])
                         ((sessionLayot)Control).SetClientInLayout(DesiredSession);
@@ -238,7 +315,7 @@ namespace ServerSide
         }
         private bool IsMicroNameExist(string name)
         {
-            foreach (var sessionOb in SessionViewPanel.Controls)
+            foreach (var sessionOb in SessionsViewPanel.Controls)
             {
                 sessionLayot CurentSession = (sessionLayot)sessionOb;
 
@@ -269,7 +346,7 @@ namespace ServerSide
                         DesiredSession.SetClientUdpEndPoint(En);
                     }).Start();
                 }
-                catch (Exception e) { }
+                catch (Exception e) { MessageBox.Show("erg"); }
             }
             
         }
@@ -292,9 +369,17 @@ namespace ServerSide
         private void ControllCliked(object sender, EventArgs e)
         {
             if (this.Layout != null)
-                this.Layout.BorderStyle = BorderStyle.None;
-            this.Layout = (sessionLayot)sender;
-            this.Layout.BorderStyle = BorderStyle.Fixed3D;
+            {
+                this.Layout.BackColor = SystemColors.MenuHighlight;
+                this.Layout.ToggleShutButton();
+                this.Layout = null;
+            }
+            else
+            {
+                this.Layout = (sessionLayot)sender;
+                this.Layout.BackColor = Color.DarkOrange;
+                this.Layout.ToggleShutButton();
+            }
         }
 
 
@@ -312,9 +397,9 @@ namespace ServerSide
         {
             try
             {
-                SessionViewPanel.Controls.Remove(this.Layout);   
-                ServerServices.removeSession(this.Layout.GetSession());
+            
                 this.Layout.GetSession().disconnect();
+                ServerServices.removeSession(this.Layout.GetSession());
                 
 
             } catch (Exception t)
@@ -331,15 +416,19 @@ namespace ServerSide
         private void button1_Click(object sender, EventArgs e)
         {
             ServerServices.CloseAllConnection();
-            SessionViewPanel.Controls.Clear();
+            SessionsViewPanel.Controls.Clear();
         }
 
         private void SessionSearch_TextChanged(object sender, EventArgs e)
         {
             string Code = SessionSearch.Text;
+            if (Code.StartsWith("&"))
+            {
+                AdvancedSearch(Code);
+                return;
+            }    
 
-
-            foreach (var Control in SessionViewPanel.Controls)
+            foreach (var Control in SessionsViewPanel.Controls)
             {
                 if ( !( (sessionLayot)Control ).GetSession().GetCode().Contains(Code) )
                 {
@@ -349,6 +438,99 @@ namespace ServerSide
                     ((sessionLayot)Control).Show();
                 }
             }
+        }
+
+        private void AdvancedSearch(string text)
+        {
+            string[] advSearch = text.Substring(1).Split('&');
+            if (advSearch.Length <= 1)
+                return;
+            switch (advSearch[0].ToLower())
+            {
+                case "code":
+                    foreach (var Control in SessionsViewPanel.Controls)
+                    {
+                        if (!((sessionLayot)Control).GetSession().GetCode().StartsWith(advSearch[1]))
+                            ((sessionLayot)Control).Hide();
+                        else
+                            ((sessionLayot)Control).Show();
+
+                    }
+                    break;
+                case "micro":
+                    foreach (var Control in SessionsViewPanel.Controls)
+                    {
+                        if (!((sessionLayot)Control).GetSession().GetControllerKnickname().StartsWith(advSearch[1]))
+                            ((sessionLayot)Control).Hide();
+                        else
+                            ((sessionLayot)Control).Show();
+                        
+                    }
+                    break;
+                case "client":
+                    foreach (var Control in SessionsViewPanel.Controls)
+                    {
+                        if (!((sessionLayot)Control).GetSession().GetClienKnickname().StartsWith(advSearch[1]))
+                            ((sessionLayot)Control).Hide();
+                        else
+                            ((sessionLayot)Control).Show();
+
+                    }
+                    break;
+                case "mip":
+                    foreach (var Control in SessionsViewPanel.Controls)
+                    {
+                        if (!((sessionLayot)Control).GetSession().GetControllerEndPoint().Item1.StartsWith(advSearch[1]))
+                            ((sessionLayot)Control).Hide();
+                        else
+                            ((sessionLayot)Control).Show();
+
+                    }
+                    break;
+                case "mport":
+                    foreach (var Control in SessionsViewPanel.Controls)
+                    {
+                        if (!((sessionLayot)Control).GetSession().GetControllerEndPoint().Item2.StartsWith(advSearch[1]))
+                            ((sessionLayot)Control).Hide();
+                        else
+                            ((sessionLayot)Control).Show();
+
+                    }
+                    break;
+                case "cip":
+                    foreach (var Control in SessionsViewPanel.Controls)
+                    {
+                        if (((sessionLayot)Control).GetSession().GetControllerEndPoint().Item1 != advSearch[1])
+                            ((sessionLayot)Control).Hide();
+                        else
+                            ((sessionLayot)Control).Show();
+
+                    }
+                    break;
+                case "cport":
+                    foreach (var Control in SessionsViewPanel.Controls)
+                    {
+                        if (!((sessionLayot)Control).GetSession().GetCLientEndPoint().Item2.StartsWith(advSearch[1]))
+                            ((sessionLayot)Control).Hide();
+                        else
+                            ((sessionLayot)Control).Show();
+
+                    }
+                    break;
+
+                default: break;
+            }
+            
+        }
+
+        private void SpeedometerLabel_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            AesEncryption.ChengeIv();
         }
     }
 

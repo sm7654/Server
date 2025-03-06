@@ -16,18 +16,40 @@ namespace ServerSide
         }
 
 
+        public static void RemoveSession(sessionLayot SL)
+        {
+            try
+            {
+                form.BeginInvoke(new Action(() => {
 
+                    form.GetSessionLayoutControls().Remove(SL);
+                }));
+            }
+            catch (Exception e)
+            {
+                return;
+            }
+        }
         public static void RemoveSession(session s)
         {
-            foreach (var Control in form.getSessionLayoutControls())
+            try
             {
-                if (((sessionLayot)Control).GetSession().Equals(s))
-                    form.getSessionLayoutControls().Remove(((sessionLayot)Control));
+                form.BeginInvoke(new Action(() => { 
+                    foreach (var Control in form.GetSessionLayoutControls())
+                    {
+                        if (((sessionLayot)Control).GetSession().Equals(s))
+                            form.GetSessionLayoutControls().Remove(((sessionLayot)Control));
+                    }
+                }));
+            }
+            catch (Exception e)
+            {
+                return;
             }
         }
         public static void disconnectClient(session s)
         {
-            foreach (var Control in form.getSessionLayoutControls())
+            foreach (var Control in form.GetSessionLayoutControls())
             {
                 if (((sessionLayot)Control).GetSession().Equals(s))
                     ((sessionLayot)Control).UpdateClientStatus_dis();
@@ -36,7 +58,7 @@ namespace ServerSide
 
         public static void disconnectController(session s)
         {
-            foreach (var Control in form.getSessionLayoutControls())
+            foreach (var Control in form.GetSessionLayoutControls())
             {
                 if (((sessionLayot)Control).GetSession().Equals(s))
                     ((sessionLayot)Control).UpdateControllerStatus_dis();

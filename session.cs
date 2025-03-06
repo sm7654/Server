@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 
- 
+
+
+
 namespace ServerSide
 {
 
@@ -26,6 +25,9 @@ namespace ServerSide
         private string ClientKnickname;
         private EndPoint ClientUDP_endpoint;
         private bool IsClientConnected = false;
+
+        private object ClientSendLock = new object();
+        private object ControllerSendLock = new object();
 
 
         public session(Socket Controller, string Code, string publicKey)
@@ -54,6 +56,7 @@ namespace ServerSide
                 {
                     try
                     {
+                        Controller.ReceiveTimeout = 0;
                         byte[] buffer = new byte[1024];
                         int byterec = Controller.Receive(buffer);
                         int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
@@ -63,17 +66,19 @@ namespace ServerSide
                         if (ServerServices.IsServerMassageFromMicro(buffer))
                         {
                             ServerServices.HandleServerMessages(buffer, this, false);
-
                         }
                         if (ClientConn != null)
                         {
-                            
-                            ClientConn.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
-                            Thread.Sleep(200);
-                            ClientConn.Send(buffer);
+                            lock (ClientSendLock)
+                            {
+                                ClientConn.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
+                                Thread.Sleep(200);
+                                ClientConn.Send(buffer);
+                            }
                         }
                     }
-                    catch (Exception e) { }
+                    catch (Exception e)
+                    { MessageBox.Show(e.Message + "1"); }
                 }
             } 
             catch 
@@ -104,14 +109,15 @@ namespace ServerSide
                         {
 
                             Controller.Send(Encoding.UTF8.GetBytes(bufferSize.ToString()));
-                            Thread.Sleep(200);
+                            Thread.Sleep(250);
                             Controller.Send(buffer);
                         }
                     }
-                    catch (Exception e) { }
+                    catch (Exception e) { MessageBox.Show(e.Message + "4"); }
                 }
             }
-            catch (Exception e) { }
+            catch (Exception e) { MessageBox.Show(e.Message + "5" +
+                ""); }
             
             
 
@@ -129,13 +135,15 @@ namespace ServerSide
 
 
             //////////////////////////////////////////////////////
-            byte[] AESkey = new byte[128];
+            /*byte[] AESkey = new byte[128];
             int bytesread = Client.Receive(AESkey);
             byte[] AESIv = new byte[128];
             bytesread = Client.Receive(AESIv);
-            AesEncryption.Addkeys(AESkey, AESIv);
+            AesEncryption.Addkeys(AESkey, AESIv);*/
             //////////////////////////////////////////////////////
-
+            byte[] AESIv = new byte[128];
+            byte[] AESkey = new byte[128];
+            int bytesread = 0;
 
             // send to conrolller client connected
             byte[] hh = ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes($"&200&{this.ClientConn.RemoteEndPoint.ToString()}")).ToArray();
@@ -158,7 +166,7 @@ namespace ServerSide
             AESIv = new byte[128];
             bytesread = Client.Receive(AESkey);
 
-            AESIv = new byte[1024];
+            AESIv = new byte[128];
             bytesread = Client.Receive(AESIv);
 
             Controller.Send(AESkey);
@@ -176,11 +184,13 @@ namespace ServerSide
 
         public void SendToClient(byte[] data)
         {
-            ClientConn.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));
-            Thread.Sleep(200);
-            ClientConn.Send(data);
+            lock (ClientSendLock) {
+                ClientConn.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));
+                Thread.Sleep(200);
+                ClientConn.Send(data);
+            }
         }
-
+        
 
 
 
@@ -216,11 +226,6 @@ namespace ServerSide
 
         }
 
-
-        
-
-
-
         private void ReadDataFromMicroConntroller()
         {
             //ignore*****************
@@ -249,14 +254,12 @@ namespace ServerSide
 
             try
             {
-                ServerServices.removeSession(this);
                 FormController.RemoveSession(this);
-                if (ClientConn != null)
-                    ClientConn.Close();
-
+                
                 if (UdpClientConn != null)
                     UdpClientConn.Close();
-                byte[] EncryptedBytes = RsaEncryption.Encrypt("Shut;", ControllerPublicKey);
+                byte[] message = ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes("&Shut")).ToArray();
+                byte[] EncryptedBytes = RsaEncryption.EncryptBytes(message, ControllerPublicKey);
                 if (Controller != null)
                 {
                     Controller.Send(Encoding.UTF8.GetBytes(EncryptedBytes.Length.ToString()));
@@ -264,13 +267,18 @@ namespace ServerSide
                     Controller.Send(EncryptedBytes);
                     Controller.Close();
                 }
+                ControllerPublicKey = null;
 
                 if (!IsClientConnected)
                     return true;
 
-                ControllerPublicKey = null;
 
-
+                if (ClientConn != null)
+                {
+                    message = ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes("&303")).ToArray();
+                    EncryptedBytes = AesEncryption.EncryptedData(message);
+                    SendToClient(EncryptedBytes);
+                }
                 ClientConn = null;
                 Controller = null;
                 UdpClientConn = null;

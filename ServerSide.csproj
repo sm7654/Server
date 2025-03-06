@@ -78,7 +78,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AesEncryption.cs" />
+    <Compile Include="BlackGuest.cs" />
     <Compile Include="ClosingController.cs" />
+    <Compile Include="Guests.cs" />
     <Compile Include="RsaEncryption.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

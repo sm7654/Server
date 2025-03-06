@@ -53,6 +53,7 @@ namespace ServerSide
 
 
                 RsaEncryption.GenerateKeys();
+                AesEncryption.GenarateKeys();
                 ServerConnectedForm OnlineServerForm = new ServerConnectedForm(ServerSock);
 
                 OnlineServerForm.Show();

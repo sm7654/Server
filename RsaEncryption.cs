@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ServerSide
 {
@@ -17,7 +18,6 @@ namespace ServerSide
         {
             using (RSA service = RSA.Create())
             {
-                service.KeySize = 4096;
                 publicKey = service.ToXmlString(false);
                 privateKey = service.ToXmlString(true);
                 return Encoding.UTF8.GetBytes(publicKey);

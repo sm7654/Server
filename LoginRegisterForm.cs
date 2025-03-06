@@ -75,7 +75,7 @@ namespace ServerSide
             if (SqlService.LoginSql(User, pass, true))
                 return;
 
-            if (SqlService.Register(User, pass, true))
+            if (SqlService.Register(User, pass, true).Item1)
             {
                 RegisterStatus.Text = "User added!";
                 usernameTextbox.Text = "";

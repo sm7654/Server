@@ -77,5 +77,13 @@ namespace ServerSide
         {
 
         }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+            ServerServices.removeSession(this.ConnectedSession);
+            FormController.RemoveSession(this);
+            this.ConnectedSession.disconnect();
+
+        }
     }
 }

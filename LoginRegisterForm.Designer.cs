@@ -42,10 +42,11 @@
             // 
             // usernameTextbox
             // 
-            this.usernameTextbox.Location = new System.Drawing.Point(425, 181);
-            this.usernameTextbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.usernameTextbox.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.usernameTextbox.Location = new System.Drawing.Point(180, 150);
+            this.usernameTextbox.Margin = new System.Windows.Forms.Padding(4);
             this.usernameTextbox.Name = "usernameTextbox";
-            this.usernameTextbox.Size = new System.Drawing.Size(241, 22);
+            this.usernameTextbox.Size = new System.Drawing.Size(250, 30);
             this.usernameTextbox.TabIndex = 0;
             this.usernameTextbox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -59,43 +60,46 @@
             // 
             this.passwordTextbox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.passwordTextbox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.passwordTextbox.Location = new System.Drawing.Point(425, 247);
-            this.passwordTextbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.passwordTextbox.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.passwordTextbox.Location = new System.Drawing.Point(180, 220);
+            this.passwordTextbox.Margin = new System.Windows.Forms.Padding(4);
             this.passwordTextbox.Name = "passwordTextbox";
-            this.passwordTextbox.PasswordChar = '#';
-            this.passwordTextbox.Size = new System.Drawing.Size(242, 22);
+            this.passwordTextbox.PasswordChar = '●';
+            this.passwordTextbox.Size = new System.Drawing.Size(250, 30);
             this.passwordTextbox.TabIndex = 2;
             // 
             // username
             // 
             this.username.AutoSize = true;
-            this.username.Font = new System.Drawing.Font("Microsoft Tai Le", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.username.Location = new System.Drawing.Point(420, 154);
+            this.username.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.username.Location = new System.Drawing.Point(180, 120);
             this.username.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.username.Name = "username";
-            this.username.Size = new System.Drawing.Size(89, 22);
+            this.username.Size = new System.Drawing.Size(91, 23);
             this.username.TabIndex = 3;
-            this.username.Text = "username:";
+            this.username.Text = "Username:";
             // 
             // password
             // 
             this.password.AutoSize = true;
-            this.password.Font = new System.Drawing.Font("Microsoft Tai Le", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.password.Location = new System.Drawing.Point(420, 224);
+            this.password.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.password.Location = new System.Drawing.Point(180, 190);
             this.password.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.password.Name = "password";
-            this.password.Size = new System.Drawing.Size(81, 22);
+            this.password.Size = new System.Drawing.Size(84, 23);
             this.password.TabIndex = 4;
-            this.password.Text = "password";
+            this.password.Text = "Password:";
             // 
             // RegisterButton
             // 
-            this.RegisterButton.BackColor = System.Drawing.Color.White;
-            this.RegisterButton.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("RegisterButton.BackgroundImage")));
-            this.RegisterButton.Location = new System.Drawing.Point(575, 322);
-            this.RegisterButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.RegisterButton.BackColor = System.Drawing.Color.Black;
+            this.RegisterButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.RegisterButton.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.RegisterButton.ForeColor = System.Drawing.Color.White;
+            this.RegisterButton.Location = new System.Drawing.Point(180, 258);
+            this.RegisterButton.Margin = new System.Windows.Forms.Padding(4);
             this.RegisterButton.Name = "RegisterButton";
-            this.RegisterButton.Size = new System.Drawing.Size(93, 28);
+            this.RegisterButton.Size = new System.Drawing.Size(100, 52);
             this.RegisterButton.TabIndex = 5;
             this.RegisterButton.Text = "AddUser";
             this.RegisterButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
@@ -104,11 +108,14 @@
             // 
             // loginButton
             // 
-            this.loginButton.BackColor = System.Drawing.Color.White;
-            this.loginButton.Location = new System.Drawing.Point(424, 321);
-            this.loginButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.loginButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
+            this.loginButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.loginButton.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.loginButton.ForeColor = System.Drawing.Color.White;
+            this.loginButton.Location = new System.Drawing.Point(315, 258);
+            this.loginButton.Margin = new System.Windows.Forms.Padding(4);
             this.loginButton.Name = "loginButton";
-            this.loginButton.Size = new System.Drawing.Size(96, 30);
+            this.loginButton.Size = new System.Drawing.Size(100, 52);
             this.loginButton.TabIndex = 6;
             this.loginButton.Text = "Login";
             this.loginButton.UseVisualStyleBackColor = false;
@@ -118,10 +125,12 @@
             // 
             this.RegisterStatus.AutoSize = true;
             this.RegisterStatus.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.RegisterStatus.Location = new System.Drawing.Point(528, 391);
+            this.RegisterStatus.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.RegisterStatus.ForeColor = System.Drawing.Color.Red;
+            this.RegisterStatus.Location = new System.Drawing.Point(180, 330);
             this.RegisterStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.RegisterStatus.Name = "RegisterStatus";
-            this.RegisterStatus.Size = new System.Drawing.Size(2, 18);
+            this.RegisterStatus.Size = new System.Drawing.Size(2, 22);
             this.RegisterStatus.TabIndex = 7;
             // 
             // LoginRegisterForm
@@ -129,7 +138,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1109, 554);
+            this.ClientSize = new System.Drawing.Size(600, 400);
             this.Controls.Add(this.RegisterStatus);
             this.Controls.Add(this.loginButton);
             this.Controls.Add(this.RegisterButton);
@@ -138,7 +147,7 @@
             this.Controls.Add(this.passwordTextbox);
             this.Controls.Add(this.usernameTextbox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "LoginRegisterForm";
             this.Text = "LoginRegisterForm";
             this.Load += new System.EventHandler(this.LoginRegisterForm_Load);
@@ -146,6 +155,7 @@
             this.PerformLayout();
 
         }
+
 
         #endregion
 

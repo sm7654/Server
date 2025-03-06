@@ -4,32 +4,75 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ServerSide
 {
     static class AesEncryption
     {
-        private static byte[] aesKey;
-        private static byte[] aesIV;
+        private static byte[] AESkey;
+        private static byte[] AESiv;
 
-        public static void Addkeys(byte[] key, byte[] Iv)
+        /*public static void Addkeys(byte[] key, byte[] Iv)
         {
-            aesKey = RsaEncryption.DecryptToBytes(key);
-            aesIV = RsaEncryption.DecryptToBytes(Iv);
+            AESkey = RsaEncryption.DecryptToBytes(key);
+            AESiv = RsaEncryption.DecryptToBytes(Iv);
+        }
+*/
+
+        public static int GetRandomDelay()
+        {
+            Random _random = new Random();
+            return _random.Next(10000, 11000); // Random number between 60000 and 180000 (inclusive)
         }
 
+        public static void ChengeIv()
+        {
+            //while (true)
+            //{
+                int delay = GetRandomDelay();
+                Thread.Sleep(delay);
+                byte[] AESTemp;
+                using (Aes aesServise = Aes.Create())
+                {
+                    aesServise.KeySize = 192;
+                    AESTemp = aesServise.IV;
+                }
+            MessageBox.Show(Convert.ToBase64String(AESTemp));
+                ServerServices.ChangeIvToSessions(AESTemp);
+                AESiv = AESTemp;
+            //}
+        }
+        public static void GenarateKeys()
+        {
 
+            using (Aes aesServise = Aes.Create())
+            {
+                aesServise.KeySize = 192;
+                AESkey = aesServise.Key;
+                AESiv = aesServise.IV;
+            }
+            //new Thread(ChengeIv).Start();
+        }
+        public static (byte[], byte[]) GetAesEncryptedKeys(string RsaKey)
+        {
+            byte[] EncryptedKey = RsaEncryption.EncryptBytes(AESkey, RsaKey);
+            byte[] EncryptedIV = RsaEncryption.EncryptBytes(AESiv, RsaKey);
+
+            return (EncryptedKey, EncryptedIV);
+        }
         public static byte[] EncryptedData(byte[] data)
         {
-            if (aesKey == null || aesIV == null)
+            if (AESkey == null || AESiv == null)
                 return null;
             try
             {
                 using (Aes aes = Aes.Create())
                 {
-                    aes.Key = aesKey;
-                    aes.IV = aesIV;
+                    aes.Key = AESkey;
+                    aes.IV = AESiv;
 
                     ICryptoTransform encryptor = aes.CreateEncryptor();
                     using (MemoryStream ms = new MemoryStream())
@@ -50,14 +93,14 @@ namespace ServerSide
 
         public static byte[] DecryptData(byte[] encryptedData)
         {
-            if (aesKey == null || aesIV == null)
+            if (AESkey == null || AESiv == null)
                 return null;
             try
             {
                 using (Aes aes = Aes.Create())
                 {
-                    aes.Key = aesKey;
-                    aes.IV = aesIV;
+                    aes.Key = AESkey;
+                    aes.IV = AESiv;
 
                     ICryptoTransform decryptor = aes.CreateDecryptor();
                     using (MemoryStream ms = new MemoryStream(encryptedData))
@@ -82,6 +125,6 @@ namespace ServerSide
         }
 
 
-        //
+        
     }
 }
