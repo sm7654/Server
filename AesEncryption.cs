@@ -32,8 +32,8 @@ namespace ServerSide
         {
             //while (true)
             //{
-                int delay = GetRandomDelay();
-                Thread.Sleep(delay);
+                //int delay = GetRandomDelay();
+                //Thread.Sleep(delay);
                 byte[] AESTemp;
                 using (Aes aesServise = Aes.Create())
                 {

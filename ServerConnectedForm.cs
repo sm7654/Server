@@ -90,8 +90,8 @@ namespace ServerSide
 
 
                 new Thread(() => SelectionOfConnections(Conn)).Start();
-                new Thread(() => ListenToUdpClientConnections()).Start();
-                new Thread(() => ReadVideoBytesFromMicro()).Start();
+                //new Thread(() => ListenToUdpClientConnections()).Start();
+                //new Thread(() => ReadVideoBytesFromMicro()).Start();
                 
 
 
@@ -121,6 +121,34 @@ namespace ServerSide
                 //////////////////////////////
 
 
+                byte[] bytes = new byte[128];
+                Conn.Receive(bytes);
+                string MotherBoardSerialNumber = "";
+                try
+                {
+                    MotherBoardSerialNumber = RsaEncryption.Decrypt(bytes);
+
+                    (bool NC, Guest g) = ServerServices.HasBennHere(MotherBoardSerialNumber);
+                    Thread.Sleep(100);
+
+                    if (NC)
+                    {
+                        if (g is BlackGuest)
+                        {
+                            Conn.Send(Encoding.UTF8.GetBytes("NoOk"));
+                            return;
+                        }
+                        Conn.Send(Encoding.UTF8.GetBytes("Ok"));
+                    }
+                    else
+                    {
+                        Conn.Send(Encoding.UTF8.GetBytes("Ok"));
+                    }
+                    
+                    
+                } catch (Exception e)
+                {
+                }
 
 
 
@@ -153,16 +181,12 @@ namespace ServerSide
                 {
                     Guest TempG = null;
                     string ConnIp = ((IPEndPoint)Conn.RemoteEndPoint).Address.ToString();
-                    (bool HasBennHere, Guest g) = ServerServices.HasBennHere(ConnIp);
+                    (bool HasBennHere, Guest g) = ServerServices.HasBennHere(MotherBoardSerialNumber);
                     if (!HasBennHere)
                         ServerServices.AddGuest(g);
 
                     TempG = (Guest)g;
-                     if (g is BlackGuest)
-                    {
-                        SendToClient(Conn, $"999&");
-                        return;
-                    }
+                     
                     do
                     {
                         try
@@ -218,6 +242,12 @@ namespace ServerSide
 
                             CodeAndKnickname = reciveIdentifiers(Conn);
 
+                            if (TempG.GetLogs() > 8 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 3))
+                            {
+                                SendToClient(Conn, $"999&");
+                                ServerServices.MakeGuestBlack(g);
+                                return;
+                            }
                         
                         
                             
@@ -226,21 +256,9 @@ namespace ServerSide
                         catch (Exception ex) {
                             SendToClient(Conn, $"400&");
                         }
-                        if (TempG.GetLogs() > 8)
-                        {
-                            if (g is Guest && !(g is BlackGuest))
-                            {
-                                if ((TempG.AvrageLogTime() < 10
 
-                                    || TempG.IsConssistent())
-                                    && TempG.GetLogs() > 8)
-                                {
-                                    ServerServices.MakeGuestBlack(TempG);
-                                    SendToClient(Conn, $"999&");
-                                    return;
-                                }
-                            }
-                        }
+
+
                     }
 
                     while (true);
@@ -531,6 +549,10 @@ namespace ServerSide
         private void button1_Click_1(object sender, EventArgs e)
         {
             AesEncryption.ChengeIv();
+        }
+
+        private void TitleLabel_Click(object sender, EventArgs e)
+        {
         }
     }
 

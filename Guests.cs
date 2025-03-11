@@ -9,7 +9,7 @@ namespace ServerSide
 {
     internal class Guest
     {
-        protected string ip;
+        protected string MotherBoard_SN;
         private int logs;
         private double Timer;
         private bool HasEntered = false;
@@ -22,7 +22,7 @@ namespace ServerSide
         public Guest(Guest ForgainGuest)
         {
             // Set all the variables of the current object (this) to match the passed object (ForgainGuest)
-            this.ip = ForgainGuest.GetIp();
+            this.MotherBoard_SN = ForgainGuest.GEt_MotherBoard_SN();
             this.logs = ForgainGuest.GetLogs();
             this.Timer = ForgainGuest.GetTimer();
             this.HasEntered = ForgainGuest.GetHasEntered();
@@ -31,24 +31,24 @@ namespace ServerSide
 
 
         // Constructor with IP address
-        public Guest(string ip)
+        public Guest(string SN)
         {
             logs = 1;
             Timer = 0;
             new Thread(Count).Start();
-            this.ip = ip;
+            this.MotherBoard_SN = SN;
         }
 
         // Getter for ip
-        public string GetIp()
+        public string GEt_MotherBoard_SN()
         {
-            return this.ip;
+            return this.MotherBoard_SN;
         }
 
         // Setter for ip
-        public void SetIp(string ipAddress)
+        public void Set_MotherBoard_SN(string SN)
         {
-            this.ip = ipAddress;
+            this.MotherBoard_SN = SN;
         }
 
         // Getter for logs

@@ -33,13 +33,14 @@ namespace ServerSide
             this.HeaderPanel = new System.Windows.Forms.Panel();
             this.TitleLabel = new System.Windows.Forms.Label();
             this.SearchPanel = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
             this.ShutServerButton = new System.Windows.Forms.Button();
             this.ShutSessionsButton = new System.Windows.Forms.Button();
             this.SearchLabel = new System.Windows.Forms.Label();
             this.SessionSearch = new System.Windows.Forms.TextBox();
             this.SessionsViewPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.MainContainer = new System.Windows.Forms.Panel();
-            this.button1 = new System.Windows.Forms.Button();
+            this.TezxtText = new System.Windows.Forms.Label();
             this.HeaderPanel.SuspendLayout();
             this.SearchPanel.SuspendLayout();
             this.MainContainer.SuspendLayout();
@@ -48,6 +49,7 @@ namespace ServerSide
             // HeaderPanel
             // 
             this.HeaderPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(144)))), ((int)(((byte)(255)))));
+            this.HeaderPanel.Controls.Add(this.TezxtText);
             this.HeaderPanel.Controls.Add(this.TitleLabel);
             this.HeaderPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.HeaderPanel.Location = new System.Drawing.Point(0, 0);
@@ -67,6 +69,7 @@ namespace ServerSide
             this.TitleLabel.Size = new System.Drawing.Size(348, 46);
             this.TitleLabel.TabIndex = 0;
             this.TitleLabel.Text = "Server Control Panel";
+            this.TitleLabel.Click += new System.EventHandler(this.TitleLabel_Click);
             // 
             // SearchPanel
             // 
@@ -82,6 +85,16 @@ namespace ServerSide
             this.SearchPanel.Padding = new System.Windows.Forms.Padding(10);
             this.SearchPanel.Size = new System.Drawing.Size(1200, 49);
             this.SearchPanel.TabIndex = 1;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(821, 13);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(90, 30);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "Change IV";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // ShutServerButton
             // 
@@ -157,15 +170,13 @@ namespace ServerSide
             this.MainContainer.Size = new System.Drawing.Size(1200, 800);
             this.MainContainer.TabIndex = 0;
             // 
-            // button1
+            // TezxtText
             // 
-            this.button1.Location = new System.Drawing.Point(821, 13);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(90, 30);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "Change IV";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            this.TezxtText.AutoSize = true;
+            this.TezxtText.Location = new System.Drawing.Point(662, 23);
+            this.TezxtText.Name = "TezxtText";
+            this.TezxtText.Size = new System.Drawing.Size(0, 16);
+            this.TezxtText.TabIndex = 1;
             // 
             // ServerConnectedForm
             // 
@@ -193,6 +204,7 @@ namespace ServerSide
         }
 
         private Button button1;
+        private Label TezxtText;
     }
 }
 

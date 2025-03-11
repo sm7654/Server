@@ -26,20 +26,19 @@ namespace ServerSide
             byte[] chageIv = AesEncryption.EncryptedData(ServerRole.Concat(Encoding.UTF8.GetBytes("&CHANGEIV&").Concat(iv)).ToArray());
             foreach (session Session in sessionsList)
                 Session.SendToClient(chageIv);
-            
         }
 
-        public static (bool, Guest) HasBennHere(string ip)
+        public static (bool, Guest) HasBennHere(string MotherBoard_SN)
         {
             foreach (Guest guest in ConnectionRequests)
             {
-                if (ip == guest.GetIp())
+                if (MotherBoard_SN == guest.GEt_MotherBoard_SN())
                 {
                     return (true, guest);
                 }
             }
             
-            Guest g = new Guest(ip);
+            Guest g = new Guest(MotherBoard_SN);
             return (false, g);
         }
         
@@ -51,7 +50,7 @@ namespace ServerSide
                 object item = ConnectionRequests[i];
                 if (item is Guest)
                 {
-                    if (((Guest)item).GetIp() == g.GetIp())
+                    if (((Guest)item).GEt_MotherBoard_SN() == g.GEt_MotherBoard_SN())
                     {
                         BlackGuest bg = new BlackGuest(g);
                         ConnectionRequests[i] = bg;

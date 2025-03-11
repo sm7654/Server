@@ -43,13 +43,11 @@ namespace ServerSide
 
                 Socket ServerSock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                int port = 65000;// port forwarding - 65000
+                int port = 65000;
 
                 IPEndPoint Ep = new IPEndPoint(IPAddress.Parse("0.0.0.0"), port);
 
-                ServerSock.Bind(Ep); /*  */
-
-                //new Thread(() => portProvider(ServerSock)).Start);
+                ServerSock.Bind(Ep);
 
 
                 RsaEncryption.GenerateKeys();
