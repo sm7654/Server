@@ -18,6 +18,7 @@ namespace ServerSide
         {
             using (RSA service = RSA.Create())
             {
+                service.KeySize = 4096;
                 publicKey = service.ToXmlString(false);
                 privateKey = service.ToXmlString(true);
                 return Encoding.UTF8.GetBytes(publicKey);

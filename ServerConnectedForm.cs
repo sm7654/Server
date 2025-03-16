@@ -160,6 +160,7 @@ namespace ServerSide
                     if (IsMicroNameExist(CodeAndKnickname[1]))
                     {
                         Conn.Send(RsaEncryption.Encrypt("500", PublicKey));
+                        Conn.Close();
                         return;
                     }
 
