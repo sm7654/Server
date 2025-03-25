@@ -10,7 +10,6 @@ namespace ServerSide
         private System.Windows.Forms.Panel HeaderPanel;
         private System.Windows.Forms.Panel SearchPanel;
         private System.Windows.Forms.Panel MainContainer;
-        private System.Windows.Forms.FlowLayoutPanel SessionsViewPanel;
 
         private System.Windows.Forms.Label TitleLabel;
         private System.Windows.Forms.Label SearchLabel;
@@ -31,19 +30,24 @@ namespace ServerSide
         private void InitializeComponent()
         {
             this.HeaderPanel = new System.Windows.Forms.Panel();
+            this.TezxtText = new System.Windows.Forms.Label();
             this.TitleLabel = new System.Windows.Forms.Label();
             this.SearchPanel = new System.Windows.Forms.Panel();
-            this.button1 = new System.Windows.Forms.Button();
             this.ShutServerButton = new System.Windows.Forms.Button();
             this.ShutSessionsButton = new System.Windows.Forms.Button();
             this.SearchLabel = new System.Windows.Forms.Label();
             this.SessionSearch = new System.Windows.Forms.TextBox();
-            this.SessionsViewPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.MainContainer = new System.Windows.Forms.Panel();
-            this.TezxtText = new System.Windows.Forms.Label();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.BlockedClients = new System.Windows.Forms.FlowLayoutPanel();
+            this.SessionsViewPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.HeaderPanel.SuspendLayout();
             this.SearchPanel.SuspendLayout();
             this.MainContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
             // 
             // HeaderPanel
@@ -57,6 +61,14 @@ namespace ServerSide
             this.HeaderPanel.Padding = new System.Windows.Forms.Padding(10);
             this.HeaderPanel.Size = new System.Drawing.Size(1200, 60);
             this.HeaderPanel.TabIndex = 2;
+            // 
+            // TezxtText
+            // 
+            this.TezxtText.AutoSize = true;
+            this.TezxtText.Location = new System.Drawing.Point(662, 23);
+            this.TezxtText.Name = "TezxtText";
+            this.TezxtText.Size = new System.Drawing.Size(0, 16);
+            this.TezxtText.TabIndex = 1;
             // 
             // TitleLabel
             // 
@@ -74,7 +86,6 @@ namespace ServerSide
             // SearchPanel
             // 
             this.SearchPanel.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.SearchPanel.Controls.Add(this.button1);
             this.SearchPanel.Controls.Add(this.ShutServerButton);
             this.SearchPanel.Controls.Add(this.ShutSessionsButton);
             this.SearchPanel.Controls.Add(this.SearchLabel);
@@ -86,18 +97,9 @@ namespace ServerSide
             this.SearchPanel.Size = new System.Drawing.Size(1200, 49);
             this.SearchPanel.TabIndex = 1;
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(821, 13);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(90, 30);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "Change IV";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click_1);
-            // 
             // ShutServerButton
             // 
+            this.ShutServerButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ShutServerButton.BackColor = System.Drawing.Color.Red;
             this.ShutServerButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShutServerButton.Font = new System.Drawing.Font("Segoe UI", 10F);
@@ -113,6 +115,7 @@ namespace ServerSide
             // 
             // ShutSessionsButton
             // 
+            this.ShutSessionsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ShutSessionsButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(140)))), ((int)(((byte)(0)))));
             this.ShutSessionsButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShutSessionsButton.Font = new System.Drawing.Font("Segoe UI", 10F);
@@ -147,21 +150,10 @@ namespace ServerSide
             this.SessionSearch.TabIndex = 2;
             this.SessionSearch.TextChanged += new System.EventHandler(this.SessionSearch_TextChanged);
             // 
-            // SessionsViewPanel
-            // 
-            this.SessionsViewPanel.AutoScroll = true;
-            this.SessionsViewPanel.BackColor = System.Drawing.Color.White;
-            this.SessionsViewPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.SessionsViewPanel.Location = new System.Drawing.Point(0, 109);
-            this.SessionsViewPanel.Name = "SessionsViewPanel";
-            this.SessionsViewPanel.Padding = new System.Windows.Forms.Padding(10);
-            this.SessionsViewPanel.Size = new System.Drawing.Size(1200, 691);
-            this.SessionsViewPanel.TabIndex = 0;
-            // 
             // MainContainer
             // 
             this.MainContainer.BackColor = System.Drawing.Color.White;
-            this.MainContainer.Controls.Add(this.SessionsViewPanel);
+            this.MainContainer.Controls.Add(this.splitContainer1);
             this.MainContainer.Controls.Add(this.SearchPanel);
             this.MainContainer.Controls.Add(this.HeaderPanel);
             this.MainContainer.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -170,13 +162,43 @@ namespace ServerSide
             this.MainContainer.Size = new System.Drawing.Size(1200, 800);
             this.MainContainer.TabIndex = 0;
             // 
-            // TezxtText
+            // splitContainer1
             // 
-            this.TezxtText.AutoSize = true;
-            this.TezxtText.Location = new System.Drawing.Point(662, 23);
-            this.TezxtText.Name = "TezxtText";
-            this.TezxtText.Size = new System.Drawing.Size(0, 16);
-            this.TezxtText.TabIndex = 1;
+            this.splitContainer1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 109);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.SessionsViewPanel);
+            this.splitContainer1.Panel1MinSize = 370;
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.BlockedClients);
+            this.splitContainer1.Panel2MinSize = 370;
+            this.splitContainer1.Size = new System.Drawing.Size(1200, 691);
+            this.splitContainer1.SplitterDistance = 370;
+            this.splitContainer1.TabIndex = 3;
+            // 
+            // BlockedClients
+            // 
+            this.BlockedClients.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.BlockedClients.Location = new System.Drawing.Point(0, 0);
+            this.BlockedClients.MinimumSize = new System.Drawing.Size(470, 0);
+            this.BlockedClients.Name = "BlockedClients";
+            this.BlockedClients.Size = new System.Drawing.Size(824, 689);
+            this.BlockedClients.TabIndex = 0;
+            // 
+            // SessionsViewPanel
+            // 
+            this.SessionsViewPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.SessionsViewPanel.Location = new System.Drawing.Point(0, 0);
+            this.SessionsViewPanel.MinimumSize = new System.Drawing.Size(470, 0);
+            this.SessionsViewPanel.Name = "SessionsViewPanel";
+            this.SessionsViewPanel.Size = new System.Drawing.Size(470, 689);
+            this.SessionsViewPanel.TabIndex = 0;
             // 
             // ServerConnectedForm
             // 
@@ -192,6 +214,10 @@ namespace ServerSide
             this.SearchPanel.ResumeLayout(false);
             this.SearchPanel.PerformLayout();
             this.MainContainer.ResumeLayout(false);
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -202,9 +228,10 @@ namespace ServerSide
         {
             return this.SessionsViewPanel.Controls;
         }
-
-        private Button button1;
         private Label TezxtText;
+        private SplitContainer splitContainer1;
+        private FlowLayoutPanel SessionsViewPanel;
+        private FlowLayoutPanel BlockedClients;
     }
 }
 

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ServerSide
 {
-    internal class BlackGuest : Guest
+    public class BlackGuest : Guest
     {
-
+        private int ConnectAttemps = 0;
         public BlackGuest(Guest g) : base(g)
         {
 
@@ -17,7 +17,11 @@ namespace ServerSide
         {
 
         }
-
+        public int AddAttempt()
+        {
+            ConnectAttemps++;
+            return ConnectAttemps;
+        }
 
         public override void Log()
         {

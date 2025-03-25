@@ -34,6 +34,7 @@ namespace ServerSide
             {
                 if (MotherBoard_SN == guest.GEt_MotherBoard_SN())
                 {
+                    guest.RestartCount();
                     return (true, guest);
                 }
             }
@@ -41,9 +42,20 @@ namespace ServerSide
             Guest g = new Guest(MotherBoard_SN);
             return (false, g);
         }
-        
+        public static void StopCountToGuest(Guest g)
+        {
+            foreach (Guest guest in ConnectionRequests)
+            {
+                if (guest == g)
+                {
+                    guest.StopCount();
+                    break;
+                }
+            }
+        }
+
         private static object lockedThread = new object();
-        public static void MakeGuestBlack(Guest g)
+        public static BlackGuest MakeGuestBlack(Guest g)
         {
             for (int i = 0; i < ConnectionRequests.Count; i++)
             {
@@ -54,10 +66,11 @@ namespace ServerSide
                     {
                         BlackGuest bg = new BlackGuest(g);
                         ConnectionRequests[i] = bg;
-                        return;
+                        return bg;
                     }
                 }
             }
+            return null;
         }
 
         public static void AddGuest(Guest g)

@@ -15,12 +15,6 @@ namespace ServerSide
         private static byte[] AESkey;
         private static byte[] AESiv;
 
-        /*public static void Addkeys(byte[] key, byte[] Iv)
-        {
-            AESkey = RsaEncryption.DecryptToBytes(key);
-            AESiv = RsaEncryption.DecryptToBytes(Iv);
-        }
-*/
 
         public static int GetRandomDelay()
         {
@@ -30,31 +24,31 @@ namespace ServerSide
 
         public static void ChengeIv()
         {
-            //while (true)
-            //{
-                //int delay = GetRandomDelay();
-                //Thread.Sleep(delay);
+            while (true)
+            {
+                int delay = GetRandomDelay();
+                Thread.Sleep(delay);
                 byte[] AESTemp;
                 using (Aes aesServise = Aes.Create())
                 {
-                    aesServise.KeySize = 192;
+                    aesServise.KeySize = 256;
                     AESTemp = aesServise.IV;
                 }
-            MessageBox.Show(Convert.ToBase64String(AESTemp));
+            
                 ServerServices.ChangeIvToSessions(AESTemp);
                 AESiv = AESTemp;
-            //}
+            }
         }
         public static void GenarateKeys()
         {
 
             using (Aes aesServise = Aes.Create())
             {
-                aesServise.KeySize = 192;
+                aesServise.KeySize = 256;
                 AESkey = aesServise.Key;
                 AESiv = aesServise.IV;
             }
-            //new Thread(ChengeIv).Start();
+            new Thread(ChengeIv).Start();
         }
         public static (byte[], byte[]) GetAesEncryptedKeys(string RsaKey)
         {

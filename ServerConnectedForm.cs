@@ -124,11 +124,13 @@ namespace ServerSide
                 byte[] bytes = new byte[128];
                 Conn.Receive(bytes);
                 string MotherBoardSerialNumber = "";
+                Guest TempG = null;
                 try
                 {
                     MotherBoardSerialNumber = RsaEncryption.Decrypt(bytes);
 
                     (bool NC, Guest g) = ServerServices.HasBennHere(MotherBoardSerialNumber);
+
                     Thread.Sleep(100);
 
                     if (NC)
@@ -136,6 +138,13 @@ namespace ServerSide
                         if (g is BlackGuest)
                         {
                             Conn.Send(Encoding.UTF8.GetBytes("NoOk"));
+                            foreach (BalockedClient badGuest in BlockedClients.Controls)
+                                if (badGuest.Get_MotherBoard_SN() == MotherBoardSerialNumber)
+                                {
+                                    badGuest.AddAttempt();
+                                    break;
+                                }
+                            
                             return;
                         }
                         Conn.Send(Encoding.UTF8.GetBytes("Ok"));
@@ -143,8 +152,9 @@ namespace ServerSide
                     else
                     {
                         Conn.Send(Encoding.UTF8.GetBytes("Ok"));
+                        ServerServices.AddGuest(g);
                     }
-                    
+                    TempG = g;
                     
                 } catch (Exception e)
                 {
@@ -180,13 +190,7 @@ namespace ServerSide
                 }
                 else
                 {
-                    Guest TempG = null;
-                    string ConnIp = ((IPEndPoint)Conn.RemoteEndPoint).Address.ToString();
-                    (bool HasBennHere, Guest g) = ServerServices.HasBennHere(MotherBoardSerialNumber);
-                    if (!HasBennHere)
-                        ServerServices.AddGuest(g);
-
-                    TempG = (Guest)g;
+                    
                      
                     do
                     {
@@ -234,19 +238,20 @@ namespace ServerSide
                             }
                             else
                             {
-                                if (LoginRequest && TempG != null)
-                                {
-                                    TempG.Log();
-                                    SendToClient(Conn, $"400&");
-                                }
+                                TempG.Log();
+                                SendToClient(Conn, $"400&");
                             }
 
                             CodeAndKnickname = reciveIdentifiers(Conn);
 
-                            if (TempG.GetLogs() > 8 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 3))
+                            if (TempG.GetLogs() > 8 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 4))
                             {
                                 SendToClient(Conn, $"999&");
-                                ServerServices.MakeGuestBlack(g);
+                                BalockedClient NewBad = new BalockedClient(ServerServices.MakeGuestBlack(TempG));
+                                this.BeginInvoke(new Action(() => {
+                                    BlockedClients.Controls.Add(NewBad);
+                                }));
+                                Conn.Close();
                                 return;
                             }
                         
@@ -256,6 +261,14 @@ namespace ServerSide
                         }
                         catch (Exception ex) {
                             SendToClient(Conn, $"400&");
+                            if (CodeAndKnickname[0] == null)
+                            {
+                                ServerServices.StopCountToGuest(TempG);
+                                Conn.Close();
+                                return;
+                            }
+                            CodeAndKnickname = reciveIdentifiers(Conn);
+                            
                         }
 
 
@@ -274,7 +287,7 @@ namespace ServerSide
         {
             byte[] EncryptedMessage = AesEncryption.EncryptedData(Encoding.UTF8.GetBytes(message));
             Conn.Send(Encoding.UTF8.GetBytes(EncryptedMessage.Length.ToString()));
-            Thread.Sleep(250);
+            Thread.Sleep(300);
             Conn.Send(EncryptedMessage);
 
 
@@ -549,7 +562,7 @@ namespace ServerSide
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            AesEncryption.ChengeIv();
+            
         }
 
         private void TitleLabel_Click(object sender, EventArgs e)

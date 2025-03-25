@@ -51,6 +51,7 @@
             // 
             this.SessionName.AutoSize = true;
             this.SessionName.BackColor = System.Drawing.Color.Transparent;
+            this.SessionName.Cursor = System.Windows.Forms.Cursors.Default;
             this.SessionName.Font = new System.Drawing.Font("Arial", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SessionName.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.SessionName.Location = new System.Drawing.Point(4, 5);
@@ -64,6 +65,7 @@
             // 
             this.SessionCodeLabel.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.SessionCodeLabel.AutoSize = true;
+            this.SessionCodeLabel.Cursor = System.Windows.Forms.Cursors.Default;
             this.SessionCodeLabel.Font = new System.Drawing.Font("Segoe UI Emoji", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SessionCodeLabel.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.SessionCodeLabel.Location = new System.Drawing.Point(402, 5);
@@ -94,6 +96,7 @@
             this.ConectionTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 27F));
             this.ConectionTable.Controls.Add(this.panel1, 1, 0);
             this.ConectionTable.Controls.Add(this.panel2, 0, 0);
+            this.ConectionTable.Cursor = System.Windows.Forms.Cursors.Default;
             this.ConectionTable.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.ConectionTable.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ConectionTable.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
@@ -109,7 +112,7 @@
             // 
             // panel1
             // 
-            this.panel1.BackColor = System.Drawing.Color.Transparent;
+            this.panel1.BackColor = System.Drawing.SystemColors.Control;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel1.Controls.Add(this.pictureBox2);
             this.panel1.Controls.Add(this.ClientPort);
@@ -176,7 +179,7 @@
             this.panel2.Location = new System.Drawing.Point(4, 4);
             this.panel2.Margin = new System.Windows.Forms.Padding(4);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(220, 82);
+            this.panel2.Size = new System.Drawing.Size(222, 82);
             this.panel2.TabIndex = 1;
             this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
             // 
@@ -222,6 +225,7 @@
             this.Controls.Add(this.ConectionTable);
             this.Controls.Add(this.SessionCodeLabel);
             this.Controls.Add(this.SessionName);
+            this.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "sessionLayot";
             this.Size = new System.Drawing.Size(460, 127);

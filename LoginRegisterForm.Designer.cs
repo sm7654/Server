@@ -96,10 +96,10 @@
             this.RegisterButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.RegisterButton.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.RegisterButton.ForeColor = System.Drawing.Color.White;
-            this.RegisterButton.Location = new System.Drawing.Point(180, 258);
+            this.RegisterButton.Location = new System.Drawing.Point(184, 278);
             this.RegisterButton.Margin = new System.Windows.Forms.Padding(4);
             this.RegisterButton.Name = "RegisterButton";
-            this.RegisterButton.Size = new System.Drawing.Size(100, 52);
+            this.RegisterButton.Size = new System.Drawing.Size(116, 35);
             this.RegisterButton.TabIndex = 5;
             this.RegisterButton.Text = "AddUser";
             this.RegisterButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
@@ -108,14 +108,14 @@
             // 
             // loginButton
             // 
-            this.loginButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(152)))), ((int)(((byte)(219)))));
+            this.loginButton.BackColor = System.Drawing.Color.Black;
             this.loginButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.loginButton.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.loginButton.ForeColor = System.Drawing.Color.White;
-            this.loginButton.Location = new System.Drawing.Point(315, 258);
+            this.loginButton.Location = new System.Drawing.Point(315, 278);
             this.loginButton.Margin = new System.Windows.Forms.Padding(4);
             this.loginButton.Name = "loginButton";
-            this.loginButton.Size = new System.Drawing.Size(100, 52);
+            this.loginButton.Size = new System.Drawing.Size(113, 35);
             this.loginButton.TabIndex = 6;
             this.loginButton.Text = "Login";
             this.loginButton.UseVisualStyleBackColor = false;

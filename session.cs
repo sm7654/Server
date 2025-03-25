@@ -82,7 +82,7 @@ namespace ServerSide
                 }
             } 
             catch 
-            (Exception e) { }
+            (Exception e) { MessageBox.Show(e.Message + "1"); }
             
         }
         private void ClientStream()
@@ -134,13 +134,6 @@ namespace ServerSide
             this.ClientKnickname = name;
 
 
-            //////////////////////////////////////////////////////
-            /*byte[] AESkey = new byte[128];
-            int bytesread = Client.Receive(AESkey);
-            byte[] AESIv = new byte[128];
-            bytesread = Client.Receive(AESIv);
-            AesEncryption.Addkeys(AESkey, AESIv);*/
-            //////////////////////////////////////////////////////
             byte[] AESIv = new byte[128];
             byte[] AESkey = new byte[128];
             int bytesread = 0;
@@ -184,6 +177,8 @@ namespace ServerSide
 
         public void SendToClient(byte[] data)
         {
+            if (ClientConn == null)
+                return;
             lock (ClientSendLock) {
                 ClientConn.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));
                 Thread.Sleep(200);

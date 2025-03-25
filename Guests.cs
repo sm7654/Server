@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ServerSide
 {
-    internal class Guest
+    public class Guest
     {
         protected string MotherBoard_SN;
         private int logs;
@@ -16,21 +16,18 @@ namespace ServerSide
         List<double> gaps = new List<double>();
         private readonly object LockObject = new object();
 
-        // Default constructor
         public Guest() { }
 
         public Guest(Guest ForgainGuest)
         {
-            // Set all the variables of the current object (this) to match the passed object (ForgainGuest)
             this.MotherBoard_SN = ForgainGuest.GEt_MotherBoard_SN();
             this.logs = ForgainGuest.GetLogs();
             this.Timer = ForgainGuest.GetTimer();
             this.HasEntered = ForgainGuest.GetHasEntered();
-            this.gaps = new List<double>(ForgainGuest.GetGaps());  // Make sure we create a new list to avoid reference issues
+            this.gaps = new List<double>(ForgainGuest.GetGaps()); 
         }
 
 
-        // Constructor with IP address
         public Guest(string SN)
         {
             logs = 1;
@@ -39,67 +36,56 @@ namespace ServerSide
             this.MotherBoard_SN = SN;
         }
 
-        // Getter for ip
         public string GEt_MotherBoard_SN()
         {
             return this.MotherBoard_SN;
         }
 
-        // Setter for ip
         public void Set_MotherBoard_SN(string SN)
         {
             this.MotherBoard_SN = SN;
         }
 
-        // Getter for logs
         public int GetLogs()
         {
             return this.logs;
         }
 
-        // Setter for logs
         public void SetLogs(int logCount)
         {
             this.logs = logCount;
         }
 
-        // Getter for Timer
         public double GetTimer()
         {
             return this.Timer;
         }
 
-        // Setter for Timer
         public void SetTimer(double time)
         {
             this.Timer = time;
         }
 
-        // Getter for HasEntered
         public bool GetHasEntered()
         {
             return this.HasEntered;
         }
 
-        // Setter for HasEntered
         public void SetHasEntered(bool hasEntered)
         {
             this.HasEntered = hasEntered;
         }
 
-        // Getter for gaps
         public List<double> GetGaps()
         {
             return this.gaps;
         }
 
-        // Setter for gaps
         public void SetGaps(List<double> gapList)
         {
             this.gaps = gapList;
         }
 
-        // Function that counts the time and updates the gaps
         private void Count()
         {
             double tempTimer = 0;
@@ -117,7 +103,6 @@ namespace ServerSide
             Timer += tempTimer;
         }
 
-        // Logs the event and creates a new thread to count time
         public virtual void Log()
         {
             lock (LockObject)
@@ -130,7 +115,6 @@ namespace ServerSide
             }
         }
 
-        // Returns the average log time
         public double AvrageLogTime()
         {
             lock (LockObject)
@@ -141,6 +125,16 @@ namespace ServerSide
                 HasEntered = false;
                 return t;
             }
+        }
+
+        public void StopCount()
+        {
+            HasEntered = true;
+        }
+        public void RestartCount()
+        {
+            HasEntered = false;
+            new Thread(Count).Start();
         }
 
         public bool IsConssistent()
