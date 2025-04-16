@@ -15,17 +15,17 @@ using System.Diagnostics;
 
 namespace ServerSide
 {
-    public partial class Form1 : Form
+    public partial class StartServerForm : Form
     {
-        public Form1()
+        public StartServerForm()
         {
             InitializeComponent();
+
             
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
         }
 
         
@@ -78,16 +78,9 @@ namespace ServerSide
             ServerServices.CloseConnection();
         }
 
-        private void panel1_Paint(object sender, PaintEventArgs e)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            ClosingController.btnExit_Click();
         }
-
-        private void Form1_MouseDown(object sender, MouseEventArgs e)
-        {
-
-        }
-
-        
     }
 }

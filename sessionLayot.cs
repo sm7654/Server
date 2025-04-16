@@ -29,7 +29,8 @@ namespace ServerSide
             (ClientIp.Text, ClientPort.Text) = ("not connected", "not connected");
             ClientKickname.Text = ("not provided");
             
-            this.ConnectedSession = session;//
+            this.ConnectedSession = session;
+            session.SetSessionUi(this);
         }
 
 
@@ -62,20 +63,6 @@ namespace ServerSide
         public System.Windows.Forms.Label GetClientPortLabels()
         {
             return ClientPort;
-        }
-        private void panel2_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void ConectionTable_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void sessionLayot_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)

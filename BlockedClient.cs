@@ -10,16 +10,16 @@ using System.Windows.Forms;
 
 namespace ServerSide
 {
-    public partial class BalockedClient : UserControl
+    public partial class BlockedClient : UserControl
     {
-        public BalockedClient(BlackGuest guest)
+        public BlockedClient(BadGuest guest)
         {
             InitializeComponent();
             MotherBoardlbl.Text = guest.GEt_MotherBoard_SN();
             this.guest = guest;
         }
         
-        private BlackGuest guest;
+        private BadGuest guest;
         public void AddAttempt()
         {
             ConnetAttemps.Text = $"{guest.AddAttempt()}";
@@ -28,8 +28,8 @@ namespace ServerSide
         {
             return this.guest.GEt_MotherBoard_SN();
         }
-        
-        private void ConnetAttemps_Click(object sender, EventArgs e)
+
+        private void DateOfBlock_Click(object sender, EventArgs e)
         {
 
         }

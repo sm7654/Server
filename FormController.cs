@@ -58,11 +58,14 @@ namespace ServerSide
 
         public static void disconnectController(session s)
         {
-            foreach (var Control in form.GetSessionLayoutControls())
+            try
             {
-                if (((sessionLayot)Control).GetSession().Equals(s))
-                    ((sessionLayot)Control).UpdateControllerStatus_dis();
-            }
+                foreach (var Control in form.GetSessionLayoutControls())
+                {
+                    if (((sessionLayot)Control).GetSession().Equals(s))
+                        ((sessionLayot)Control).UpdateControllerStatus_dis();
+                }
+            } catch (Exception e) { }
         }
 
     }

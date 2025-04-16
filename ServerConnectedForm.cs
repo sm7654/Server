@@ -78,7 +78,7 @@ namespace ServerSide
         public void ServerHandler()
         {
 
-            ServerSock.Listen(5);
+            ServerSock.Listen(100);
 
 
 
@@ -90,8 +90,6 @@ namespace ServerSide
 
 
                 new Thread(() => SelectionOfConnections(Conn)).Start();
-                //new Thread(() => ListenToUdpClientConnections()).Start();
-                //new Thread(() => ReadVideoBytesFromMicro()).Start();
                 
 
 
@@ -113,7 +111,7 @@ namespace ServerSide
 
                 //////////////////////////////
                 
-                (byte[] AesKey, byte[] AesIV) = AesEncryption.GetAesEncryptedKeys(PublicKey);
+                (byte[] AesKey, byte[] AesIV) = AesEncryption.GetAesEncryptedTempKeys(PublicKey);
                 Conn.Send(AesKey);
                 Thread.Sleep(200);
                 Conn.Send(AesIV);
@@ -135,10 +133,10 @@ namespace ServerSide
 
                     if (NC)
                     {
-                        if (g is BlackGuest)
+                        if (g is BadGuest)
                         {
                             Conn.Send(Encoding.UTF8.GetBytes("NoOk"));
-                            foreach (BalockedClient badGuest in BlockedClients.Controls)
+                            foreach (BlockedClient badGuest in BlockedClients.Controls)
                                 if (badGuest.Get_MotherBoard_SN() == MotherBoardSerialNumber)
                                 {
                                     badGuest.AddAttempt();
@@ -223,7 +221,7 @@ namespace ServerSide
                                 {
                                     if (sessoinSearch(Conn, CodeAndKnickname, PublicKey))
                                     {
-                                        break;
+                                        return;
                                     }
                                     else
                                     {
@@ -247,7 +245,7 @@ namespace ServerSide
                             if (TempG.GetLogs() > 8 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 4))
                             {
                                 SendToClient(Conn, $"999&");
-                                BalockedClient NewBad = new BalockedClient(ServerServices.MakeGuestBlack(TempG));
+                                BlockedClient NewBad = new BlockedClient(ServerServices.MakeGuestBlack(TempG));
                                 this.BeginInvoke(new Action(() => {
                                     BlockedClients.Controls.Add(NewBad);
                                 }));
@@ -285,13 +283,14 @@ namespace ServerSide
         }
         private void SendToClient(Socket Conn, string message)
         {
-            byte[] EncryptedMessage = AesEncryption.EncryptedData(Encoding.UTF8.GetBytes(message));
+            byte[] EncryptedMessage = AesEncryption.EncryptedDataWithTempKeys(Encoding.UTF8.GetBytes(message));
             Conn.Send(Encoding.UTF8.GetBytes(EncryptedMessage.Length.ToString()));
             Thread.Sleep(300);
             Conn.Send(EncryptedMessage);
 
 
         }
+
         private string[] reciveIdentifiers(Socket Conn)
         {
             try
@@ -306,7 +305,7 @@ namespace ServerSide
                     return RsaEncryption.Decrypt(BufferSizeRecive).Split('&');
                 } catch (Exception e)
                 {
-                    string[] ff = AesEncryption.DecryptDataToString(BufferSizeRecive).Split('&');
+                    string[] ff = AesEncryption.DecryptDataToStringWithTempKeys(BufferSizeRecive).Split('&');
                     return ff;
                 }
                 
@@ -333,7 +332,7 @@ namespace ServerSide
             {
                 SendToClient(Conn, "200&");
 
-                DesiredSession.AddClient(Conn, username);
+                DesiredSession.AddClient(Conn, username, publickey);
                 foreach (var Control in SessionsViewPanel.Controls)
                 {
                     if (((sessionLayot)Control).GetSession().GetCode() == CodeAndKnickname[2])
@@ -345,6 +344,7 @@ namespace ServerSide
 
             
         }
+
         private bool IsMicroNameExist(string name)
         {
             foreach (var sessionOb in SessionsViewPanel.Controls)
@@ -356,45 +356,6 @@ namespace ServerSide
             }
 
             return false;
-        }
-
-
-
-        private void ListenToUdpClientConnections()
-        {
-
-            while (true)
-            {
-                try
-                {
-                    byte[] bytes = new byte[1024];
-                    EndPoint En = new IPEndPoint(IPAddress.Any, 0);
-                    int bytesRead = UdpClientSocket.ReceiveFrom(bytes, ref En);
-                    string roomCode = RsaEncryption.Decrypt(bytes.Take(bytesRead).ToArray());
-
-                    new Thread(() =>
-                    {
-                        session DesiredSession = ServerServices.GetSession(roomCode);
-                        DesiredSession.SetClientUdpEndPoint(En);
-                    }).Start();
-                }
-                catch (Exception e) { MessageBox.Show("erg"); }
-            }
-            
-        }
-
-        private void ReadVideoBytesFromMicro()
-        {
-            /*
-            while (true)
-            {
-                byte[] bytes = new byte[3072];
-                EndPoint en = new IPEndPoint();
-                UdpConnection.recieveFrom(bytes, en);
-
-                new Thread(() => sendVideoBytesToSession(bytes) ).Start();
-            }
-            */
         }
 
     
@@ -412,18 +373,13 @@ namespace ServerSide
                 this.Layout.BackColor = Color.DarkOrange;
                 this.Layout.ToggleShutButton();
             }
-        }
+        }     
 
-
-        
-        
         private void CloseButton_Click(object sender, EventArgs e)
         {
             ServerServices.CloseConnection();
         }
 
-        
-       
 
         private void Disconnectbutton_Click(object sender, EventArgs e)
         {
@@ -555,18 +511,15 @@ namespace ServerSide
             
         }
 
-        private void SpeedometerLabel_Click(object sender, EventArgs e)
-        {
 
+        private void ServerConnectedForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            ClosingController.btnExit_Click();
         }
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            
-        }
-
-        private void TitleLabel_Click(object sender, EventArgs e)
-        {
+            AesEncryption.ChengeIvAndKey();
         }
     }
 

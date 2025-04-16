@@ -1,6 +1,10 @@
-﻿namespace ServerSide
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace ServerSide
 {
-    partial class Form1
+    partial class StartServerForm : Form
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +33,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StartServerForm));
             this.button1 = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.njlkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,71 +45,79 @@
             // 
             // button1
             // 
-            this.button1.BackColor = System.Drawing.Color.CornflowerBlue;
-            this.button1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.LightSkyBlue;
+            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
             this.button1.FlatAppearance.BorderSize = 0;
-            this.button1.Font = new System.Drawing.Font("Microsoft Tai Le", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.ForeColor = System.Drawing.SystemColors.Window;
-            this.button1.Location = new System.Drawing.Point(352, 351);
-            this.button1.Margin = new System.Windows.Forms.Padding(0);
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.button1.ForeColor = System.Drawing.Color.White;
+            this.button1.Location = new System.Drawing.Point(468, 396);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(80, 30);
-            this.button1.TabIndex = 0;
+            this.button1.Size = new System.Drawing.Size(180, 45);
+            this.button1.TabIndex = 1;
             this.button1.Text = "Start Server";
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // contextMenuStrip1
             // 
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.njlkToolStripMenuItem,
             this.klklToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(104, 48);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(114, 52);
             // 
             // njlkToolStripMenuItem
             // 
             this.njlkToolStripMenuItem.Name = "njlkToolStripMenuItem";
-            this.njlkToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.njlkToolStripMenuItem.Size = new System.Drawing.Size(113, 24);
             this.njlkToolStripMenuItem.Text = "n/jlk/";
             // 
             // klklToolStripMenuItem
             // 
             this.klklToolStripMenuItem.Name = "klklToolStripMenuItem";
-            this.klklToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.klklToolStripMenuItem.Size = new System.Drawing.Size(113, 24);
             this.klklToolStripMenuItem.Text = "kl;kl;";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(321, 92);
+            this.label1.Font = new System.Drawing.Font("Segoe UI Semibold", 11F, System.Drawing.FontStyle.Bold);
+            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
+            this.label1.Location = new System.Drawing.Point(418, 117);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(141, 13);
+            this.label1.Size = new System.Drawing.Size(265, 25);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Server binds to 0.0.0.0:1122";
+            this.label1.Text = "Server binds to 0.0.0.0:65000";
             // 
             // ClientConnectedStatus
             // 
             this.ClientConnectedStatus.AutoSize = true;
-            this.ClientConnectedStatus.Location = new System.Drawing.Point(372, 142);
+            this.ClientConnectedStatus.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.ClientConnectedStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(153)))), ((int)(((byte)(0)))));
+            this.ClientConnectedStatus.Location = new System.Drawing.Point(496, 190);
+            this.ClientConnectedStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.ClientConnectedStatus.Name = "ClientConnectedStatus";
-            this.ClientConnectedStatus.Size = new System.Drawing.Size(0, 13);
+            this.ClientConnectedStatus.Size = new System.Drawing.Size(0, 23);
             this.ClientConnectedStatus.TabIndex = 3;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(819, 450);
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.ClientSize = new System.Drawing.Size(1092, 554);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.ClientConnectedStatus);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.button1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Server Control Panel";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -122,4 +134,3 @@
         private System.Windows.Forms.Label ClientConnectedStatus;
     }
 }
-

@@ -33,14 +33,15 @@ namespace ServerSide
             this.TezxtText = new System.Windows.Forms.Label();
             this.TitleLabel = new System.Windows.Forms.Label();
             this.SearchPanel = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
             this.ShutServerButton = new System.Windows.Forms.Button();
             this.ShutSessionsButton = new System.Windows.Forms.Button();
             this.SearchLabel = new System.Windows.Forms.Label();
             this.SessionSearch = new System.Windows.Forms.TextBox();
             this.MainContainer = new System.Windows.Forms.Panel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.BlockedClients = new System.Windows.Forms.FlowLayoutPanel();
             this.SessionsViewPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.BlockedClients = new System.Windows.Forms.FlowLayoutPanel();
             this.HeaderPanel.SuspendLayout();
             this.SearchPanel.SuspendLayout();
             this.MainContainer.SuspendLayout();
@@ -59,7 +60,7 @@ namespace ServerSide
             this.HeaderPanel.Location = new System.Drawing.Point(0, 0);
             this.HeaderPanel.Name = "HeaderPanel";
             this.HeaderPanel.Padding = new System.Windows.Forms.Padding(10);
-            this.HeaderPanel.Size = new System.Drawing.Size(1200, 60);
+            this.HeaderPanel.Size = new System.Drawing.Size(1456, 60);
             this.HeaderPanel.TabIndex = 2;
             // 
             // TezxtText
@@ -81,11 +82,11 @@ namespace ServerSide
             this.TitleLabel.Size = new System.Drawing.Size(348, 46);
             this.TitleLabel.TabIndex = 0;
             this.TitleLabel.Text = "Server Control Panel";
-            this.TitleLabel.Click += new System.EventHandler(this.TitleLabel_Click);
             // 
             // SearchPanel
             // 
             this.SearchPanel.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.SearchPanel.Controls.Add(this.button1);
             this.SearchPanel.Controls.Add(this.ShutServerButton);
             this.SearchPanel.Controls.Add(this.ShutSessionsButton);
             this.SearchPanel.Controls.Add(this.SearchLabel);
@@ -94,8 +95,18 @@ namespace ServerSide
             this.SearchPanel.Location = new System.Drawing.Point(0, 60);
             this.SearchPanel.Name = "SearchPanel";
             this.SearchPanel.Padding = new System.Windows.Forms.Padding(10);
-            this.SearchPanel.Size = new System.Drawing.Size(1200, 49);
+            this.SearchPanel.Size = new System.Drawing.Size(1456, 49);
             this.SearchPanel.TabIndex = 1;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(692, 13);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // ShutServerButton
             // 
@@ -104,7 +115,7 @@ namespace ServerSide
             this.ShutServerButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShutServerButton.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.ShutServerButton.ForeColor = System.Drawing.Color.White;
-            this.ShutServerButton.Location = new System.Drawing.Point(1068, 11);
+            this.ShutServerButton.Location = new System.Drawing.Point(1324, 11);
             this.ShutServerButton.Margin = new System.Windows.Forms.Padding(30, 5, 5, 0);
             this.ShutServerButton.Name = "ShutServerButton";
             this.ShutServerButton.Size = new System.Drawing.Size(118, 31);
@@ -120,7 +131,7 @@ namespace ServerSide
             this.ShutSessionsButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShutSessionsButton.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.ShutSessionsButton.ForeColor = System.Drawing.Color.White;
-            this.ShutSessionsButton.Location = new System.Drawing.Point(940, 11);
+            this.ShutSessionsButton.Location = new System.Drawing.Point(1196, 11);
             this.ShutSessionsButton.Margin = new System.Windows.Forms.Padding(5, 5, 20, 0);
             this.ShutSessionsButton.Name = "ShutSessionsButton";
             this.ShutSessionsButton.Size = new System.Drawing.Size(125, 31);
@@ -159,7 +170,7 @@ namespace ServerSide
             this.MainContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.MainContainer.Location = new System.Drawing.Point(0, 0);
             this.MainContainer.Name = "MainContainer";
-            this.MainContainer.Size = new System.Drawing.Size(1200, 800);
+            this.MainContainer.Size = new System.Drawing.Size(1456, 800);
             this.MainContainer.TabIndex = 0;
             // 
             // splitContainer1
@@ -178,18 +189,9 @@ namespace ServerSide
             // 
             this.splitContainer1.Panel2.Controls.Add(this.BlockedClients);
             this.splitContainer1.Panel2MinSize = 370;
-            this.splitContainer1.Size = new System.Drawing.Size(1200, 691);
-            this.splitContainer1.SplitterDistance = 370;
+            this.splitContainer1.Size = new System.Drawing.Size(1456, 691);
+            this.splitContainer1.SplitterDistance = 452;
             this.splitContainer1.TabIndex = 3;
-            // 
-            // BlockedClients
-            // 
-            this.BlockedClients.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.BlockedClients.Location = new System.Drawing.Point(0, 0);
-            this.BlockedClients.MinimumSize = new System.Drawing.Size(470, 0);
-            this.BlockedClients.Name = "BlockedClients";
-            this.BlockedClients.Size = new System.Drawing.Size(824, 689);
-            this.BlockedClients.TabIndex = 0;
             // 
             // SessionsViewPanel
             // 
@@ -200,14 +202,24 @@ namespace ServerSide
             this.SessionsViewPanel.Size = new System.Drawing.Size(470, 689);
             this.SessionsViewPanel.TabIndex = 0;
             // 
+            // BlockedClients
+            // 
+            this.BlockedClients.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.BlockedClients.Location = new System.Drawing.Point(0, 0);
+            this.BlockedClients.MinimumSize = new System.Drawing.Size(470, 0);
+            this.BlockedClients.Name = "BlockedClients";
+            this.BlockedClients.Size = new System.Drawing.Size(998, 689);
+            this.BlockedClients.TabIndex = 0;
+            // 
             // ServerConnectedForm
             // 
-            this.ClientSize = new System.Drawing.Size(1200, 800);
+            this.ClientSize = new System.Drawing.Size(1456, 800);
             this.Controls.Add(this.MainContainer);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "ServerConnectedForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Server Control Panel";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ServerConnectedForm_FormClosing);
             this.Load += new System.EventHandler(this.ServerConnectedForm_Load);
             this.HeaderPanel.ResumeLayout(false);
             this.HeaderPanel.PerformLayout();
@@ -232,6 +244,7 @@ namespace ServerSide
         private SplitContainer splitContainer1;
         private FlowLayoutPanel SessionsViewPanel;
         private FlowLayoutPanel BlockedClients;
+        private Button button1;
     }
 }
 

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.Sockets;
+using System.Net;
 using System.Windows.Forms;
+using System.Text;
 
 namespace ServerSide
 {
@@ -18,8 +13,12 @@ namespace ServerSide
         public LoginRegisterForm()
         {
             InitializeComponent();
+            this.FormClosing += CloseForm;
         }
-
+        private void CloseForm(object sender, EventArgs e)
+        {
+            ClosingController.btnExit_Click();
+        }
         private void LoginRegisterForm_Load(object sender, EventArgs e)
         {
             try
@@ -29,13 +28,6 @@ namespace ServerSide
                 
             }
         }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        
 
         
 
@@ -54,7 +46,7 @@ namespace ServerSide
             if (SqlService.LoginSql(User, pass, true)) 
             {
                 this.Hide();
-                Form1 initial = new Form1();
+                StartServerForm initial = new StartServerForm();
                 initial.Show();
             } else
             {
@@ -90,6 +82,10 @@ namespace ServerSide
         private void CloseButton_Click(object sender, EventArgs e)
         {
             ClosingController.btnExit_Click();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace ServerSide
 {
-    partial class BalockedClient
+    partial class BlockedClient
     {
         /// <summary> 
         /// Required designer variable.
@@ -75,7 +75,6 @@ namespace ServerSide
             this.ConnetAttemps.Size = new System.Drawing.Size(18, 20);
             this.ConnetAttemps.TabIndex = 1;
             this.ConnetAttemps.Text = "0";
-            this.ConnetAttemps.Click += new System.EventHandler(this.ConnetAttemps_Click);
             // 
             // DateOfBlock
             // 
@@ -89,6 +88,7 @@ namespace ServerSide
             this.DateOfBlock.TabIndex = 2;
             this.DateOfBlock.Text = "15-4-2025";
             this.DateOfBlock.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.DateOfBlock.Click += new System.EventHandler(this.DateOfBlock_Click);
             // 
             // panel1
             // 
@@ -99,7 +99,7 @@ namespace ServerSide
             this.panel1.Size = new System.Drawing.Size(367, 18);
             this.panel1.TabIndex = 3;
             // 
-            // BalockedClient
+            // BlockedClient
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -107,7 +107,7 @@ namespace ServerSide
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.DateOfBlock);
             this.Controls.Add(this.CooBackground);
-            this.Name = "BalockedClient";
+            this.Name = "BlockedClient";
             this.Size = new System.Drawing.Size(457, 50);
             this.CooBackground.ResumeLayout(false);
             this.CooBackground.PerformLayout();

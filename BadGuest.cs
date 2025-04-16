@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ServerSide
+﻿namespace ServerSide
 {
-    public class BlackGuest : Guest
+    public class BadGuest : Guest
     {
         private int ConnectAttemps = 0;
-        public BlackGuest(Guest g) : base(g)
+        public BadGuest(Guest g) : base(g)
         {
 
         }
-        public BlackGuest() : base()
+        public BadGuest() : base()
         {
 
         }

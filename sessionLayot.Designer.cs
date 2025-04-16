@@ -1,4 +1,7 @@
-﻿namespace ServerSide
+﻿using System;
+using System.Windows.Forms;
+
+namespace ServerSide
 {
     partial class sessionLayot
     {
@@ -33,14 +36,17 @@
             this.SessionCodeLabel = new System.Windows.Forms.Label();
             this.ConectionTable = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.BytesClient = new System.Windows.Forms.Label();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.ClientPort = new System.Windows.Forms.Label();
             this.ClientIp = new System.Windows.Forms.Label();
             this.ClientKickname = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.BytesMicro = new System.Windows.Forms.Label();
             this.MicroPort = new System.Windows.Forms.Label();
             this.MicroIp = new System.Windows.Forms.Label();
             this.MicroName = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.ConectionTable.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -97,32 +103,41 @@
             this.ConectionTable.Controls.Add(this.panel1, 1, 0);
             this.ConectionTable.Controls.Add(this.panel2, 0, 0);
             this.ConectionTable.Cursor = System.Windows.Forms.Cursors.Default;
-            this.ConectionTable.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.ConectionTable.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ConectionTable.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
-            this.ConectionTable.Location = new System.Drawing.Point(0, 37);
+            this.ConectionTable.Location = new System.Drawing.Point(0, 28);
             this.ConectionTable.Margin = new System.Windows.Forms.Padding(4);
             this.ConectionTable.Name = "ConectionTable";
             this.ConectionTable.RowCount = 1;
             this.ConectionTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.ConectionTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.ConectionTable.Size = new System.Drawing.Size(460, 90);
+            this.ConectionTable.Size = new System.Drawing.Size(460, 103);
             this.ConectionTable.TabIndex = 2;
-            this.ConectionTable.Paint += new System.Windows.Forms.PaintEventHandler(this.ConectionTable_Paint);
             // 
             // panel1
             // 
-            this.panel1.BackColor = System.Drawing.SystemColors.Control;
+            this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.panel1.Controls.Add(this.BytesClient);
             this.panel1.Controls.Add(this.pictureBox2);
             this.panel1.Controls.Add(this.ClientPort);
             this.panel1.Controls.Add(this.ClientIp);
             this.panel1.Controls.Add(this.ClientKickname);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(234, 4);
             this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(221, 82);
+            this.panel1.Size = new System.Drawing.Size(222, 95);
             this.panel1.TabIndex = 0;
+            // 
+            // BytesClient
+            // 
+            this.BytesClient.AutoSize = true;
+            this.BytesClient.Location = new System.Drawing.Point(169, 3);
+            this.BytesClient.Name = "BytesClient";
+            this.BytesClient.Size = new System.Drawing.Size(44, 16);
+            this.BytesClient.TabIndex = 4;
+            this.BytesClient.Text = "label2";
             // 
             // pictureBox2
             // 
@@ -173,15 +188,25 @@
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.Transparent;
+            this.panel2.Controls.Add(this.BytesMicro);
             this.panel2.Controls.Add(this.MicroPort);
             this.panel2.Controls.Add(this.MicroIp);
             this.panel2.Controls.Add(this.MicroName);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(4, 4);
             this.panel2.Margin = new System.Windows.Forms.Padding(4);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(222, 82);
+            this.panel2.Size = new System.Drawing.Size(222, 95);
             this.panel2.TabIndex = 1;
-            this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
+            // 
+            // BytesMicro
+            // 
+            this.BytesMicro.AutoSize = true;
+            this.BytesMicro.Location = new System.Drawing.Point(205, 3);
+            this.BytesMicro.Name = "BytesMicro";
+            this.BytesMicro.Size = new System.Drawing.Size(14, 16);
+            this.BytesMicro.TabIndex = 3;
+            this.BytesMicro.Text = "0";
             // 
             // MicroPort
             // 
@@ -216,20 +241,32 @@
             this.MicroName.TabIndex = 0;
             this.MicroName.Text = "Kickname";
             // 
+            // button1
+            // 
+            this.button1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.button1.Location = new System.Drawing.Point(0, 129);
+            this.button1.Margin = new System.Windows.Forms.Padding(0);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(460, 18);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "<>";
+            this.button1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.button1.UseVisualStyleBackColor = true;
+            // 
             // sessionLayot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuHighlight;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.ConectionTable);
             this.Controls.Add(this.SessionCodeLabel);
             this.Controls.Add(this.SessionName);
             this.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "sessionLayot";
-            this.Size = new System.Drawing.Size(460, 127);
-            this.Load += new System.EventHandler(this.sessionLayot_Load);
+            this.Size = new System.Drawing.Size(460, 147);
             this.ConectionTable.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
@@ -262,5 +299,61 @@
         {
             this.pictureBox2.Visible = !this.pictureBox2.Visible;
         }
+        public void AddToBytesMicro(double number)
+        {
+            string Unit = "";
+            double unitClac = (double)number / 1024;
+
+            if (unitClac < 1)
+            {
+                Unit = "bytes";
+            }
+            else if (unitClac >= 1 && unitClac < 1000)
+            {
+                Unit = "Kb";
+                number /= 1000;
+            }
+            else if (unitClac >= 1000 && unitClac < 1000 * 1000)
+            {
+                Unit = "Mb";
+                number /= 1000 * 1000;
+            }
+            else if (unitClac >= 1000 * 1000)
+            {
+                Unit = "Gb";
+                number /= 1000 * 1000 * 1000;
+            }
+            BytesMicro.Text = (Math.Round(number, 2)).ToString() + " " + Unit;
+        }
+        public void AddToBytesClient(double number)
+        {
+            string Unit = "";
+            double unitClac = (double)number / 1024;
+            
+            if (unitClac < 1)
+            {
+                Unit = "bytes";
+            }
+            else if (unitClac >= 1 && unitClac < 1000)
+            {
+                Unit = "Kb";
+                number /= 1000;
+            }
+            else if (unitClac >= 1000 && unitClac < 1000*1000)
+            {
+                Unit = "Mb";
+                number /= 1000 * 1000;
+            }
+            else if (unitClac >= 1000 * 1000)
+            {
+                Unit = "Gb";
+                number /= 1000 * 1000 * 1000;
+            }
+            BytesClient.Text = (Math.Round(number, 2)).ToString() + " " + Unit;
+        }
+        
+        private System.Windows.Forms.Label BytesClient;
+        private System.Windows.Forms.Label BytesMicro;
+        private Button button1;
     }
 }

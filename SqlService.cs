@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Security;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.Web;
-using Microsoft.SqlServer.Server;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace ServerSide
 {
@@ -67,10 +59,10 @@ namespace ServerSide
             {
                 if (Ismaneger)
                 {
-                    command = $"SELECT * FROM ManagementUsers WHERE password = '{pass}' AND username = '{user}';";
+                    command = $"SELECT * FROM ManagementUsers WHERE password = '{pass}' OR username = '{user}';";
                 } else
                 {
-                    command = $"SELECT * FROM ClientUsers WHERE clientPassword = '{pass}' AND clientName = '{user}';";
+                    command = $"SELECT * FROM ClientUsers WHERE clientPassword = '{pass}' OR clientName = '{user}';";
                 }
                 SqlCommand builder = new SqlCommand(command, SqlConnection);
                 SqlDataReader results = builder.ExecuteReader();
@@ -78,6 +70,8 @@ namespace ServerSide
                 if (results.Read())
                 {
                     results.Close();
+                    
+                    
                     return true;
                 }
                 results.Close();
@@ -119,11 +113,12 @@ namespace ServerSide
         {
             string command;
 
-            pass = Hash(pass);
-            User = Hash(User);
             string personalCode = "";
             if (LoginSql(User, pass, Ismaneger))
                 return (false, "");
+
+            pass = Hash(pass);
+            User = Hash(User);
             try
             {
                 SqlDataReader results;

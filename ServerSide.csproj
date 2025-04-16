@@ -39,6 +39,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -79,21 +80,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AesEncryption.cs" />
-    <Compile Include="BalockedClient.cs">
+    <Compile Include="BlockedClient.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="BalockedClient.Designer.cs">
-      <DependentUpon>BalockedClient.cs</DependentUpon>
+    <Compile Include="BlockedClient.Designer.cs">
+      <DependentUpon>BlockedClient.cs</DependentUpon>
     </Compile>
-    <Compile Include="BlackGuest.cs" />
+    <Compile Include="BadGuest.cs" />
     <Compile Include="ClosingController.cs" />
     <Compile Include="Guests.cs" />
     <Compile Include="RsaEncryption.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="StartServerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="StartServerForm.Designer.cs">
+      <DependentUpon>StartServerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="FormController.cs" />
     <Compile Include="LoginRegisterForm.cs">
@@ -119,11 +120,11 @@
       <DependentUpon>sessionLayot.cs</DependentUpon>
     </Compile>
     <Compile Include="SqlService.cs" />
-    <EmbeddedResource Include="BalockedClient.resx">
-      <DependentUpon>BalockedClient.cs</DependentUpon>
+    <EmbeddedResource Include="BlockedClient.resx">
+      <DependentUpon>BlockedClient.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="StartServerForm.resx">
+      <DependentUpon>StartServerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LoginRegisterForm.resx">
       <DependentUpon>LoginRegisterForm.cs</DependentUpon>

@@ -21,9 +21,10 @@ namespace ServerSide
 
         private static byte[] ServerRole = Encoding.UTF8.GetBytes("%%ServerRelatedMessage%%");
 
-        public static void ChangeIvToSessions(byte[] iv)
+        public static void ChengeIvAndKeyToSessions(byte[] iv, byte[] key)
         {
-            byte[] chageIv = AesEncryption.EncryptedData(ServerRole.Concat(Encoding.UTF8.GetBytes("&CHANGEIV&").Concat(iv)).ToArray());
+
+            byte[] chageIv = AesEncryption.EncryptedData(ServerRole.Concat(Encoding.UTF8.GetBytes("&CHANGEIVANDKEY&").Concat(iv).Concat(key)).ToArray());
             foreach (session Session in sessionsList)
                 Session.SendToClient(chageIv);
         }
@@ -55,7 +56,7 @@ namespace ServerSide
         }
 
         private static object lockedThread = new object();
-        public static BlackGuest MakeGuestBlack(Guest g)
+        public static BadGuest MakeGuestBlack(Guest g)
         {
             for (int i = 0; i < ConnectionRequests.Count; i++)
             {
@@ -64,7 +65,7 @@ namespace ServerSide
                 {
                     if (((Guest)item).GEt_MotherBoard_SN() == g.GEt_MotherBoard_SN())
                     {
-                        BlackGuest bg = new BlackGuest(g);
+                        BadGuest bg = new BadGuest(g);
                         ConnectionRequests[i] = bg;
                         return bg;
                     }
@@ -119,53 +120,57 @@ namespace ServerSide
 
         public static void HandleServerMessages(byte[] buffer, session curentSession, bool IsCLient)
         {
-            string message = "";
-            if (!IsCLient)
-                message = RsaEncryption.Decrypt(buffer);
-            else
-                message = AesEncryption.DecryptDataToString(buffer);
-
-            string tempString = message.Split('&')[1];
-
-            switch (tempString.Split(';')[0])
+            try
             {
-                case "EXPERREQUST":
-                    
-                    string experimentString = SqlService.GetExpererimentOfUser(message);
-                    if (experimentString == "")
-                        return;
-                    byte[] bytes = ServerRole.Concat(Encoding.UTF8.GetBytes("&EXPERIMENT_RESULTS" + experimentString)).ToArray();
-                    curentSession.SendToClient(AesEncryption.EncryptedData(bytes));
+                string message = "";
+                if (!IsCLient)
+                    message = RsaEncryption.Decrypt(buffer);
+                else
+                    message = AesEncryption.DecryptDataToString(buffer);
 
-                    break;
-                case "EXPERIMENT_RESULTS":
-                    
-                    SqlService.AddExperimentToDatabase(tempString, curentSession.GetClienKnickname(), tempString.Split(';')[tempString.Split(';').Length - 3]);
-                    
-                    break;
-                case "REQSTHISTORY":
-                    // get send from sql 
-                    List<string> CS =  SqlService.GetAllUserHistoryAndSendToClient(message.Split('&')[2]);
-                    if (CS != null)
-                        sendCreationStringsToClient(CS, curentSession);
+                string tempString = message.Split('&')[1];
 
-                    break;
-                case "302":
-                    curentSession.disconnectClient(); 
-                    FormController.disconnectClient(curentSession);
-                    
-                    break;
+                switch (tempString.Split(';')[0])
+                {
+                    case "EXPERREQUST":
 
-                case "303":
-                    sessionsList.Remove(curentSession);
-                    curentSession.disconnect();
-                    FormController.disconnectController(curentSession);
-                    
-                    break;
+                        string experimentString = SqlService.GetExpererimentOfUser(message);
+                        if (experimentString == "")
+                            return;
+                        byte[] bytes = ServerRole.Concat(Encoding.UTF8.GetBytes("&EXPERIMENT_RESULTS" + experimentString)).ToArray();
+                        curentSession.SendToClient(AesEncryption.EncryptedData(bytes));
+
+                        break;
+                    case "EXPERIMENT_RESULTS":
+
+                        SqlService.AddExperimentToDatabase(tempString, curentSession.GetClienKnickname(), tempString.Split(';')[tempString.Split(';').Length - 3]);
+
+                        break;
+                    case "REQSTHISTORY":
+                        // get send from sql 
+                        List<string> CS = SqlService.GetAllUserHistoryAndSendToClient(message.Split('&')[2]);
+                        if (CS != null)
+                            sendCreationStringsToClient(CS, curentSession);
+
+                        break;
+                    case "302":
+                        curentSession.disconnectClient();
+                        FormController.disconnectClient(curentSession);
+
+                        break;
+
+                    case "303":
+                        sessionsList.Remove(curentSession);
+                        curentSession.disconnect();
+                        FormController.disconnectController(curentSession);
+
+                        break;
 
 
-                default: break;
+                    default: break;
+                }
             }
+            catch (Exception e) { }
  
         }
         private static void sendCreationStringsToClient(List<string> CS, session curentSession)
@@ -226,9 +231,6 @@ namespace ServerSide
 
         public static void CloseConnection()
         {
-            //hell
-
-            //Send To all Sessions to close connection
             foreach (var session in sessionsList)
             {
                 session.disconnect();
