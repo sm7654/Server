@@ -46,11 +46,12 @@ namespace ServerSide
             this.MicroPort = new System.Windows.Forms.Label();
             this.MicroIp = new System.Windows.Forms.Label();
             this.MicroName = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.ExpandButton = new System.Windows.Forms.PictureBox();
             this.ConectionTable.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ExpandButton)).BeginInit();
             this.SuspendLayout();
             // 
             // SessionName
@@ -105,19 +106,20 @@ namespace ServerSide
             this.ConectionTable.Cursor = System.Windows.Forms.Cursors.Default;
             this.ConectionTable.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ConectionTable.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
-            this.ConectionTable.Location = new System.Drawing.Point(0, 28);
+            this.ConectionTable.Location = new System.Drawing.Point(0, 27);
             this.ConectionTable.Margin = new System.Windows.Forms.Padding(4);
             this.ConectionTable.Name = "ConectionTable";
             this.ConectionTable.RowCount = 1;
             this.ConectionTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.ConectionTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.ConectionTable.Size = new System.Drawing.Size(460, 103);
+            this.ConectionTable.Size = new System.Drawing.Size(460, 117);
             this.ConectionTable.TabIndex = 2;
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.panel1.Controls.Add(this.ExpandButton);
             this.panel1.Controls.Add(this.BytesClient);
             this.panel1.Controls.Add(this.pictureBox2);
             this.panel1.Controls.Add(this.ClientPort);
@@ -144,7 +146,7 @@ namespace ServerSide
             this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
             this.pictureBox2.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.Location = new System.Drawing.Point(195, 54);
+            this.pictureBox2.Location = new System.Drawing.Point(196, 69);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Padding = new System.Windows.Forms.Padding(5);
             this.pictureBox2.Size = new System.Drawing.Size(23, 23);
@@ -241,17 +243,20 @@ namespace ServerSide
             this.MicroName.TabIndex = 0;
             this.MicroName.Text = "Kickname";
             // 
-            // button1
+            // ExpandButton
             // 
-            this.button1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.button1.Location = new System.Drawing.Point(0, 129);
-            this.button1.Margin = new System.Windows.Forms.Padding(0);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(460, 18);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "<>";
-            this.button1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button1.UseVisualStyleBackColor = true;
+            this.ExpandButton.BackColor = System.Drawing.Color.Transparent;
+            this.ExpandButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ExpandButton.Image = ((System.Drawing.Image)(resources.GetObject("ExpandButton.Image")));
+            this.ExpandButton.Location = new System.Drawing.Point(167, 69);
+            this.ExpandButton.Name = "ExpandButton";
+            this.ExpandButton.Padding = new System.Windows.Forms.Padding(5);
+            this.ExpandButton.Size = new System.Drawing.Size(23, 23);
+            this.ExpandButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.ExpandButton.TabIndex = 5;
+            this.ExpandButton.TabStop = false;
+            this.ExpandButton.Visible = false;
+            this.ExpandButton.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // sessionLayot
             // 
@@ -259,20 +264,22 @@ namespace ServerSide
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuHighlight;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.ConectionTable);
             this.Controls.Add(this.SessionCodeLabel);
             this.Controls.Add(this.SessionName);
             this.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "sessionLayot";
-            this.Size = new System.Drawing.Size(460, 147);
+            this.Size = new System.Drawing.Size(460, 130);
+            this.Load += new System.EventHandler(this.sessionLayot_Load);
+            this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.sessionLayot_MouseDoubleClick);
             this.ConectionTable.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ExpandButton)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -283,7 +290,6 @@ namespace ServerSide
         private System.Windows.Forms.Label SessionName;
         private System.Windows.Forms.Label SessionCodeLabel;
         private System.Windows.Forms.TableLayoutPanel ConectionTable;
-        private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label ClientKickname;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label MicroPort;
@@ -294,12 +300,13 @@ namespace ServerSide
         private System.Windows.Forms.PictureBox pictureBox2;
 
 
-
+        
         public void ToggleShutButton()
         {
             this.pictureBox2.Visible = !this.pictureBox2.Visible;
+            this.ExpandButton.Visible = !this.ExpandButton.Visible;
         }
-        public void AddToBytesMicro(double number)
+        public string AddToBytesMicro(double number)
         {
             string Unit = "";
             double unitClac = (double)number / 1024;
@@ -324,8 +331,9 @@ namespace ServerSide
                 number /= 1000 * 1000 * 1000;
             }
             BytesMicro.Text = (Math.Round(number, 2)).ToString() + " " + Unit;
+            return BytesMicro.Text;
         }
-        public void AddToBytesClient(double number)
+        public string AddToBytesClient(double number)
         {
             string Unit = "";
             double unitClac = (double)number / 1024;
@@ -350,10 +358,15 @@ namespace ServerSide
                 number /= 1000 * 1000 * 1000;
             }
             BytesClient.Text = (Math.Round(number, 2)).ToString() + " " + Unit;
+            return BytesClient.Text;
         }
-        
+        public void setnewcode(string newcode)
+        {
+
+        }
         private System.Windows.Forms.Label BytesClient;
         private System.Windows.Forms.Label BytesMicro;
-        private Button button1;
+        private Panel panel1;
+        private PictureBox ExpandButton;
     }
 }

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./QuizCss.css">
+    <title>Quiz</title>
+</head>
+<body>
+    
+    <main>
+        <section class="GameBox">
+            <section class="CardsSwap">
+                
+                <div class="StartScreen" style="z-index: 99;">
+                    <h1>MiniProjact - Shai Moshe</h1>
+
+                    <button class="NextQuestion" onclick="Next();">
+                        Start
+                    </button>
+                </div>
+
+                <aside class="StartScreen QuestionScreen">
+                    <label class="TimerWraper counter"> </label>
+
+
+                    <h1 class="Title"></h1>
+                    <div class="Shlomi">
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="NextQuestion" onclick="Next()">
+                            Next
+                        </button>
+
+                    </div>
+
+
+                </aside>
+
+
+
+                
+                <aside class="StartScreen QuestionScreen">
+                    <label class="TimerWraper counter">  </label>
+
+                    
+                    <h1 class="Title"></h1>
+                    <div class="Shlomi">
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="NextQuestion" onclick="Next()">
+                            Next
+                        </button>
+
+                    </div>
+
+
+                </aside>
+
+                
+                <aside class="StartScreen QuestionScreen">
+                    <label class="TimerWraper counter"> </label>
+
+                    
+                    <h1 class="Title"></h1>
+                    <div class="Shlomi">
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                        <div class="optionWraper" onclick="OptionClicked(this)">
+                            <div class="option">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="NextQuestion" onclick="document.getElementById('Indecator').textContent = `You got ${CorrectCount} Correct Questions out of ${QuestionCount}!!!`; Next()">
+                            Next
+                        </button>
+
+                    </div>
+
+
+                </aside>
+
+
+                <div class="StartScreen">
+                    <h1 id="Indecator"></h1>
+
+                    <div>
+                        <button class="NextQuestion" onclick="location.reload()">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+
+        </section>
+    </main>
+
+    <script type="text/javascript" src="./QuizJavaScript.js"></script>
+</body>
+</html>

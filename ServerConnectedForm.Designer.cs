@@ -62,6 +62,7 @@ namespace ServerSide
             this.HeaderPanel.Padding = new System.Windows.Forms.Padding(10);
             this.HeaderPanel.Size = new System.Drawing.Size(1456, 60);
             this.HeaderPanel.TabIndex = 2;
+            this.HeaderPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.HeaderPanel_Paint);
             // 
             // TezxtText
             // 

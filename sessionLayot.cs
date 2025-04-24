@@ -14,6 +14,7 @@ namespace ServerSide
     public partial class sessionLayot : UserControl
     {
         session ConnectedSession;
+
         public sessionLayot()
         {
             InitializeComponent();
@@ -28,16 +29,19 @@ namespace ServerSide
             (MicroIp.Text, MicroPort.Text) = session.GetControllerEndPoint();
             (ClientIp.Text, ClientPort.Text) = ("not connected", "not connected");
             ClientKickname.Text = ("not provided");
-            
+            SessionName.Text = session.GetSessionName();
             this.ConnectedSession = session;
             session.SetSessionUi(this);
         }
 
 
-        public void UpdateClientStatus_dis()
+        public void UpdateClientStatus_dis(string newcode)
         {
             (ClientIp.Text, ClientPort.Text) = ("____", "____");
             ClientKickname.Text = ("disconnected");
+            BytesClient.Text = "0 bytes";
+            BytesMicro.Text = "0 bytes";
+            SessionCodeLabel.Text = newcode;
 
         }
         public void UpdateControllerStatus_dis()
@@ -71,6 +75,27 @@ namespace ServerSide
             FormController.RemoveSession(this);
             this.ConnectedSession.disconnect();
 
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+            
+        }
+
+        private void sessionLayot_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void sessionLayot_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+            SessionDisplayForm sessionDisplayForm = new SessionDisplayForm(this.ConnectedSession.GetSessionsRecords());
+            sessionDisplayForm.ShowDialog();
         }
     }
 }

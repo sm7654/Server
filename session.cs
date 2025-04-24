@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -16,7 +17,10 @@ namespace ServerSide
 
     public class session
     {
+        private string sessionName;
         private string Code;
+        private uint EnterTime = 0;
+        private string EnterDate = "";
 
         private Socket Controller;
         private string ControllerKnickname;
@@ -25,7 +29,7 @@ namespace ServerSide
         private Socket ClientConn = null;
         private Socket UdpClientConn = null;
         private string ClientKnickname;
-        private EndPoint ClientUDP_endpoint;
+        private string Client_endpoint;
         private bool IsClientConnected = false;
 
         private object ClientSendLock = new object();
@@ -35,15 +39,19 @@ namespace ServerSide
         private int BytesFromClient = 0;
 
         private sessionLayot SessionUI = null;
+        private string microDataString = "";
+        private string clientDataString = "";
 
 
-        public session(Socket Controller, string Code, string publicKey)
+        private List<SessionRecord> SessionsRecoeds = new List<SessionRecord>();
+
+        public session(Socket Controller, string Code, string publicKey, string sessionname)
         {
 
             this.Controller = Controller;
             this.Code = Code;
             this.ControllerPublicKey = publicKey;
-
+            this.sessionName = sessionname;
 
             byte[] EncryptedCode = RsaEncryption.Encrypt($"{Code}", ControllerPublicKey);
 
@@ -54,6 +62,8 @@ namespace ServerSide
 
 
         }
+
+        
 
         private void MicroStream()
         {
@@ -198,6 +208,12 @@ namespace ServerSide
             AddToBytesToCLient(128 * 2);
 
             AddToBytesToMicro(128 * 2);
+
+            Client_endpoint = Client.RemoteEndPoint.ToString();
+            EnterTime = ServerServices.GetTime();
+            EnterDate = DateTime.Now.ToString();
+
+
             return true;
         }
 
@@ -219,6 +235,10 @@ namespace ServerSide
 
             }
         }
+        public void SendToClientFromServer(byte[] data)
+        {
+            SendToClient(ServerServices.GetServerRole().Concat(data).ToArray());
+        }
         public void SendToMicro(byte[] data)
         {
             if (Controller == null)
@@ -233,6 +253,10 @@ namespace ServerSide
 
             }
         }
+        public void SendToMicroFromServer(byte[] data)
+        {
+            SendToMicro(ServerServices.GetServerRole().Concat(data).ToArray());
+        }
 
         private void AddToBytesToCLient(int bytes)
         {
@@ -244,8 +268,7 @@ namespace ServerSide
                 if (SessionUI == null)
                     return;
                 SessionUI.BeginInvoke(new Action(() => {
-                    SessionUI.AddToBytesClient(BytesFromClient);
-
+                    clientDataString = SessionUI.AddToBytesClient(BytesFromClient);
                 }));
             }
         }
@@ -258,7 +281,7 @@ namespace ServerSide
                 if (SessionUI == null)
                     return;
                 SessionUI.BeginInvoke(new Action(() => {
-                    SessionUI.AddToBytesClient(BytesFromClient);
+                    clientDataString = SessionUI.AddToBytesClient(BytesFromClient);
 
                 }));
             }
@@ -273,7 +296,7 @@ namespace ServerSide
                 if (SessionUI == null)
                     return;
                 SessionUI.BeginInvoke(new Action(() => {
-                    SessionUI.AddToBytesMicro(BytesFromMicro);
+                    microDataString = SessionUI.AddToBytesMicro(BytesFromMicro);
 
                 }));
             }
@@ -288,7 +311,7 @@ namespace ServerSide
                 if (SessionUI == null)
                     return;
                 SessionUI.BeginInvoke(new Action(() => {
-                    SessionUI.AddToBytesMicro(BytesFromMicro);
+                    microDataString = SessionUI.AddToBytesMicro(BytesFromMicro);
 
                 }));
             }
@@ -310,24 +333,35 @@ namespace ServerSide
         }
 
 
-        public void disconnectClient()
+        public void disconnectClient(string newcode)
         {
+            SessionRecord SR = new SessionRecord(this.Code, Client_endpoint, this.ClientKnickname);
+            SR.SetSessionDetails(this.microDataString, this.clientDataString, (ServerServices.GetTime() - this.EnterTime).ToString(), this.EnterDate);
+            this.SessionsRecoeds.Add(SR);
+            this.microDataString = "";
+            this.clientDataString = "";
+            EnterTime = 0;
+            EnterDate = "";
+            BytesFromClient = 0;
+            BytesFromMicro = 0;
             ClientConn = null;
             UdpClientConn = null;
             ClientKnickname = null;
-            ClientUDP_endpoint = null;
+            Client_endpoint = "";
+            this.Code = newcode;
             byte[] bytes =
                 RsaEncryption.EncryptBytes(
-                    ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes("&302")).ToArray()
+                    ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes($"&302&{this.Code}")).ToArray()
                     , ControllerPublicKey
                 );
 
             SendToMicro(bytes);
 
-            /*Controller.Send(Encoding.UTF8.GetBytes(bytes.Length.ToString()));
-            Thread.Sleep(200);
-            Controller.Send(bytes);
-*/
+
+
+
+
+
 
         }
 
@@ -392,7 +426,7 @@ namespace ServerSide
 
                 Code = null;
 
-                ClientUDP_endpoint = null;
+                Client_endpoint = null;
 
                 return true;
             }
@@ -402,6 +436,10 @@ namespace ServerSide
             }
         }
 
+        public uint GetEnterTime()
+        {
+            return EnterTime;
+        }
         private void UpdateCLientBytes(int number)
         {
             
@@ -413,7 +451,10 @@ namespace ServerSide
         }
 
 
-
+        public string GetSessionName()
+        {
+            return sessionName;
+        }
         public string GetCode()
         {
             return this.Code;
@@ -435,19 +476,16 @@ namespace ServerSide
         {
             this.ControllerPublicKey = publicKey;
         }
-        public void SetClientUdpEndPoint(EndPoint En)
-        {
-            this.ClientUDP_endpoint = En;
-        }
-        public string GetClientUdpEndPoint()
-        {
-            return this.ClientUDP_endpoint.ToString();
-        }
+        
+        
         public (string, string) GetControllerEndPoint()
         {
             return (((IPEndPoint)this.Controller.RemoteEndPoint).Address.ToString(), ((IPEndPoint)this.Controller.RemoteEndPoint).Port.ToString());
         }
         
-
+        public List<SessionRecord> GetSessionsRecords()
+        {
+            return this.SessionsRecoeds;
+        }
     }
 }

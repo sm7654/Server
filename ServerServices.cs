@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Linq;
 
 
 
@@ -18,6 +14,7 @@ namespace ServerSide
         private static Socket serverSocket;
         private static List<session> sessionsList = new List<session>();
         private static List<Guest> ConnectionRequests = new List<Guest>();
+        private static uint timer = 0;
 
         private static byte[] ServerRole = Encoding.UTF8.GetBytes("%%ServerRelatedMessage%%");
 
@@ -154,9 +151,10 @@ namespace ServerSide
 
                         break;
                     case "302":
-                        curentSession.disconnectClient();
-                        FormController.disconnectClient(curentSession);
 
+                        string newCode = ServerServices.GenerateRandomString(5);
+                        curentSession.disconnectClient(newCode);
+                        FormController.disconnectClient(curentSession, newCode);
                         break;
 
                     case "303":
@@ -185,6 +183,24 @@ namespace ServerSide
         }
 
 
+        public static string GenerateRandomString(int length)
+        {
+            string code;
+            do
+            {
+                Random _random = new Random();
+                const string chars = "a2QjWz3n0v1p7Gm5kI9oXebVd4yHcL6f8sT";
+                char[] stringChars = new char[length];
+
+                for (int i = 0; i < length; i++)
+                {
+                    stringChars[i] = chars[_random.Next(chars.Length)];
+                }
+                code = new string(stringChars);
+            } while (!Avalible(code));
+
+            return code;
+        }
 
 
         public static void AddServerSock(Socket ServerSock) { serverSocket = ServerSock; }
@@ -247,6 +263,25 @@ namespace ServerSide
                 session.disconnect();
             }
             sessionsList = new List<session>();
+        }
+        public static void StartTimer()
+        {
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    timer++;
+                }
+            }).Start();
+        }
+        public static uint GetTime()
+        {
+            return timer;
+        }
+        public static List<session> GetSessionsList()
+        {
+            return sessionsList;
         }
     }
 }

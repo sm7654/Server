@@ -1,22 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Web;
 using System.Windows.Forms;
-using System.Xml.Linq;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace ServerSide
 {
@@ -28,25 +17,7 @@ namespace ServerSide
 
 
 
-        public static string GenerateRandomString(int length)
-        {
-            string code;
-            do
-            {
-                Random _random = new Random();
-                const string chars = "a2QjWz3n0v1p7Gm5kI9oXebVd4yHcL6f8sT";
-                char[] stringChars = new char[length];
-
-                for (int i = 0; i < length; i++)
-                {
-                    stringChars[i] = chars[_random.Next(chars.Length)];
-                }
-                code = new string(stringChars);
-            } while (!ServerServices.Avalible(code));
-
-            return code;
-        }
-
+        
 
         public ServerConnectedForm(Socket serverSock)
         {
@@ -55,6 +26,7 @@ namespace ServerSide
             UdpClientSocket.Bind(new IPEndPoint(IPAddress.Any, 65000));
             InitializeComponent();
             FormController.SetForm(this);
+            ServerServices.StartTimer();
         }
 
         public ServerConnectedForm()
@@ -172,7 +144,7 @@ namespace ServerSide
                         return;
                     }
 
-                    session session = new session(Conn, GenerateRandomString(5), PublicKey);
+                    session session = new session(Conn, ServerServices.GenerateRandomString(5), PublicKey, CodeAndKnickname[2]);
                     session.SetControllerKnickname(CodeAndKnickname[1]);
                     ServerServices.addSession(session);
 
@@ -180,6 +152,7 @@ namespace ServerSide
                     {
 
                         sessionLayot test = new sessionLayot(session);
+                        
                         test.Click += ControllCliked;
                         SessionsViewPanel.Controls.Add(test);
 
@@ -347,18 +320,15 @@ namespace ServerSide
 
         private bool IsMicroNameExist(string name)
         {
-            foreach (var sessionOb in SessionsViewPanel.Controls)
-            {
-                sessionLayot CurentSession = (sessionLayot)sessionOb;
-
-                if (CurentSession.GetSession().GetControllerKnickname() == name)
+            foreach (session s in ServerServices.GetSessionsList())
+                if (s.GetControllerKnickname().Equals(name))
                     return true;
-            }
+            
 
             return false;
         }
 
-    
+
         private void ControllCliked(object sender, EventArgs e)
         {
             if (this.Layout != null)
@@ -435,6 +405,16 @@ namespace ServerSide
                 return;
             switch (advSearch[0].ToLower())
             {
+                case "sn":
+                    foreach (var Control in SessionsViewPanel.Controls)
+                    {
+                        if (!((sessionLayot)Control).GetSession().GetSessionName().StartsWith(advSearch[1]))
+                            ((sessionLayot)Control).Hide();
+                        else
+                            ((sessionLayot)Control).Show();
+
+                    }
+                    break;
                 case "code":
                     foreach (var Control in SessionsViewPanel.Controls)
                     {
@@ -519,7 +499,14 @@ namespace ServerSide
 
         private void button1_Click_1(object sender, EventArgs e)
         {
+           
             AesEncryption.ChengeIvAndKey();
+
+        }
+
+        private void HeaderPanel_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 

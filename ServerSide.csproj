@@ -90,6 +90,19 @@
     <Compile Include="ClosingController.cs" />
     <Compile Include="Guests.cs" />
     <Compile Include="RsaEncryption.cs" />
+    <Compile Include="SessionDisplayForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SessionDisplayForm.Designer.cs">
+      <DependentUpon>SessionDisplayForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SessionRecord.cs" />
+    <Compile Include="SessionRecordControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SessionRecordControl.Designer.cs">
+      <DependentUpon>SessionRecordControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="StartServerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -122,6 +135,12 @@
     <Compile Include="SqlService.cs" />
     <EmbeddedResource Include="BlockedClient.resx">
       <DependentUpon>BlockedClient.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SessionDisplayForm.resx">
+      <DependentUpon>SessionDisplayForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SessionRecordControl.resx">
+      <DependentUpon>SessionRecordControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="StartServerForm.resx">
       <DependentUpon>StartServerForm.cs</DependentUpon>
@@ -171,6 +190,15 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="microcontrollericon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Expand.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

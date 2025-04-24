@@ -47,12 +47,14 @@ namespace ServerSide
                 return;
             }
         }
-        public static void disconnectClient(session s)
+        public static void disconnectClient(session s, string newcode)
         {
             foreach (var Control in form.GetSessionLayoutControls())
             {
                 if (((sessionLayot)Control).GetSession().Equals(s))
-                    ((sessionLayot)Control).UpdateClientStatus_dis();
+                {
+                    ((sessionLayot)Control).UpdateClientStatus_dis(newcode);
+                }
             }
         }
 
