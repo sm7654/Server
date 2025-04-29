@@ -499,8 +499,10 @@ namespace ServerSide
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-           
-            AesEncryption.ChengeIvAndKey();
+            //MessageBox.Show(
+            //ServerServices.EV()
+            //); 
+            //AesEncryption.ChengeIvAndKey();
 
         }
 

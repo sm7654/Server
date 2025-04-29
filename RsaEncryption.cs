@@ -48,7 +48,7 @@ namespace ServerSide
             {
                 service.FromXmlString(privateKey);
                 byte[] decryptedData = service.Decrypt(data, RSAEncryptionPadding.Pkcs1);
-                return Encoding.ASCII.GetString(decryptedData);
+                return Encoding.UTF8.GetString(decryptedData);
             }
         }
 

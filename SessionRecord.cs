@@ -12,44 +12,88 @@ namespace ServerSide
         private string sessionCode;
         private string clientEndPoint;
         private string clientKicname;
-        private string microDataString;
-        private string clientDataString;
-        private string sessionDuration;
-
+        private uint microData = 0;
+        private uint clientData = 0;
+        private uint sessionEnterTime = 0;
+        private uint sessionTotalTime;
         private string startDate;
         private string endDate;
 
-        public SessionRecord(string sessionCode, string clientEndPoint, string clientname)
+
+        private bool IsLiveRecord = true;
+
+
+        public SessionRecord(string sessionCode, string clientEndPoint, string clientname, uint clientData, uint microData, uint EnterTime, string startDate)
         {
             this.sessionCode = sessionCode;
             this.clientEndPoint = clientEndPoint;
             this.clientKicname = clientname;
+            this.microData = microData;
+            this.clientData = clientData;
+            this.sessionEnterTime = EnterTime;
+            this.startDate = DateTime.Now.ToString();
         }
 
-        public void SetSessionDetails(string microDataString, string clientDataString, string sessionDuration, string startDate)
+        
+/*
+         
+        public void SetStartDate(string startDate)
+        {
+            this.startDate = startDate;
+        }
+
+        public void SetSessionCode(string sessionCode)
+        {
+            this.sessionCode = sessionCode;
+        }
+
+        public void SetClientEndPoint(string clientEndPoint)
+        {
+            this.clientEndPoint = clientEndPoint;
+        }
+
+        public void SetClientName(string clientName)
+        {
+            this.clientKicname = clientName;
+        }
+*//*
+        public void SetMicroData(string microDataString)
         {
             this.microDataString = microDataString;
+        }*/
+
+        /*public void SetClientDataString(string clientDataString)
+        {
             this.clientDataString = clientDataString;
-            this.sessionDuration = sessionDuration;
-            this.startDate = startDate;
-            this.endDate = DateTime.Now.ToString();
-
-            string message =
-           $"Session Code: {sessionCode}\n" +
-           $"Client Endpoint: {clientEndPoint}\n" +
-           $"Client Nickname: {clientKicname}\n" +
-           $"Micro Data: {microDataString}\n" +
-           $"Client Data: {clientDataString}\n" +
-           $"Session Duration: {sessionDuration}\n" +
-           $"Start Date: {startDate}\n" +
-           $"End Date: {endDate}";
-
-            MessageBox.Show(message, "Session Record Details", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+*/
+        public void SetSessionDuration(uint sessionDuration)
+        {
+            this.sessionEnterTime = sessionDuration;
         }
 
-        public void Temp()
+        
+
+        public void SetBytesToMicro(uint b)
         {
-            Console.WriteLine("feweffew");
+            this.microData = b;
+        }
+        public void SetBytesToClient(uint b)
+        {
+            this.clientData = b;
+        }
+
+
+        public void MakeNotLiveRecored()
+        {
+            IsLiveRecord = false;
+            this.endDate = DateTime.Now.ToString();
+            this.sessionTotalTime = ServerServices.GetTime() - sessionEnterTime;
+        }
+
+        public bool IsRecordLive()
+        {
+            return this.IsLiveRecord;
         }
         public string GetSessionCode() { return sessionCode; }
 
@@ -57,14 +101,18 @@ namespace ServerSide
 
         public string GetClientEndPoint() { return clientEndPoint; }
 
-        public string GetMicroDataString() { return microDataString; }
+        public uint GetMicroData() { return microData; }
 
-        public string GetClientDataString() { return clientDataString; }
+        public uint GetClientData() { return clientData; }
 
-        public string GetSessionDuration() { return sessionDuration; }
+        public uint GetSessionDuration() { return sessionEnterTime; }
 
         public string GetStartDate() { return startDate; }
 
         public string GetEndDate() { return endDate; }
+        public uint GetSessionTotalTime()
+        {
+            return sessionTotalTime;
+        }
     }
 }

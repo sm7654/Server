@@ -36,22 +36,20 @@ namespace ServerSide
             this.SessionCodeLabel = new System.Windows.Forms.Label();
             this.ConectionTable = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.BytesClient = new System.Windows.Forms.Label();
+            this.ExpandButton = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.ClientPort = new System.Windows.Forms.Label();
             this.ClientIp = new System.Windows.Forms.Label();
             this.ClientKickname = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.BytesMicro = new System.Windows.Forms.Label();
             this.MicroPort = new System.Windows.Forms.Label();
             this.MicroIp = new System.Windows.Forms.Label();
             this.MicroName = new System.Windows.Forms.Label();
-            this.ExpandButton = new System.Windows.Forms.PictureBox();
             this.ConectionTable.SuspendLayout();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ExpandButton)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ExpandButton)).BeginInit();
             this.SuspendLayout();
             // 
             // SessionName
@@ -120,7 +118,6 @@ namespace ServerSide
             this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel1.Controls.Add(this.ExpandButton);
-            this.panel1.Controls.Add(this.BytesClient);
             this.panel1.Controls.Add(this.pictureBox2);
             this.panel1.Controls.Add(this.ClientPort);
             this.panel1.Controls.Add(this.ClientIp);
@@ -132,14 +129,20 @@ namespace ServerSide
             this.panel1.Size = new System.Drawing.Size(222, 95);
             this.panel1.TabIndex = 0;
             // 
-            // BytesClient
+            // ExpandButton
             // 
-            this.BytesClient.AutoSize = true;
-            this.BytesClient.Location = new System.Drawing.Point(169, 3);
-            this.BytesClient.Name = "BytesClient";
-            this.BytesClient.Size = new System.Drawing.Size(44, 16);
-            this.BytesClient.TabIndex = 4;
-            this.BytesClient.Text = "label2";
+            this.ExpandButton.BackColor = System.Drawing.Color.Transparent;
+            this.ExpandButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ExpandButton.Image = ((System.Drawing.Image)(resources.GetObject("ExpandButton.Image")));
+            this.ExpandButton.Location = new System.Drawing.Point(167, 69);
+            this.ExpandButton.Name = "ExpandButton";
+            this.ExpandButton.Padding = new System.Windows.Forms.Padding(5);
+            this.ExpandButton.Size = new System.Drawing.Size(23, 23);
+            this.ExpandButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.ExpandButton.TabIndex = 5;
+            this.ExpandButton.TabStop = false;
+            this.ExpandButton.Visible = false;
+            this.ExpandButton.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // pictureBox2
             // 
@@ -190,7 +193,6 @@ namespace ServerSide
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.Transparent;
-            this.panel2.Controls.Add(this.BytesMicro);
             this.panel2.Controls.Add(this.MicroPort);
             this.panel2.Controls.Add(this.MicroIp);
             this.panel2.Controls.Add(this.MicroName);
@@ -200,15 +202,6 @@ namespace ServerSide
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(222, 95);
             this.panel2.TabIndex = 1;
-            // 
-            // BytesMicro
-            // 
-            this.BytesMicro.AutoSize = true;
-            this.BytesMicro.Location = new System.Drawing.Point(205, 3);
-            this.BytesMicro.Name = "BytesMicro";
-            this.BytesMicro.Size = new System.Drawing.Size(14, 16);
-            this.BytesMicro.TabIndex = 3;
-            this.BytesMicro.Text = "0";
             // 
             // MicroPort
             // 
@@ -243,21 +236,6 @@ namespace ServerSide
             this.MicroName.TabIndex = 0;
             this.MicroName.Text = "Kickname";
             // 
-            // ExpandButton
-            // 
-            this.ExpandButton.BackColor = System.Drawing.Color.Transparent;
-            this.ExpandButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.ExpandButton.Image = ((System.Drawing.Image)(resources.GetObject("ExpandButton.Image")));
-            this.ExpandButton.Location = new System.Drawing.Point(167, 69);
-            this.ExpandButton.Name = "ExpandButton";
-            this.ExpandButton.Padding = new System.Windows.Forms.Padding(5);
-            this.ExpandButton.Size = new System.Drawing.Size(23, 23);
-            this.ExpandButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.ExpandButton.TabIndex = 5;
-            this.ExpandButton.TabStop = false;
-            this.ExpandButton.Visible = false;
-            this.ExpandButton.Click += new System.EventHandler(this.pictureBox1_Click);
-            // 
             // sessionLayot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -276,10 +254,10 @@ namespace ServerSide
             this.ConectionTable.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ExpandButton)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ExpandButton)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -306,66 +284,11 @@ namespace ServerSide
             this.pictureBox2.Visible = !this.pictureBox2.Visible;
             this.ExpandButton.Visible = !this.ExpandButton.Visible;
         }
-        public string AddToBytesMicro(double number)
-        {
-            string Unit = "";
-            double unitClac = (double)number / 1024;
-
-            if (unitClac < 1)
-            {
-                Unit = "bytes";
-            }
-            else if (unitClac >= 1 && unitClac < 1000)
-            {
-                Unit = "Kb";
-                number /= 1000;
-            }
-            else if (unitClac >= 1000 && unitClac < 1000 * 1000)
-            {
-                Unit = "Mb";
-                number /= 1000 * 1000;
-            }
-            else if (unitClac >= 1000 * 1000)
-            {
-                Unit = "Gb";
-                number /= 1000 * 1000 * 1000;
-            }
-            BytesMicro.Text = (Math.Round(number, 2)).ToString() + " " + Unit;
-            return BytesMicro.Text;
-        }
-        public string AddToBytesClient(double number)
-        {
-            string Unit = "";
-            double unitClac = (double)number / 1024;
-            
-            if (unitClac < 1)
-            {
-                Unit = "bytes";
-            }
-            else if (unitClac >= 1 && unitClac < 1000)
-            {
-                Unit = "Kb";
-                number /= 1000;
-            }
-            else if (unitClac >= 1000 && unitClac < 1000*1000)
-            {
-                Unit = "Mb";
-                number /= 1000 * 1000;
-            }
-            else if (unitClac >= 1000 * 1000)
-            {
-                Unit = "Gb";
-                number /= 1000 * 1000 * 1000;
-            }
-            BytesClient.Text = (Math.Round(number, 2)).ToString() + " " + Unit;
-            return BytesClient.Text;
-        }
+        
         public void setnewcode(string newcode)
         {
 
         }
-        private System.Windows.Forms.Label BytesClient;
-        private System.Windows.Forms.Label BytesMicro;
         private Panel panel1;
         private PictureBox ExpandButton;
     }

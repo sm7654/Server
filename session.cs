@@ -19,6 +19,7 @@ namespace ServerSide
     {
         private string sessionName;
         private string Code;
+        private uint EnterTimeGlobal = 0;
         private uint EnterTime = 0;
         private string EnterDate = "";
 
@@ -35,16 +36,18 @@ namespace ServerSide
         private object ClientSendLock = new object();
         private object ControllerSendLock = new object();
 
-        private int BytesFromMicro = 0;
-        private int BytesFromClient = 0;
+        private uint BytesFromMicroGlobal = 0;
+        private uint BytesFromMicro = 0;
+        private uint BytesFromClient = 0;
+
 
         private sessionLayot SessionUI = null;
-        private string microDataString = "";
-        private string clientDataString = "";
 
 
         private List<SessionRecord> SessionsRecoeds = new List<SessionRecord>();
 
+        private SessionRecord SRD = null;
+        
         public session(Socket Controller, string Code, string publicKey, string sessionname)
         {
 
@@ -79,7 +82,7 @@ namespace ServerSide
                         int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
                         buffer = new byte[bufferSize];
                         Controller.Receive(buffer);
-                        AddToBytesToMicro(byterec, bufferSize);
+                        AddToBytesToMicro((uint)byterec, (uint)bufferSize);
                         if (ServerServices.IsServerMassageFromMicro(buffer))
                         {
                             ServerServices.HandleServerMessages(buffer, this, false);
@@ -117,7 +120,7 @@ namespace ServerSide
                         int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
                         buffer = new byte[bufferSize];
                         ClientConn.Receive(buffer);
-                        AddToBytesToCLient(byterec, bufferSize);
+                        AddToBytesToCLient((uint)byterec, (uint)bufferSize);
                         if (ServerServices.IsServerMassageFromClient(buffer))
                         {
                             ServerServices.HandleServerMessages(buffer, this, true);
@@ -150,6 +153,13 @@ namespace ServerSide
                 return false;
             this.ClientConn = Client;
             this.ClientKnickname = name;
+            this.Client_endpoint = Client.RemoteEndPoint.ToString();
+            EnterTime = ServerServices.GetTime();
+            EnterDate = DateTime.Now.ToString();
+
+
+            SRD = new SessionRecord(Code, Client_endpoint, ClientKnickname, BytesFromClient,  BytesFromMicro,  EnterTime, EnterDate);
+            SessionsRecoeds.Add(SRD);
 
             (byte[] AESKEYSERVER, byte[] AESIVSERVER) = AesEncryption.GetAesEncryptedKeys(publickeyClient);
             Client.Send(AESKEYSERVER);
@@ -204,14 +214,13 @@ namespace ServerSide
 
             new Thread(() => ClientStream()).Start();
 
-            AddToBytesToCLient(AESIVSERVER.Length, AESKEYSERVER.Length);
+            AddToBytesToCLient((uint)AESIVSERVER.Length, (uint)AESKEYSERVER.Length);
             AddToBytesToCLient(128 * 2);
 
             AddToBytesToMicro(128 * 2);
 
-            Client_endpoint = Client.RemoteEndPoint.ToString();
-            EnterTime = ServerServices.GetTime();
-            EnterDate = DateTime.Now.ToString();
+            
+
 
 
             return true;
@@ -229,7 +238,7 @@ namespace ServerSide
                 ClientConn.Send(data);
 
 
-                AddToBytesToCLient(Encoding.UTF8.GetBytes(data.Length.ToString()).Length, data.Length);
+                AddToBytesToCLient((uint)Encoding.UTF8.GetBytes(data.Length.ToString()).Length, (uint)data.Length);
 
 
 
@@ -249,7 +258,7 @@ namespace ServerSide
                 Thread.Sleep(250);
                 Controller.Send(data);
 
-                AddToBytesToMicro(Encoding.UTF8.GetBytes(data.ToString()).Length, data.Length);
+                AddToBytesToMicro((uint)Encoding.UTF8.GetBytes(data.ToString()).Length, (uint)data.Length);
 
             }
         }
@@ -258,62 +267,57 @@ namespace ServerSide
             SendToMicro(ServerServices.GetServerRole().Concat(data).ToArray());
         }
 
-        private void AddToBytesToCLient(int bytes)
+        private void AddToBytesToCLient(uint bytes)
         {
             lock ((object)BytesFromClient)
             {
                 BytesFromClient += bytes;
+                
+                if (SRD != null)
+                {
+                    SRD.SetBytesToClient(BytesFromClient);
+                }
 
-                UpdateCLientBytes(BytesFromClient);
-                if (SessionUI == null)
-                    return;
-                SessionUI.BeginInvoke(new Action(() => {
-                    clientDataString = SessionUI.AddToBytesClient(BytesFromClient);
-                }));
             }
         }
-        private void AddToBytesToCLient(int First, int Last)
+        private void AddToBytesToCLient(uint First, uint Last)
         {
             lock ((object)BytesFromClient)
             {
                 BytesFromClient += First + Last;
-                UpdateCLientBytes(BytesFromClient);
-                if (SessionUI == null)
-                    return;
-                SessionUI.BeginInvoke(new Action(() => {
-                    clientDataString = SessionUI.AddToBytesClient(BytesFromClient);
+                if (SRD != null)
+                {
+                    SRD.SetBytesToClient(BytesFromClient);
+                }
 
-                }));
             }
         }
-        private void AddToBytesToMicro(int bytes)
+        private void AddToBytesToMicro(uint bytes)
         {
             lock ((object)BytesFromMicro)
             {
                 BytesFromMicro += bytes;
+                BytesFromMicroGlobal += bytes;
+                if (SRD != null)
+                {
+                    SRD.SetBytesToMicro(BytesFromMicro);
+                }
 
-                UpdateMicrotBytes(BytesFromMicro);
-                if (SessionUI == null)
-                    return;
-                SessionUI.BeginInvoke(new Action(() => {
-                    microDataString = SessionUI.AddToBytesMicro(BytesFromMicro);
-
-                }));
             }
         }
-        private void AddToBytesToMicro(int First, int Last)
+        private void AddToBytesToMicro(uint First, uint Last)
         {
             lock ((object)BytesFromMicro)
             {
                 BytesFromMicro += First + Last;
+                BytesFromMicroGlobal += First + Last;
 
-                UpdateMicrotBytes(BytesFromMicro);
-                if (SessionUI == null)
-                    return;
-                SessionUI.BeginInvoke(new Action(() => {
-                    microDataString = SessionUI.AddToBytesMicro(BytesFromMicro);
-
-                }));
+                
+                if (SRD != null)
+                {
+                    SRD.SetBytesToMicro(BytesFromMicro);
+                }
+                
             }
         }
 
@@ -335,11 +339,9 @@ namespace ServerSide
 
         public void disconnectClient(string newcode)
         {
-            SessionRecord SR = new SessionRecord(this.Code, Client_endpoint, this.ClientKnickname);
-            SR.SetSessionDetails(this.microDataString, this.clientDataString, (ServerServices.GetTime() - this.EnterTime).ToString(), this.EnterDate);
-            this.SessionsRecoeds.Add(SR);
-            this.microDataString = "";
-            this.clientDataString = "";
+            SRD.MakeNotLiveRecored();
+            SRD = null;
+            
             EnterTime = 0;
             EnterDate = "";
             BytesFromClient = 0;
@@ -365,28 +367,11 @@ namespace ServerSide
 
         }
 
-        /*private void ReadDataFromMicroConntroller()
-        {
-            //ignore*****************
-            while (true)
-            {
-                try
-                {
-                    byte[] BufferSizeRecive = new byte[1024];
-                    int massageLength = ClientConn.Receive(BufferSizeRecive);
+    
 
-                    massageLength = int.Parse(Encoding.UTF8.GetString(BufferSizeRecive, 0, massageLength));
-                    byte[] Buffer = new byte[massageLength];
 
-                    ClientConn.Receive(Buffer);
-                    string MSG = Encoding.UTF8.GetString(Buffer);
 
-                    // send message to controller
-                }
-                catch (FormatException e) { }
-            }
-        }
-*/
+
         public bool disconnect()
         {
 
@@ -394,6 +379,15 @@ namespace ServerSide
             try
             {
                 FormController.RemoveSession(this);
+                SRD.MakeNotLiveRecored();
+                SRD = null;
+                SessionsRecoeds = null;
+                BytesFromMicroGlobal = 0;
+                BytesFromMicro = 0;
+                BytesFromClient = 0;
+                EnterDate = null;
+                EnterTimeGlobal = 0;
+                EnterTime = 0;
 
                 if (UdpClientConn != null)
                     UdpClientConn.Close();
@@ -440,15 +434,7 @@ namespace ServerSide
         {
             return EnterTime;
         }
-        private void UpdateCLientBytes(int number)
-        {
-            
-        }
-
-        private void UpdateMicrotBytes(int number)
-        {
-            
-        }
+        
 
 
         public string GetSessionName()
@@ -486,6 +472,10 @@ namespace ServerSide
         public List<SessionRecord> GetSessionsRecords()
         {
             return this.SessionsRecoeds;
+        }
+        public uint GetTotalMicroBytes()
+        {
+            return BytesFromMicroGlobal;
         }
     }
 }

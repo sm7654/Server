@@ -14,6 +14,7 @@ namespace ServerSide
     public partial class sessionLayot : UserControl
     {
         session ConnectedSession;
+        SessionDisplayForm SDF; 
 
         public sessionLayot()
         {
@@ -39,8 +40,7 @@ namespace ServerSide
         {
             (ClientIp.Text, ClientPort.Text) = ("____", "____");
             ClientKickname.Text = ("disconnected");
-            BytesClient.Text = "0 bytes";
-            BytesMicro.Text = "0 bytes";
+            
             SessionCodeLabel.Text = newcode;
 
         }
@@ -94,8 +94,14 @@ namespace ServerSide
         private void pictureBox1_Click(object sender, EventArgs e)
         {
 
-            SessionDisplayForm sessionDisplayForm = new SessionDisplayForm(this.ConnectedSession.GetSessionsRecords());
+            SessionDisplayForm sessionDisplayForm = new SessionDisplayForm(this.ConnectedSession);
+            SDF = sessionDisplayForm;
             sessionDisplayForm.ShowDialog();
+        }
+        public void Closeform()
+        {
+            SDF.CleanForm();
+            SDF.Close();
         }
     }
 }

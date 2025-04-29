@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 
 
 
@@ -283,5 +284,55 @@ namespace ServerSide
         {
             return sessionsList;
         }
+
+        public static string CalcTime(uint timeinsec)
+        {
+            uint hours;
+            uint minutes;
+            uint seconds;
+            hours = timeinsec / 3600;
+            minutes = (timeinsec - hours * 3600) / 60;
+            seconds = timeinsec - hours * 3600 - minutes * 60;
+
+            if (minutes < 0)
+                minutes = 0;
+            if (seconds < 0)
+                seconds = 0;
+
+
+            return $"{hours}h {minutes}m {seconds}s";
+        }
+
+
+
+        public static string MakeBytesString(double number)
+        {
+            string Unit = "";
+            double unitClac = (double)number / 1024;
+
+            if (unitClac < 1)
+            {
+                Unit = "bytes";
+            }
+            else if (unitClac >= 1 && unitClac < 1000)
+            {
+                Unit = "Kb";
+                number /= 1000;
+            }
+            else if (unitClac >= 1000 && unitClac < 1000 * 1000)
+            {
+                Unit = "Mb";
+                number /= 1000 * 1000;
+            }
+            else if (unitClac >= 1000 * 1000)
+            {
+                Unit = "Gb";
+                number /= 1000 * 1000 * 1000;
+            }
+            return (Math.Round(number, 2)).ToString() + " " + Unit;
+        }
+        
+
+
     }
 }
