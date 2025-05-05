@@ -19,6 +19,7 @@ namespace ServerSide
         private uint microData = 0;
         private uint clientData = 0;
         private uint sessionEnterTime = 0;
+
         public SessionRecordControl()
         {
             InitializeComponent();
@@ -86,7 +87,7 @@ namespace ServerSide
             while (SR.IsRecordLive())
             {
                 this.SessionDurationlabel.Text = $"🕔 Session Duration: {ServerServices.CalcTime(ServerServices.GetTime() - this.sessionEnterTime)}";
-                Thread.Sleep(950);
+                Thread.Sleep(970);
             }
             DisconnectClient();
         }
@@ -108,6 +109,10 @@ namespace ServerSide
         {
 
         }
-        
+
+        private void SessionDurationlabel_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

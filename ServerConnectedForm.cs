@@ -74,78 +74,125 @@ namespace ServerSide
             try
             {
 
-
+                bool IsMicro = false;
+                Guest TempG = null;
                 byte[] PublicKeyBytes = new byte[1024];
                 int Keylength = Conn.Receive(PublicKeyBytes);
                 string PublicKey = Encoding.UTF8.GetString(PublicKeyBytes, 0, Keylength);
                 Conn.Send(RsaEncryption.getpublickey());
 
 
+                byte[] recognition = new byte[128];
+                Conn.Receive(recognition);
+                string re = RsaEncryption.Decrypt(recognition);
+                if (re == "Esp")
+                    IsMicro = true;
                 //////////////////////////////
-                
-                (byte[] AesKey, byte[] AesIV) = AesEncryption.GetAesEncryptedTempKeys(PublicKey);
+
+                /*(byte[] AesKey, byte[] AesIV) = AesEncryption.GetAesEncryptedTempKeys(PublicKey);
                 Conn.Send(AesKey);
                 Thread.Sleep(200);
                 Conn.Send(AesIV);
-
+*/
                 //////////////////////////////
 
-
-                byte[] bytes = new byte[128];
-                Conn.Receive(bytes);
-                string MotherBoardSerialNumber = "";
-                Guest TempG = null;
-                try
+                if (!IsMicro)
                 {
-                    MotherBoardSerialNumber = RsaEncryption.Decrypt(bytes);
 
-                    (bool NC, Guest g) = ServerServices.HasBennHere(MotherBoardSerialNumber);
 
-                    Thread.Sleep(100);
-
-                    if (NC)
-                    {
-                        if (g is BadGuest)
-                        {
-                            Conn.Send(Encoding.UTF8.GetBytes("NoOk"));
-                            foreach (BlockedClient badGuest in BlockedClients.Controls)
-                                if (badGuest.Get_MotherBoard_SN() == MotherBoardSerialNumber)
-                                {
-                                    badGuest.AddAttempt();
-                                    break;
-                                }
-                            
-                            return;
-                        }
-                        Conn.Send(Encoding.UTF8.GetBytes("Ok"));
-                    }
-                    else
-                    {
-                        Conn.Send(Encoding.UTF8.GetBytes("Ok"));
-                        ServerServices.AddGuest(g);
-                    }
-                    TempG = g;
+                    byte[] bytes = new byte[128];
+                    Conn.Receive(bytes);
+                    string MotherBoardSerialNumber = "";
                     
-                } catch (Exception e)
-                {
+
+                    try
+                    {
+
+
+                        MotherBoardSerialNumber = RsaEncryption.Decrypt(bytes);
+
+                        (bool NC, Guest g) = ServerServices.HasBennHere(MotherBoardSerialNumber);
+
+                        Thread.Sleep(100);
+
+                        if (NC)
+                        {
+                            if (g is BadGuest)
+                            {
+                                Conn.Send(Encoding.UTF8.GetBytes("NoOk"));
+                                foreach (BlockedClient badGuest in BlockedClients.Controls)
+                                    if (badGuest.Get_MotherBoard_SN() == MotherBoardSerialNumber)
+                                    {
+                                        badGuest.AddAttempt();
+                                        break;
+                                    }
+
+                                return;
+                            }
+                            Conn.Send(Encoding.UTF8.GetBytes("Ok"));
+                        }
+                        else
+                        {
+                            Conn.Send(Encoding.UTF8.GetBytes("Ok"));
+                            ServerServices.AddGuest(g);
+                        }
+                        TempG = g;
+
+                    }
+                    catch (Exception e)
+                    {
+                    }
                 }
 
 
 
-                string[] CodeAndKnickname = reciveIdentifiers(Conn);
-                
-                if (CodeAndKnickname[0] == "Esp")
+                //string[] CodeAndKnickname = reciveIdentifiers(Conn);
+                string[] SessionAndMicroName;
+                if (IsMicro)
                 {
+                    AesEncryprionForSession AEFS = new AesEncryprionForSession();
+                    (byte[] aeskey, byte[] aesIv) = AEFS.GetMicroKeys(PublicKey);
+                    Conn.Send(aeskey);
+                    Thread.Sleep(200);
+                    Conn.Send(aesIv);
 
-                    if (IsMicroNameExist(CodeAndKnickname[1]))
+                    do
                     {
-                        Conn.Send(RsaEncryption.Encrypt("500", PublicKey));
-                        Conn.Close();
-                        return;
-                    }
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////
+                        //get micro name and session name
+                        byte[] MicroSessionName = new byte[1024];
+                        int byterec = Conn.Receive(MicroSessionName);
+                        int bufferSize = int.Parse(Encoding.UTF8.GetString(MicroSessionName, 0, byterec));
+                        MicroSessionName = new byte[bufferSize];
+                        Conn.Receive(MicroSessionName);
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////
+                        SessionAndMicroName = AEFS.DecryptDataForMicroToString(MicroSessionName).Split('&');
 
-                    session session = new session(Conn, ServerServices.GenerateRandomString(5), PublicKey, CodeAndKnickname[2]);
-                    session.SetControllerKnickname(CodeAndKnickname[1]);
+                        if (!IsMicroNameExist(SessionAndMicroName[0]))
+                        {
+                            break;
+                        } else
+                        {
+                            //send to micro error message
+                            byte[] Error = AEFS.EncryptedDataToMicro(Encoding.UTF8.GetBytes($"500"));
+                            Conn.Send(Encoding.UTF8.GetBytes(Error.Length.ToString()));
+                            Thread.Sleep(250);
+                            Conn.Send(Error);
+                        }
+                    }
+                    while (true);
+
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    //Send the code to the micro
+                    string Code = ServerServices.GenerateRandomString(5);
+                    byte[] EncryptesCode = AEFS.EncryptedDataToMicro($"{Code}");
+                    Conn.Send(Encoding.UTF8.GetBytes(EncryptesCode.Length.ToString()));
+                    Thread.Sleep(250);
+                    Conn.Send(EncryptesCode);
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    
+                    session session = new session(Conn, Code, SessionAndMicroName[0],PublicKey ,AEFS);
+                    session.SetControllerKnickname(SessionAndMicroName[1]);
                     ServerServices.addSession(session);
 
                     this.BeginInvoke(new Action(() =>
@@ -161,31 +208,33 @@ namespace ServerSide
                 }
                 else
                 {
-                    
-                     
+                    (byte[] key, byte[] iv) = AesEncryption.GetAesEncryptedTempKeys(PublicKey);
+
+                    Conn.Send(key);
+                    Thread.Sleep(200);
+                    Conn.Send(iv);
+
+
+                    string[] CodeAndKnickname = reciveIdentifiers(Conn);
                     do
                     {
                         try
                         {
-                            string username = CodeAndKnickname[0];
+                            string username = CodeAndKnickname[1];
                             bool success = false;
                             bool LoginRequest = false;
                             string personalCode = "";
-                            if (CodeAndKnickname.Length > 2)
+                            if (CodeAndKnickname[0] == "RESETPASS")
+                            {
+                                success = SqlService.RestPass(username, CodeAndKnickname[2], CodeAndKnickname[3], false);
+                            } else if (CodeAndKnickname[0] == "CONNECTOSESSION")
+                            {
+                                success = SqlService.LoginSql(username, CodeAndKnickname[2], false);
+                                LoginRequest = true;
+                            } else if (CodeAndKnickname[0] == "NEWCLIENT")
                             {
 
-                                if (CodeAndKnickname[CodeAndKnickname.Length - 1] == "RESETPASS")
-                                    success = SqlService.RestPass(username, CodeAndKnickname[1], CodeAndKnickname[2], false);
-                                else
-                                {
-                                    success = SqlService.LoginSql(username, CodeAndKnickname[1], false);
-                                    LoginRequest = true;
-                                }
-                            }
-                            else
-                            {
-
-                                (success, personalCode) = SqlService.Register(username, CodeAndKnickname[1], false);
+                                (success, personalCode) = SqlService.Register(username, CodeAndKnickname[2], false);
                             }
 
                             if (success)
@@ -275,12 +324,11 @@ namespace ServerSide
                 Conn.Receive(BufferSizeRecive);
                 try
                 {
-                    return RsaEncryption.Decrypt(BufferSizeRecive).Split('&');
-                } catch (Exception e)
-                {
                     string[] ff = AesEncryption.DecryptDataToStringWithTempKeys(BufferSizeRecive).Split('&');
                     return ff;
                 }
+                catch (Exception e)
+                { return new string[7]; }
                 
             }
             catch (Exception e) {
@@ -292,10 +340,10 @@ namespace ServerSide
 
         private bool sessoinSearch(Socket Conn,  string[] CodeAndKnickname, string publickey)
         {
-            string username = CodeAndKnickname[0];
+            string username = CodeAndKnickname[1];
             
            
-            session DesiredSession = ServerServices.GetSession(CodeAndKnickname[2]);
+            session DesiredSession = ServerServices.GetSession(CodeAndKnickname[3]);
             if (DesiredSession == null)
             {
                 SendToClient(Conn, "400&");
@@ -308,7 +356,7 @@ namespace ServerSide
                 DesiredSession.AddClient(Conn, username, publickey);
                 foreach (var Control in SessionsViewPanel.Controls)
                 {
-                    if (((sessionLayot)Control).GetSession().GetCode() == CodeAndKnickname[2])
+                    if (((sessionLayot)Control).GetSession().GetCode() == CodeAndKnickname[3])
                         ((sessionLayot)Control).SetClientInLayout(DesiredSession);
                 }
                 return true;
@@ -347,6 +395,7 @@ namespace ServerSide
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
+            SessionsViewPanel.Controls.Clear();
             ServerServices.CloseConnection();
         }
 
@@ -355,9 +404,10 @@ namespace ServerSide
         {
             try
             {
-            
-                this.Layout.GetSession().disconnect();
-                ServerServices.removeSession(this.Layout.GetSession());
+                session s = this.Layout.GetSession();
+                s.disconnect();
+                FormController.RemoveSession(s);
+                ServerServices.removeSession(s);
                 
 
             } catch (Exception t)
@@ -374,7 +424,6 @@ namespace ServerSide
         private void button1_Click(object sender, EventArgs e)
         {
             ServerServices.CloseAllConnection();
-            SessionsViewPanel.Controls.Clear();
         }
 
         private void SessionSearch_TextChanged(object sender, EventArgs e)

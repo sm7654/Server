@@ -69,7 +69,7 @@ namespace ServerSide
             this.TezxtText.AutoSize = true;
             this.TezxtText.Location = new System.Drawing.Point(662, 23);
             this.TezxtText.Name = "TezxtText";
-            this.TezxtText.Size = new System.Drawing.Size(0, 16);
+            this.TezxtText.Size = new System.Drawing.Size(0, 13);
             this.TezxtText.TabIndex = 1;
             // 
             // TitleLabel
@@ -80,7 +80,7 @@ namespace ServerSide
             this.TitleLabel.ForeColor = System.Drawing.Color.White;
             this.TitleLabel.Location = new System.Drawing.Point(10, 10);
             this.TitleLabel.Name = "TitleLabel";
-            this.TitleLabel.Size = new System.Drawing.Size(348, 46);
+            this.TitleLabel.Size = new System.Drawing.Size(281, 37);
             this.TitleLabel.TabIndex = 0;
             this.TitleLabel.Text = "Server Control Panel";
             // 
@@ -148,7 +148,7 @@ namespace ServerSide
             this.SearchLabel.ForeColor = System.Drawing.Color.Black;
             this.SearchLabel.Location = new System.Drawing.Point(10, 11);
             this.SearchLabel.Name = "SearchLabel";
-            this.SearchLabel.Size = new System.Drawing.Size(152, 28);
+            this.SearchLabel.Size = new System.Drawing.Size(124, 21);
             this.SearchLabel.TabIndex = 1;
             this.SearchLabel.Text = "Search Sessions:";
             // 
@@ -158,7 +158,7 @@ namespace ServerSide
             this.SessionSearch.ForeColor = System.Drawing.Color.Black;
             this.SessionSearch.Location = new System.Drawing.Point(160, 8);
             this.SessionSearch.Name = "SessionSearch";
-            this.SessionSearch.Size = new System.Drawing.Size(300, 34);
+            this.SessionSearch.Size = new System.Drawing.Size(300, 29);
             this.SessionSearch.TabIndex = 2;
             this.SessionSearch.TextChanged += new System.EventHandler(this.SessionSearch_TextChanged);
             // 
@@ -191,7 +191,7 @@ namespace ServerSide
             this.splitContainer1.Panel2.Controls.Add(this.BlockedClients);
             this.splitContainer1.Panel2MinSize = 370;
             this.splitContainer1.Size = new System.Drawing.Size(1456, 691);
-            this.splitContainer1.SplitterDistance = 452;
+            this.splitContainer1.SplitterDistance = 806;
             this.splitContainer1.TabIndex = 3;
             // 
             // SessionsViewPanel
@@ -200,7 +200,7 @@ namespace ServerSide
             this.SessionsViewPanel.Location = new System.Drawing.Point(0, 0);
             this.SessionsViewPanel.MinimumSize = new System.Drawing.Size(470, 0);
             this.SessionsViewPanel.Name = "SessionsViewPanel";
-            this.SessionsViewPanel.Size = new System.Drawing.Size(470, 689);
+            this.SessionsViewPanel.Size = new System.Drawing.Size(804, 689);
             this.SessionsViewPanel.TabIndex = 0;
             // 
             // BlockedClients
@@ -209,7 +209,7 @@ namespace ServerSide
             this.BlockedClients.Location = new System.Drawing.Point(0, 0);
             this.BlockedClients.MinimumSize = new System.Drawing.Size(470, 0);
             this.BlockedClients.Name = "BlockedClients";
-            this.BlockedClients.Size = new System.Drawing.Size(998, 689);
+            this.BlockedClients.Size = new System.Drawing.Size(644, 689);
             this.BlockedClients.TabIndex = 0;
             // 
             // ServerConnectedForm

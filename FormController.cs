@@ -53,7 +53,11 @@ namespace ServerSide
             {
                 if (((sessionLayot)Control).GetSession().Equals(s))
                 {
-                    ((sessionLayot)Control).UpdateClientStatus_dis(newcode);
+                    ((sessionLayot)Control).BeginInvoke(new Action(() =>
+                    {
+                        ((sessionLayot)Control).UpdateClientStatus_dis(newcode);
+                    }));
+                    
                 }
             }
         }

@@ -22,7 +22,7 @@ namespace ServerSide
         public static void ChengeIvAndKeyToSessions(byte[] iv, byte[] key)
         {
 
-            byte[] chageIv = AesEncryption.EncryptedData(ServerRole.Concat(Encoding.UTF8.GetBytes("&CHANGEIVANDKEY&").Concat(iv).Concat(key)).ToArray());
+            byte[] chageIv = ServerRole.Concat(Encoding.UTF8.GetBytes("&CHANGEIVANDKEY&").Concat(iv).Concat(key)).ToArray();
             foreach (session Session in sessionsList)
                 Session.SendToClient(chageIv);
         }
@@ -84,7 +84,6 @@ namespace ServerSide
         {
             try
             {
-                data = RsaEncryption.DecryptToBytes(data);
                 if (data.Take(ServerRole.Length).SequenceEqual(ServerRole))
                 {
                     return true;
@@ -101,7 +100,6 @@ namespace ServerSide
         {
             try
             {
-                data = AesEncryption.DecryptData(data);
                 if (data.Take(ServerRole.Length).SequenceEqual(ServerRole))
                 {
                     return true;
@@ -116,16 +114,12 @@ namespace ServerSide
 
 
 
-        public static void HandleServerMessages(byte[] buffer, session curentSession, bool IsCLient)
+        public static void HandleServerMessages(byte[] buffer, session curentSession)
         {
             try
             {
                 string message = "";
-                if (!IsCLient)
-                    message = RsaEncryption.Decrypt(buffer);
-                else
-                    message = AesEncryption.DecryptDataToString(buffer);
-
+               
                 string tempString = message.Split('&')[1];
 
                 switch (tempString.Split(';')[0])
@@ -136,7 +130,7 @@ namespace ServerSide
                         if (experimentString == "")
                             return;
                         byte[] bytes = ServerRole.Concat(Encoding.UTF8.GetBytes("&EXPERIMENT_RESULTS" + experimentString)).ToArray();
-                        curentSession.SendToClient(AesEncryption.EncryptedData(bytes));
+                        curentSession.SendToClient(bytes);
 
                         break;
                     case "EXPERIMENT_RESULTS":
@@ -151,17 +145,12 @@ namespace ServerSide
                             sendCreationStringsToClient(CS, curentSession);
 
                         break;
-                    case "302":
-
-                        string newCode = ServerServices.GenerateRandomString(5);
-                        curentSession.disconnectClient(newCode);
-                        FormController.disconnectClient(curentSession, newCode);
-                        break;
 
                     case "303":
+
                         sessionsList.Remove(curentSession);
+                        FormController.RemoveSession(curentSession);
                         curentSession.disconnect();
-                        FormController.disconnectController(curentSession);
 
                         break;
 
@@ -169,7 +158,9 @@ namespace ServerSide
                     default: break;
                 }
             }
-            catch (Exception e) { }
+            catch (Exception e) 
+            {
+            }
  
         }
         private static void sendCreationStringsToClient(List<string> CS, session curentSession)
@@ -179,8 +170,7 @@ namespace ServerSide
             {
                 Experiments = Experiments.Concat(Encoding.UTF8.GetBytes($"&{CreationString}")).ToArray();
             }
-            byte[] CreationByteArray = AesEncryption.EncryptedData(Experiments);
-            curentSession.SendToClient(CreationByteArray);
+            curentSession.SendToClient(Experiments);
         }
 
 

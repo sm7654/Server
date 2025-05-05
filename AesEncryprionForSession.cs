@@ -1,61 +1,53 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace ServerSide
 {
-    static class AesEncryption
+    public class AesEncryprionForSession
     {
-        private static byte[] AESkey;
-        private static byte[] AESiv;
+        private byte[] aesIvClient;
+        private byte[] aesKeyClient;
 
-        private static byte[] AESkeyTemp;
-        private static byte[] AESivTemp;
+        private byte[] aesIvMicro;
+        private byte[] aesKeyMicro;
 
-        
-        
-        public static void GenerateTempKeys()
+        public AesEncryprionForSession()
         {
             using (Aes aesServise = Aes.Create())
             {
                 aesServise.KeySize = 256;
-                AESkeyTemp = aesServise.Key;
-                AESivTemp = aesServise.IV;
+                aesIvMicro = aesServise.IV;
+                aesKeyMicro = aesServise.Key;
+            }
+            using (Aes aesServise = Aes.Create())
+            {
+                aesServise.KeySize = 256;
+                aesIvClient = aesServise.IV;
+                aesKeyClient = aesServise.Key;
             }
         }
+        
 
-        public static (byte[], byte[]) GetAesEncryptedTempKeys(string RsaKey)
+
+
+
+
+        public byte[] EncryptedDataToClient(byte[] data)
         {
-            byte[] EncryptedKey = RsaEncryption.EncryptBytes(AESkeyTemp, RsaKey);
-            byte[] EncryptedIV = RsaEncryption.EncryptBytes(AESivTemp, RsaKey);
-
-            return (EncryptedKey, EncryptedIV);
-        }
-        public static (byte[], byte[]) GetAesEncryptedKeys(string RsaKey)
-        {
-            byte[] EncryptedKey = RsaEncryption.EncryptBytes(AESkey, RsaKey);
-            byte[] EncryptedIV = RsaEncryption.EncryptBytes(AESiv, RsaKey);
-
-            return (EncryptedKey, EncryptedIV);
-        }
-       
-
-
-
-
-        public static byte[] EncryptedDataWithTempKeys(byte[] data)
-        {
-            if (AESkeyTemp == null || AESivTemp == null)
+            if (aesKeyClient == null || aesIvClient == null)
                 return null;
             try
             {
                 using (Aes aes = Aes.Create())
                 {
-                    aes.Key = AESkeyTemp;
-                    aes.IV = AESivTemp;
+                    aes.Key = aesKeyClient;
+                    aes.IV = aesIvClient;
 
                     ICryptoTransform encryptor = aes.CreateEncryptor();
                     using (MemoryStream ms = new MemoryStream())
@@ -74,16 +66,20 @@ namespace ServerSide
             return null;
         }
 
-        public static byte[] DecryptDataWithTempKeys(byte[] encryptedData)
+        public byte[] EncryptedDataToClient(string data)
         {
-            if (AESkeyTemp == null || AESivTemp == null)
+            return EncryptedDataToClient(Encoding.UTF8.GetBytes(data));
+        }
+        public byte[] DecryptDataForClient(byte[] encryptedData)
+        {
+            if (aesKeyMicro == null || aesIvMicro == null)
                 return null;
             try
             {
                 using (Aes aes = Aes.Create())
                 {
-                    aes.Key = AESkeyTemp;
-                    aes.IV = AESivTemp;
+                    aes.Key = aesKeyMicro;
+                    aes.IV = aesIvMicro;
 
                     ICryptoTransform decryptor = aes.CreateDecryptor();
                     using (MemoryStream ms = new MemoryStream(encryptedData))
@@ -98,60 +94,38 @@ namespace ServerSide
             catch (Exception e)
             {
                 // Handle the exception appropriately
+                Console.WriteLine();
             }
 
             return null;
         }
 
-        
-        public static string DecryptDataToStringWithTempKeys(byte[] data)
+        public string DecryptDataForClientToString(byte[] encryptedData)
         {
-            return Encoding.UTF8.GetString(DecryptDataWithTempKeys(data));
+            try
+            {
+                return Encoding.UTF8.GetString(DecryptDataForClient(encryptedData));
+            }
+            catch (Exception e)
+            {
+                return "";
+            }
         }
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /*public static void GenarateKeys()
+        public byte[] EncryptedDataToMicro(byte[] data)
         {
-
-            using (Aes aesServise = Aes.Create())
-            {
-                aesServise.KeySize = 256;
-                AESkey = aesServise.Key;
-                AESiv = aesServise.IV;
-            }
-           
-            //new Thread(ChengeIvAndKey).Start();
-        }*/
-
-
-        /* public static byte[] EncryptedData(byte[] data)
-        {
-            if (AESkey == null || AESiv == null)
+            if (aesKeyMicro == null || aesIvMicro == null)
                 return null;
             try
             {
                 using (Aes aes = Aes.Create())
                 {
-                    aes.Key = AESkey;
-                    aes.IV = AESiv;
+                    aes.Key = aesKeyMicro;
+                    aes.IV = aesIvMicro;
 
                     ICryptoTransform encryptor = aes.CreateEncryptor();
                     using (MemoryStream ms = new MemoryStream())
@@ -170,16 +144,20 @@ namespace ServerSide
             return null;
         }
 
-        public static byte[] DecryptData(byte[] encryptedData)
+        public byte[] EncryptedDataToMicro(string data)
         {
-            if (AESkey == null || AESiv == null)
+            return EncryptedDataToMicro(Encoding.UTF8.GetBytes(data));
+        }
+        public byte[] DecryptDataForMicro(byte[] encryptedData)
+        {
+            if (aesKeyMicro == null || aesIvMicro == null)
                 return null;
             try
             {
                 using (Aes aes = Aes.Create())
                 {
-                    aes.Key = AESkey;
-                    aes.IV = AESiv;
+                    aes.Key = aesKeyMicro;
+                    aes.IV = aesIvMicro;
 
                     ICryptoTransform decryptor = aes.CreateDecryptor();
                     using (MemoryStream ms = new MemoryStream(encryptedData))
@@ -194,41 +172,39 @@ namespace ServerSide
             catch (Exception e)
             {
                 // Handle the exception appropriately
+                Console.WriteLine();
             }
 
             return null;
         }
-        public static string DecryptDataToString(byte[] data)
+
+        public string DecryptDataForMicroToString(byte[] encryptedData)
         {
-            return Encoding.UTF8.GetString(DecryptData(data));
-        }*/
-        /*public static int GetRandomDelay()
-        {
-            Random _random = new Random();
-            return _random.Next(10000, 11000); // Random number between 60000 and 180000 (inclusive)
+            try
+            {
+                return Encoding.UTF8.GetString(DecryptDataForMicro(encryptedData));
+            } catch (Exception e)
+            {
+                return "";
+            }
         }
 
-        public static void ChengeIvAndKey()
-        {
-            //while (true)
-            //{
-                int delay = GetRandomDelay();
-                delay = 0;
-                Thread.Sleep(delay);
-                byte[] AESTempIV;
-                byte[] AESTempIKey;
-                using (Aes aesServise = Aes.Create())
-                {
-                    aesServise.KeySize = 256;
-                    AESTempIV = aesServise.IV;
-                    AESTempIKey = aesServise.Key;
-                }
-            
-                ServerServices.ChengeIvAndKeyToSessions(AESTempIV, AESTempIKey);
-                AESiv = AESTempIV;
-            AESkey = AESTempIKey;
 
-            //}
-        }*/
+
+        public (byte[], byte[]) GetMicroKeys(string publickeyofmicro)
+        {
+            return (RsaEncryption.EncryptBytes(aesKeyMicro, publickeyofmicro), RsaEncryption.EncryptBytes(aesIvMicro, publickeyofmicro));
+        }
+
+        public (byte[], byte[]) GetClientKeys(string publickeyofclient)
+        {
+            return (RsaEncryption.EncryptBytes(aesKeyClient, publickeyofclient), RsaEncryption.EncryptBytes(aesIvClient, publickeyofclient));
+        }
+
+        public void SetNewIvAndKey(byte[] newiv, byte[] newkey)
+        {
+            this.aesIvClient = newiv; 
+            this.aesKeyClient = newkey;
+        }
     }
 }

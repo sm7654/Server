@@ -80,6 +80,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AesEncryprionForSession.cs" />
     <Compile Include="AesEncryption.cs" />
     <Compile Include="BlockedClient.cs">
       <SubType>UserControl</SubType>

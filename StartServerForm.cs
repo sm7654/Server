@@ -51,7 +51,7 @@ namespace ServerSide
 
 
                 RsaEncryption.GenerateKeys();
-                AesEncryption.GenarateKeys();
+                AesEncryption.GenerateTempKeys();
                 ServerConnectedForm OnlineServerForm = new ServerConnectedForm(ServerSock);
 
                 OnlineServerForm.Show();

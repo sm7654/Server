@@ -9,7 +9,7 @@ namespace ServerSide
     static class SqlService
     {
         private static SqlConnection SqlConnection;
-        private static string ConnectionString = $@"Server={Environment.MachineName};Database=ProductData;Trusted_Connection=True;";
+        private static string ConnectionString = $@"Server={Environment.MachineName};Database=DataBase_Windtunnel;Trusted_Connection=True;";
 
 
 
@@ -118,7 +118,7 @@ namespace ServerSide
                 if (Ismaneger)
                 {
                     commandForPass = $"SELECT * FROM ManagementUsers WHERE password = '{pass}';";
-                    commandForUser = "$SELECT * FROM ManagementUsers WHERE username = '{user}';";
+                    commandForUser = $"SELECT * FROM ManagementUsers WHERE username = '{User}';";
                 }
                 else
                 {
@@ -164,8 +164,8 @@ namespace ServerSide
             if (!CheckIfUserOrPassValid(User, pass, Ismaneger))
                 return (false, "");
 
-            pass = Hash(pass);
             User = Hash(User);
+            pass = Hash(pass);
             try
             {
                 SqlDataReader results;
