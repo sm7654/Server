@@ -59,10 +59,10 @@ namespace ServerSide
             {
                 if (Ismaneger)
                 {
-                    command = $"SELECT * FROM ManagementUsers WHERE password = '{pass}' OR username = '{user}';";
+                    command = $"SELECT * FROM ManagementUsers WHERE password = '{pass}' AND username = '{user}';";
                 } else
                 {
-                    command = $"SELECT * FROM ClientUsers WHERE clientPassword = '{pass}' OR clientName = '{user}';";
+                    command = $"SELECT * FROM ClientUsers WHERE clientPassword = '{pass}' AND clientName = '{user}';";
                 }
                 SqlCommand builder = new SqlCommand(command, SqlConnection);
                 SqlDataReader results = builder.ExecuteReader();
@@ -107,14 +107,61 @@ namespace ServerSide
             }
 
         }
+        private static bool CheckIfUserOrPassValid(string User, string pass, bool Ismaneger)
+        {
+            string commandForPass;
+            string commandForUser;
+            User = Hash(User);
+            pass = Hash(pass);
+            try
+            {
+                if (Ismaneger)
+                {
+                    commandForPass = $"SELECT * FROM ManagementUsers WHERE password = '{pass}';";
+                    commandForUser = "$SELECT * FROM ManagementUsers WHERE username = '{user}';";
+                }
+                else
+                {
+                    commandForPass = $"SELECT * FROM ClientUsers WHERE clientPassword = '{pass}';";
+                    commandForUser = $"SELECT * FROM ClientUsers WHERE clientName = '{User}';";
+                }
+                SqlCommand builder = new SqlCommand(commandForPass, SqlConnection);
+                SqlDataReader results = builder.ExecuteReader();
 
+                if (results.Read())
+                {
+                    results.Close();
+                    return false;
+                }
+                results.Close();
+
+
+                builder = new SqlCommand(commandForUser, SqlConnection);
+                results = builder.ExecuteReader();
+
+                if (results.Read())
+                {
+                    results.Close();
+                    return false;
+                }
+                results.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message); return false;
+            }
+
+
+            return true;
+
+        }
 
         public static (bool, string) Register(string User, string pass, bool Ismaneger)
         {
             string command;
 
             string personalCode = "";
-            if (LoginSql(User, pass, Ismaneger))
+            if (!CheckIfUserOrPassValid(User, pass, Ismaneger))
                 return (false, "");
 
             pass = Hash(pass);
