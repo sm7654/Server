@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -328,7 +329,8 @@ namespace ServerSide
                     return ff;
                 }
                 catch (Exception e)
-                { return new string[7]; }
+                {
+                    MessageBox.Show($"{e.Message} From Reciever hhooooooo"); return new string[7]; }
                 
             }
             catch (Exception e) {

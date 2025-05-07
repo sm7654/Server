@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ServerSide
 {
@@ -30,9 +31,10 @@ namespace ServerSide
                 aesServise.KeySize = 256;
                 aesIvClient = aesServise.IV;
                 aesKeyClient = aesServise.Key;
+
             }
         }
-        
+
 
 
 
@@ -72,14 +74,14 @@ namespace ServerSide
         }
         public byte[] DecryptDataForClient(byte[] encryptedData)
         {
-            if (aesKeyMicro == null || aesIvMicro == null)
+            if (aesKeyClient == null || aesIvClient == null)
                 return null;
             try
             {
                 using (Aes aes = Aes.Create())
                 {
-                    aes.Key = aesKeyMicro;
-                    aes.IV = aesIvMicro;
+                    aes.Key = aesKeyClient;
+                    aes.IV = aesIvClient;
 
                     ICryptoTransform decryptor = aes.CreateDecryptor();
                     using (MemoryStream ms = new MemoryStream(encryptedData))

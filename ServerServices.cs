@@ -24,7 +24,7 @@ namespace ServerSide
 
             byte[] chageIv = ServerRole.Concat(Encoding.UTF8.GetBytes("&CHANGEIVANDKEY&").Concat(iv).Concat(key)).ToArray();
             foreach (session Session in sessionsList)
-                Session.SendToClient(chageIv);
+                Session.SendToClient(chageIv, false);
         }
 
         public static (bool, Guest) HasBennHere(string MotherBoard_SN)
@@ -80,7 +80,7 @@ namespace ServerSide
             }
         }
 
-        public static bool IsServerMassageFromMicro(byte[] data)
+        /*public static bool IsServerMassageFromMicro(byte[] data)
         {
             try
             {
@@ -95,8 +95,8 @@ namespace ServerSide
                 
             }
             return false;
-        }
-        public static bool IsServerMassageFromClient(byte[] data)
+        }*/
+        public static bool IsItServerRelatedMessage(byte[] data)
         {
             try
             {
@@ -105,9 +105,10 @@ namespace ServerSide
                     return true;
                 }
             }
-            catch (Exception e){ 
-                
+            catch (Exception e){
+                Console.WriteLine();
             }
+
             return false;
         }
 
@@ -118,7 +119,7 @@ namespace ServerSide
         {
             try
             {
-                string message = "";
+                string message = Encoding.UTF8.GetString(buffer);
                
                 string tempString = message.Split('&')[1];
 
@@ -130,7 +131,7 @@ namespace ServerSide
                         if (experimentString == "")
                             return;
                         byte[] bytes = ServerRole.Concat(Encoding.UTF8.GetBytes("&EXPERIMENT_RESULTS" + experimentString)).ToArray();
-                        curentSession.SendToClient(bytes);
+                        curentSession.SendToClient(bytes, false);
 
                         break;
                     case "EXPERIMENT_RESULTS":
@@ -170,7 +171,7 @@ namespace ServerSide
             {
                 Experiments = Experiments.Concat(Encoding.UTF8.GetBytes($"&{CreationString}")).ToArray();
             }
-            curentSession.SendToClient(Experiments);
+            curentSession.SendToClient(Experiments, false);
         }
 
 
@@ -239,9 +240,8 @@ namespace ServerSide
         public static void CloseConnection()
         {
             foreach (var session in sessionsList)
-            {
                 session.disconnect();
-            }
+            
             
             serverSocket.Close();
             ClosingController.btnExit_Click();
@@ -250,10 +250,9 @@ namespace ServerSide
         public static void CloseAllConnection()
         {
             foreach (session session in sessionsList)
-            {
                 session.disconnect();
-            }
-            sessionsList = new List<session>();
+            
+            sessionsList.Clear();
         }
         public static void StartTimer()
         {

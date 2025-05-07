@@ -196,6 +196,7 @@ namespace ServerSide
             // 
             // SessionsViewPanel
             // 
+            this.SessionsViewPanel.AutoScroll = true;
             this.SessionsViewPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.SessionsViewPanel.Location = new System.Drawing.Point(0, 0);
             this.SessionsViewPanel.MinimumSize = new System.Drawing.Size(470, 0);

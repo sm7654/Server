@@ -304,6 +304,7 @@ namespace ServerSide
             {
                 try
                 {
+
                     string ExperResultVal = ExperResult.Split(':')[1].Split('|')[0];
                     if (Result == "Name" && ExperResult.Contains("Name"))
                     {
@@ -312,7 +313,7 @@ namespace ServerSide
                         return false;
                     }
 
-                    if (ExperResult.Contains(Result))
+                    if (ExperResult.ToLower().Contains(Result.ToLower()))
                     {
 
                         double ExperVal = double.Parse(ExperResultVal);
