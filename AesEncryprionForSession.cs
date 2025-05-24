@@ -18,6 +18,8 @@ namespace ServerSide
         private byte[] aesIvMicro;
         private byte[] aesKeyMicro;
 
+        private session currentSession;
+
         public AesEncryprionForSession()
         {
             using (Aes aesServise = Aes.Create())
@@ -31,14 +33,83 @@ namespace ServerSide
                 aesServise.KeySize = 256;
                 aesIvClient = aesServise.IV;
                 aesKeyClient = aesServise.Key;
-
             }
         }
 
+        public void setSession(session s)
+        {
+            currentSession = s;
+        }
+        public void regenerateKeysForClient()
+        {
+
+            try
+            {
+                byte[] Key;
+
+                byte[] Iv;
+
+                using (Aes aesServise = Aes.Create())
+                {
+                    aesServise.KeySize = 256;
+                    Iv = aesServise.IV;
+                    Key = aesServise.Key;
+                }
+
+                string encrypted = Convert.ToBase64String(Key);
+
+                string encryptedIv = Convert.ToBase64String(Iv);
+                byte[] serverRole = ServerServices.GetServerRole();
+                byte[] messageToSend = Encoding.UTF8.GetBytes($"&CHANGEKEYIV&{encrypted}&{encryptedIv}");
+                
+                currentSession.SendToClient(serverRole.Concat(messageToSend).ToArray(), false);
+
+                aesKeyClient = Key;
+                aesIvClient = Iv;
+            }
+            catch (Exception ex)
+            {
+
+            }
 
 
+        }
 
 
+        public void regenerateKeysForMicro()
+        {
+
+            try
+            {
+                byte[] Key;
+
+                byte[] Iv;
+
+                using (Aes aesServise = Aes.Create())
+                {
+                    aesServise.KeySize = 256;
+                    Iv = aesServise.IV;
+                    Key = aesServise.Key;
+                }
+
+                string encrypted = Convert.ToBase64String(Key);
+
+                string encryptedIv = Convert.ToBase64String(Iv);
+                byte[] serverRole = ServerServices.GetServerRole();
+                byte[] messageToSend = Encoding.UTF8.GetBytes($"&CHANGEKEYIV&{encrypted}&{encryptedIv}");
+                
+                currentSession.SendToMicro(serverRole.Concat(messageToSend).ToArray(), false);
+
+                aesKeyMicro = Key;
+                aesIvMicro = Iv;
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+
+        }
 
         public byte[] EncryptedDataToClient(byte[] data)
         {
@@ -113,10 +184,6 @@ namespace ServerSide
                 return "";
             }
         }
-
-
-
-
 
         public byte[] EncryptedDataToMicro(byte[] data)
         {

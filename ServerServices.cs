@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CredentialManagement;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -38,7 +39,7 @@ namespace ServerSide
                 }
             }
             
-            Guest g = new Guest(MotherBoard_SN);
+            Guest g = new Guest(MotherBoard_SN, true);
             return (false, g);
         }
         public static void StopCountToGuest(Guest g)
@@ -52,7 +53,18 @@ namespace ServerSide
                 }
             }
         }
-
+        public static void importBlockedGuestFromSQL()
+        {
+            List<BadGuest> l = SqlService.GetBlockedGuestFromSQL();
+            if (l == null)
+                return;
+            foreach (BadGuest guest in l)
+            {
+                ConnectionRequests.Add(guest);
+                BlockedClient blockedClient = new BlockedClient(guest);
+                FormController.AddBlockedGuest(blockedClient);
+            }
+        }
         private static object lockedThread = new object();
         public static BadGuest MakeGuestBlack(Guest g)
         {
@@ -100,6 +112,7 @@ namespace ServerSide
         {
             try
             {
+
                 if (data.Take(ServerRole.Length).SequenceEqual(ServerRole))
                 {
                     return true;
@@ -113,7 +126,40 @@ namespace ServerSide
         }
 
 
+        public static (string, string) GetKeysFromCredential()
+        {
+            try
+            {
 
+                Credential cred = new Credential();
+                cred.Target = "ServerAes";
+                string user = "";
+                string password = "";
+                if (cred.Load())
+                {
+                    user = cred.Username;
+                    password = cred.Password;
+                } else
+                {
+                    Credential NewCred = new Credential();
+                    NewCred.Target = "ServerAes";
+                    (string aesKey, string AesIv) = AesEncryption.generate();
+                    NewCred.Username = aesKey;
+                    NewCred.Password = AesIv;
+                    NewCred.PersistanceType = PersistanceType.LocalComputer;
+                    NewCred.Type = CredentialType.Generic;
+
+                    NewCred.Save();
+
+                }
+
+                return (user, password);
+            }
+            catch (Exception e)
+            {
+                return ("", "");
+            }
+        }
 
         public static void HandleServerMessages(byte[] buffer, session curentSession)
         {
@@ -122,6 +168,8 @@ namespace ServerSide
                 string message = Encoding.UTF8.GetString(buffer);
                
                 string tempString = message.Split('&')[1];
+
+
 
                 switch (tempString.Split(';')[0])
                 {
@@ -136,7 +184,7 @@ namespace ServerSide
                         break;
                     case "EXPERIMENT_RESULTS":
 
-                        SqlService.AddExperimentToDatabase(tempString, curentSession.GetClienKnickname(), tempString.Split(';')[tempString.Split(';').Length - 3]);
+                        SqlService.AddExperimentToDatabase(tempString, curentSession.GetClienKnickname());
 
                         break;
                     case "REQSTHISTORY":
@@ -146,7 +194,9 @@ namespace ServerSide
                             sendCreationStringsToClient(CS, curentSession);
 
                         break;
-
+                    case "Ping":
+                        curentSession.SendToMicroFromServer(Encoding.UTF8.GetBytes("&Ping"), false);
+                        break;
                     case "303":
 
                         sessionsList.Remove(curentSession);

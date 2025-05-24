@@ -28,21 +28,23 @@ namespace ServerSide
             InitializeComponent();
             FormController.SetForm(this);
             ServerServices.StartTimer();
+
         }
 
         public ServerConnectedForm()
         {
             InitializeComponent();
 
+
         }
         private void ServerConnectedForm_Load(object sender, EventArgs e)
         {
-            
 
 
+            ServerServices.importBlockedGuestFromSQL();
 
 
-            new Thread(() => ServerHandler()).Start();
+            new Thread(ServerHandler).Start();
         }
 
 
@@ -86,7 +88,7 @@ namespace ServerSide
                 byte[] recognition = new byte[128];
                 Conn.Receive(recognition);
                 string re = RsaEncryption.Decrypt(recognition);
-                if (re == "Esp")
+                if (re == "Micro")
                     IsMicro = true;
                 //////////////////////////////
 
@@ -99,8 +101,6 @@ namespace ServerSide
 
                 if (!IsMicro)
                 {
-
-
                     byte[] bytes = new byte[128];
                     Conn.Receive(bytes);
                     string MotherBoardSerialNumber = "";
@@ -114,7 +114,7 @@ namespace ServerSide
 
                         (bool NC, Guest g) = ServerServices.HasBennHere(MotherBoardSerialNumber);
 
-                        Thread.Sleep(100);
+                        Thread.Sleep(200);
 
                         if (NC)
                         {
@@ -154,7 +154,7 @@ namespace ServerSide
                     AesEncryprionForSession AEFS = new AesEncryprionForSession();
                     (byte[] aeskey, byte[] aesIv) = AEFS.GetMicroKeys(PublicKey);
                     Conn.Send(aeskey);
-                    Thread.Sleep(200);
+                    Thread.Sleep(400);
                     Conn.Send(aesIv);
 
                     do
@@ -169,7 +169,8 @@ namespace ServerSide
                         ////////////////////////////////////////////////////////////////////////////////////////////////////
                         SessionAndMicroName = AEFS.DecryptDataForMicroToString(MicroSessionName).Split('&');
 
-                        if (!IsMicroNameExist(SessionAndMicroName[0]))
+                        if (!IsMicroNameExist(SessionAndMicroName[0
+                            ], SessionAndMicroName[1]))
                         {
                             break;
                         } else
@@ -192,8 +193,8 @@ namespace ServerSide
                     Conn.Send(EncryptesCode);
                     /////////////////////////////////////////////////////////////////////////////////////
                     
-                    session session = new session(Conn, Code, SessionAndMicroName[0],PublicKey ,AEFS);
-                    session.SetControllerKnickname(SessionAndMicroName[1]);
+                    session session = new session(Conn, Code, SessionAndMicroName[1],PublicKey ,AEFS);
+                    session.SetControllerKnickname(SessionAndMicroName[0]);
                     ServerServices.addSession(session);
 
                     this.BeginInvoke(new Action(() =>
@@ -265,10 +266,12 @@ namespace ServerSide
 
                             CodeAndKnickname = reciveIdentifiers(Conn);
 
-                            if (TempG.GetLogs() > 8 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 4))
+                            if (TempG.GetLogs() > 8 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 1))
                             {
                                 SendToClient(Conn, $"999&");
-                                BlockedClient NewBad = new BlockedClient(ServerServices.MakeGuestBlack(TempG));
+                                BadGuest BG = ServerServices.MakeGuestBlack(TempG);
+                                BlockedClient NewBad = new BlockedClient(BG);
+                                SqlService.AddBlockedGuest(BG);
                                 this.BeginInvoke(new Action(() => {
                                     BlockedClients.Controls.Add(NewBad);
                                 }));
@@ -330,11 +333,11 @@ namespace ServerSide
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show($"{e.Message} From Reciever hhooooooo"); return new string[7]; }
+                    return new string[7];
+                }
                 
             }
             catch (Exception e) {
-                MessageBox.Show($"{e.Message} From Reciever");
                 return new string[7]; }
         }
 
@@ -343,42 +346,65 @@ namespace ServerSide
         private bool sessoinSearch(Socket Conn,  string[] CodeAndKnickname, string publickey)
         {
             string username = CodeAndKnickname[1];
-            
-           
-            session DesiredSession = ServerServices.GetSession(CodeAndKnickname[3]);
-            if (DesiredSession == null)
+            string sessionCode = CodeAndKnickname[3];
+            foreach (var Control in SessionsViewPanel.Controls)
             {
-                SendToClient(Conn, "400&");
-                return false;
-            }
-            else
-            {
-                SendToClient(Conn, "200&");
-
-                DesiredSession.AddClient(Conn, username, publickey);
-                foreach (var Control in SessionsViewPanel.Controls)
+                if (((sessionLayot)Control).GetSession().GetClienKnickname() == username)
                 {
-                    if (((sessionLayot)Control).GetSession().GetCode() == CodeAndKnickname[3])
-                        ((sessionLayot)Control).SetClientInLayout(DesiredSession);
+                    SendToClient(Conn, "400&");
+                    return false;
                 }
-                return true;
+            }
+            if (sessionCode != "-OfflineSession-")
+            {
+                session DesiredSession = ServerServices.GetSession(sessionCode);
 
+                
+                if (DesiredSession == null || DesiredSession.ClientConnected())
+                {
+                    SendToClient(Conn, "400&");
+                    return false;
+                }
+                else
+                {
+                    SendToClient(Conn, "200&");
+
+                    DesiredSession.AddClient(Conn, username, publickey);
+                    foreach (var Control in SessionsViewPanel.Controls)
+                    {
+                        if (((sessionLayot)Control).GetSession().GetCode() == sessionCode)
+                            ((sessionLayot)Control).SetClientInLayout(DesiredSession);
+                    }
+                    return true;
+                }
+            } else
+            {
+                session OfflineSession = new session();
+                SendToClient(Conn, "200&");
+                OfflineSession.AddClient(Conn, "", publickey);
+                return true;
             }
 
             
         }
 
-        private bool IsMicroNameExist(string name)
+        private bool IsMicroNameExist(string name, string sessionName)
         {
             foreach (session s in ServerServices.GetSessionsList())
-                if (s.GetControllerKnickname().Equals(name))
+            {
+                string CurrentsessionName = s.GetSessionName();
+                string CurrentmicroName = s.GetControllerKnickname();
+                if (CurrentmicroName == name || CurrentsessionName == sessionName)
                     return true;
-            
+            }
 
             return false;
         }
 
-
+        public void AddBlockedClientToPanel(BlockedClient c)
+        {
+            BlockedClients.Controls.Add(c);
+        }
         private void ControllCliked(object sender, EventArgs e)
         {
             if (this.Layout != null)
@@ -401,22 +427,6 @@ namespace ServerSide
             ServerServices.CloseConnection();
         }
 
-
-        private void Disconnectbutton_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                session s = this.Layout.GetSession();
-                s.disconnect();
-                FormController.RemoveSession(s);
-                ServerServices.removeSession(s);
-                
-
-            } catch (Exception t)
-            {
-
-            }
-        }
 
         private void DisconnectServerButton_Click(object sender, EventArgs e)
         {

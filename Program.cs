@@ -26,9 +26,16 @@ namespace ServerSide
         [STAThread]
         static void Main()
         {
+            (string key, string iv) = ServerServices.GetKeysFromCredential();
+            if (key != "" && iv != "")
+            {
+                AesEncryption.SetAESENVRkeys(key, iv);
+            }    
+
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LoginRegisterForm());
+            Application.Run(new SqlConnectionForm());
         }
     }
 }

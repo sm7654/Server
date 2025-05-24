@@ -9,14 +9,15 @@ namespace ServerSide
 {
     static class AesEncryption
     {
-        private static byte[] AESkey;
-        private static byte[] AESiv;
-
+        
         private static byte[] AESkeyTemp;
         private static byte[] AESivTemp;
 
-        
-        
+        private static byte[] AESkeyCredentialVar;
+        private static byte[] AESivCredentialVar;
+
+
+
         public static void GenerateTempKeys()
         {
             using (Aes aesServise = Aes.Create())
@@ -27,6 +28,27 @@ namespace ServerSide
             }
         }
 
+        public static void SetAESENVRkeys(string key, string iv)
+        {
+            AESkeyCredentialVar = Convert.FromBase64String(key);
+            AESivCredentialVar = Convert.FromBase64String(iv);
+        }
+        public static (string, string) generate()
+        {
+            using (Aes aesServise = Aes.Create())
+            {
+                aesServise.KeySize = 256;
+                AESkeyCredentialVar = aesServise.Key;
+                AESivCredentialVar = aesServise.IV;
+            }
+
+
+
+            return (Convert.ToBase64String(AESkeyCredentialVar), Convert.ToBase64String(AESivCredentialVar));
+        }
+
+
+
         public static (byte[], byte[]) GetAesEncryptedTempKeys(string RsaKey)
         {
             byte[] EncryptedKey = RsaEncryption.EncryptBytes(AESkeyTemp, RsaKey);
@@ -36,12 +58,92 @@ namespace ServerSide
         }
         public static (byte[], byte[]) GetAesEncryptedKeys(string RsaKey)
         {
-            byte[] EncryptedKey = RsaEncryption.EncryptBytes(AESkey, RsaKey);
-            byte[] EncryptedIV = RsaEncryption.EncryptBytes(AESiv, RsaKey);
+            byte[] EncryptedKey = RsaEncryption.EncryptBytes(AESkeyCredentialVar, RsaKey);
+            byte[] EncryptedIV = RsaEncryption.EncryptBytes(AESivCredentialVar, RsaKey);
 
             return (EncryptedKey, EncryptedIV);
         }
-       
+
+
+
+
+
+        public static byte[] EncryptDataToSql(byte[] data)
+        {
+            if (AESkeyCredentialVar == null || AESivCredentialVar == null)
+                return null;
+            try
+            {
+                using (Aes aes = Aes.Create())
+                {
+                    aes.Key = AESkeyCredentialVar;
+                    aes.IV = AESivCredentialVar;
+
+                    ICryptoTransform encryptor = aes.CreateEncryptor();
+                    using (MemoryStream ms = new MemoryStream())
+                    using (CryptoStream Cry = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                    {
+                        Cry.Write(data, 0, data.Length);
+
+                        Cry.FlushFinalBlock();
+                        return ms.ToArray();
+                    }
+
+                }
+            }
+            catch (Exception e) { }
+
+            return null;
+        }
+
+        public static byte[] DecryptDataToSql(byte[] encryptedData)
+        {
+            if (AESkeyCredentialVar == null || AESivCredentialVar == null)
+                return null;
+            try
+            {
+                using (Aes aes = Aes.Create())
+                {
+                    aes.Key = AESkeyCredentialVar;
+                    aes.IV = AESivCredentialVar;
+
+                    ICryptoTransform decryptor = aes.CreateDecryptor();
+                    using (MemoryStream ms = new MemoryStream(encryptedData))
+                    using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                    using (MemoryStream decryptedStream = new MemoryStream())
+                    {
+                        cs.CopyTo(decryptedStream);
+                        return decryptedStream.ToArray();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // Handle the exception appropriately
+            }
+
+            return null;
+        }
+
+
+        public static string DecryptDataToSqlToString(byte[] data)
+        {
+            return Encoding.UTF8.GetString(DecryptDataToSql(data));
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,16 +20,14 @@ namespace ServerSide
     {
         private string sessionName;
         private string Code;
-        private uint EnterTimeGlobal = 0;
         private uint EnterTime = 0;
         private string EnterDate = "";
 
-        private Socket Controller;
+        private Socket Controller = null;
         private string ControllerKnickname;
         private string ControllerPublicKey;
 
         private Socket ClientConn = null;
-        private Socket UdpClientConn = null;
         private string ClientKnickname;
         private string Client_endpoint;
         private bool IsClientConnected = false;
@@ -58,15 +57,20 @@ namespace ServerSide
             this.ControllerPublicKey = publickeymicro;
             this.AEFS = AESForSession;
 
+            AEFS.setSession(this);
 
+            new Thread(MicroStream).Start();
 
-            ///////////////////////////////////////
-
-
-            new Thread(() => MicroStream()).Start();
+            //new Thread(KeepConnectionAlive).Start();
+        }
+        public session()
+        {
+            AEFS = new AesEncryprionForSession();
+            this.ControllerPublicKey = "";
+            this.Controller = null;
         }
 
-        
+
 
         private void MicroStream()
         {
@@ -77,41 +81,61 @@ namespace ServerSide
 
                     byte[] buffer = new byte[1024];
                     byte[] bufferToClient = new byte[1024];
+                    int byterec = 0;
+                    int bufferSize = 0;
                     try
                     {
-                        Controller.ReceiveTimeout = 0;
-                        int byterec = Controller.Receive(buffer);
-                        int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
+                        Controller.ReceiveTimeout = 5000;
+                        byterec = Controller.Receive(buffer);
+                        bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
                         buffer = new byte[bufferSize];
                         Controller.Receive(buffer);
-                        bufferToClient = buffer;
-
-                        AddToBytesToMicro((uint)byterec + (uint)bufferSize);
-                        buffer = AEFS.DecryptDataForMicro(buffer);
-                        if (ServerServices.IsItServerRelatedMessage(buffer))
-                        {
-                            ServerServices.HandleServerMessages(buffer, this);
-                        }
-                        else if (ClientConn != null)
-                        {
-                            SendToClient(bufferToClient, true);
-                        }
                     }
-                    catch (SocketException SE)
+                    catch (SocketException EX)
                     {
-
+                        ServerServices.removeSession(this);
                         FormController.RemoveSession(this);
                         disconnect();
-                    }
+                    } 
+                    
 
-                    catch (Exception e)
-                    { 
-                        SendToClient(bufferToClient, true); }
+                    new Thread(() =>
+                    {
+                        try
+                        {
+
+                            bufferToClient = buffer;
+                            buffer = AEFS.DecryptDataForMicro(buffer);
+
+                            if (ServerServices.IsItServerRelatedMessage(buffer))
+                            {
+                                new Thread(() => ServerServices.HandleServerMessages(buffer, this)).Start();
+                            }
+                            else if (ClientConn != null)
+                            {
+
+                                new Thread(() => SendToClient(bufferToClient, true)).Start();
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            if (bufferToClient != null)
+                                SendToClient(bufferToClient, true);
+                        }
+                        AddToBytesToMicro((uint)byterec + (uint)bufferSize);
+                    }).Start();
+                    
+                    
                 }
             }
             catch
             (Exception e)
-            { }
+            {
+                ServerServices.removeSession(this);
+                FormController.RemoveSession(this);
+                disconnect();
+            }
 
         }
         private void ClientStream()
@@ -119,45 +143,58 @@ namespace ServerSide
             try
             {
 
-                while (Controller.Connected && ClientConn.Connected)
+                
+                
+                
+                while (ClientConn.Connected)
                 {
                     byte[] buffer = new byte[1024];
                     byte[] bufferoMicro = new byte[1024];
+                    int byterec = 0;
+                    int bufferSize = 0;
                     try
                     {
-                        ClientConn.SendTimeout = 0;
-                        int byterec = ClientConn.Receive(buffer);
-                        int bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
+
+                        byterec = ClientConn.Receive(buffer);
+                        bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
                         buffer = new byte[bufferSize];
                         ClientConn.Receive(buffer);
                         bufferoMicro = buffer;
                         buffer = AEFS.DecryptDataForClient(buffer);
-                        if (ServerServices.IsItServerRelatedMessage(buffer))
-                        {
-                            ServerServices.HandleServerMessages(buffer, this);
-                        }
-                        else
-                        {
-
-                            SendToMicro(bufferoMicro, true);
-                        }
-
-                        AddToBytesToCLient((uint)byterec + (uint)bufferSize);
                     }
                     catch (SocketException SE)
                     {
                         string newCode = ServerServices.GenerateRandomString(5);
                         disconnectClient(newCode);
                         FormController.disconnectClient(this, newCode);
-                        
+
                     }
-                    catch (Exception e) {
-                        SendToMicro(bufferoMicro, true);
-                    }
+                    new Thread(() =>
+                    {
+                        try
+                        {
+                            if (ServerServices.IsItServerRelatedMessage(buffer))
+                            {
+                                new Thread(() => ServerServices.HandleServerMessages(buffer, this)).Start();
+                            }
+                            else
+                            {
+                                new Thread(() => SendToMicro(bufferoMicro, true)).Start();
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            SendToMicro(bufferoMicro, true);
+                        }
+                        AddToBytesToCLient((uint)byterec + (uint)bufferSize);
+                    }).Start();
+                    
+                    
                 }
             }
             catch (Exception e) {
-                 }
+
+            }
 
 
 
@@ -173,13 +210,17 @@ namespace ServerSide
             this.ClientConn = Client;
             this.ClientKnickname = name;
             this.Client_endpoint = Client.RemoteEndPoint.ToString();
-            EnterTime = ServerServices.GetTime();
-            EnterDate = DateTime.Now.ToString();
+            if (Controller != null)
+            {
+                EnterTime = ServerServices.GetTime();
+                EnterDate = DateTime.Now.ToString();
 
+                SRD = new SessionRecord(Code, Client_endpoint, ClientKnickname, BytesFromClient,  BytesFromMicro,  EnterTime, EnterDate);
+                SessionsRecoeds.Add(SRD);
 
-            SRD = new SessionRecord(Code, Client_endpoint, ClientKnickname, BytesFromClient,  BytesFromMicro,  EnterTime, EnterDate);
-            SessionsRecoeds.Add(SRD);
+            }
 
+            
             (byte[] AESKEYSERVER, byte[] AESIVSERVER) = AEFS.GetClientKeys(publickeyClient);
             Client.Send(AESKEYSERVER);
             Thread.Sleep(200);
@@ -192,29 +233,26 @@ namespace ServerSide
             int bytesread = 0;
 
             // send to conrolller client connected
-            byte[] hh = ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes($"&200&{this.ClientConn.RemoteEndPoint.ToString()}")).ToArray();
+            if (Controller != null)
+            {
+                lock (ControllerSendLock)
+                {
+                    byte[] hh = Encoding.UTF8.GetBytes($"&200&{this.ClientConn.RemoteEndPoint.ToString()}");
 
+                    SendToMicroFromServer(hh, false);
+                    SendToClient(Encoding.UTF8.GetBytes(ControllerPublicKey), false);
 
-            SendToMicro(hh, false);
-            
-            SendToClient(Encoding.UTF8.GetBytes(ControllerPublicKey), false);
-            
+                    AESIv = new byte[128];
+                    bytesread = Client.Receive(AESkey);
 
+                    AESIv = new byte[128];
+                    bytesread = Client.Receive(AESIv);
 
-            // recive from to client the AES keys and send it to controller
-
-            AESIv = new byte[128];
-            bytesread = Client.Receive(AESkey);
-
-            AESIv = new byte[128];
-            bytesread = Client.Receive(AESIv);
-
-
-
-            Controller.Send(AESkey);
-            Thread.Sleep(200);
-            Controller.Send(AESIv);
-
+                    Controller.Send(AESkey);
+                    Thread.Sleep(200);
+                    Controller.Send(AESIv);
+                }
+            }
 
 
             IsClientConnected = true;
@@ -226,10 +264,11 @@ namespace ServerSide
 
             AddToBytesToMicro(128 * 2);
 
-            
 
 
 
+            new Thread(() => ChangeIvAndKeyForClient()).Start();
+            new Thread(() => ChangeIvAndKeyForMicro()).Start();
             return true;
         }
 
@@ -267,7 +306,7 @@ namespace ServerSide
                     if (!Encrypted)
                         data = AEFS.EncryptedDataToMicro(data);
                     Controller.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));
-                    Thread.Sleep(200);
+                    Thread.Sleep(250);
                     Controller.Send(data);
 
                     AddToBytesToMicro((uint)Encoding.UTF8.GetBytes(data.ToString()).Length + (uint)data.Length);
@@ -281,7 +320,10 @@ namespace ServerSide
         {
             SendToMicro(ServerServices.GetServerRole().Concat(data).ToArray(), Encrypted);
         }
-
+        public void SendToMicroFromServerPing(byte[] data, bool Encrypted)
+        {
+            SendToMicro(data, Encrypted);
+        }
         private void AddToBytesToCLient(uint bytes)
         {
             lock ((object)BytesFromClient)
@@ -329,15 +371,17 @@ namespace ServerSide
 
         public void disconnectClient(string newcode)
         {
+            if (Controller != null)
+            {
+                SRD.MakeNotLiveRecored();
+                SRD = null; 
 
-            SRD.MakeNotLiveRecored();
-            SRD = null; 
+            }
             EnterTime = 0;
             EnterDate = "";
             BytesFromClient = 0;
             BytesFromMicro = 0;
             ClientConn = null;
-            UdpClientConn = null;
             ClientKnickname = null;
             Client_endpoint = "";
             this.Code = newcode;
@@ -376,10 +420,8 @@ namespace ServerSide
             BytesFromMicro = 0;
             BytesFromClient = 0;
             EnterDate = null;
-            EnterTimeGlobal = 0;
             EnterTime = 0;
-            UdpClientConn = null;
-
+            
 
 
             Client_endpoint = null;
@@ -396,7 +438,7 @@ namespace ServerSide
                 }
 
             }
-            catch (Exception e) { Controller.Close(); }
+            catch (Exception e) { Controller.Close(); MessageBox.Show("hoo shit, not good"); }
 
             try {
                 if (ClientConn != null)
@@ -425,31 +467,27 @@ namespace ServerSide
         public int GetRandomDelay()
         {
             Random _random = new Random();
-            return _random.Next(10000, 11000); // Random number between 60000 and 180000 (inclusive)
+            return _random.Next(1000 * 60 * 1, 1000 * 60 * 3); // Random number between 60000 and 180000 (inclusive)
         }
 
-        public void ChengeIvAndKey()
+        public void ChangeIvAndKeyForClient()
         {
-            //while (true)
-            //{
-            int delay = GetRandomDelay();
-            delay = 0;
-            Thread.Sleep(delay);
-            byte[] AESTempIV;
-            byte[] AESTempIKey;
-            using (Aes aesServise = Aes.Create())
+            while (true)
             {
-                aesServise.KeySize = 256;
-                AESTempIV = aesServise.IV;
-                AESTempIKey = aesServise.Key;
+                int delay = GetRandomDelay();
+                Thread.Sleep(delay);
+                AEFS.regenerateKeysForClient();
             }
-
-            AEFS.SetNewIvAndKey(AESTempIV, AESTempIKey);
-
-            byte[] chageIv = ServerServices.GetServerRole().Concat(Encoding.UTF8.GetBytes("&CHANGEIVANDKEY&").Concat(AESTempIV).Concat(AESTempIKey)).ToArray();
-            //}
         }
-
+        public void ChangeIvAndKeyForMicro()
+        {
+            while (true)
+            {
+                int delay = GetRandomDelay();
+                Thread.Sleep(delay);
+                AEFS.regenerateKeysForMicro();
+            }
+        }
         public uint GetEnterTime()
         {
             return EnterTime;
@@ -497,5 +535,10 @@ namespace ServerSide
         {
             return BytesFromMicroGlobal;
         }
+        public bool ClientConnected()
+        {
+            return IsClientConnected;
+        }
+
     }
 }

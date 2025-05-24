@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Linq;
 
 namespace ServerSide
 {
     static class SqlService
     {
         private static SqlConnection SqlConnection;
-        private static string ConnectionString = $@"Server={Environment.MachineName};Database=DataBase_Windtunnel;Trusted_Connection=True;";
-
-
+        private static string ConnectionString = "";
 
         public static string GenerateRandomString(int length)
         {
@@ -19,7 +19,8 @@ namespace ServerSide
             do
             {
                 Random _random = new Random();
-                const string chars = "a2QjWz3n0v1p7Gm5kI9oXebVd4yHcL6f8sT";
+                
+                string chars = "a2QjWz3n0v1p7Gm5kI9oXebVd4yHcL6f8sT";
                 char[] stringChars = new char[length];
 
                 for (int i = 0; i < length; i++)
@@ -33,14 +34,12 @@ namespace ServerSide
         }
 
 
-
-
-
-        public static bool ConnectToSql()
+        public static bool ConnectToSql(string name, string pass, string db)
         {
             try
             {
                 Console.WriteLine("Connecting to SQL server...");
+                string ConnectionString = $"Server={Environment.MachineName};Database={db};User ID={name};Password={pass};";
 
                 SqlConnection = new SqlConnection(ConnectionString);
                 SqlConnection.Open();
@@ -199,11 +198,12 @@ namespace ServerSide
         }
 
 
-        public static void AddExperimentToDatabase(string resultsData, string username, string Time)
+        public static void AddExperimentToDatabase(string resultsData, string username)
         {
             try
             {
-                string command = $"INSERT INTO Experiments (username, CreationString, TimeCreated, expername) VALUES ('{Hash(username)}','{resultsData}', '{Time}', '{resultsData.Split(';')[resultsData.Split(';').Length - 1]}')";
+                resultsData = Convert.ToBase64String(AesEncryption.EncryptDataToSql(Encoding.UTF8.GetBytes(resultsData)));
+                string command = $"INSERT INTO Experiments (username, CreationString, expername) VALUES ('{Hash(username)}','{resultsData}', '{resultsData.Split(';')[resultsData.Split(';').Length - 1]}')";
                 SqlCommand builder = new SqlCommand(command, SqlConnection);
                 int rowsEffected = builder.ExecuteNonQuery();
             }
@@ -229,7 +229,8 @@ namespace ServerSide
                 {
                     while (reader.Read())
                     {
-                        string CreationString = GetCreationStringIfExperStandConditions(Filtters, reader.GetString(2));
+                        string de = AesEncryption.DecryptDataToSqlToString(Convert.FromBase64String(reader.GetString(2)) );
+                        string CreationString = GetCreationStringIfExperStandConditions(Filtters, de);
                         if (CreationString != "")
                             hh += $"&{CreationString}";
                     }
@@ -284,6 +285,8 @@ namespace ServerSide
                         if (!DoesExperStandConditions("!=", item, CreationString))
                             return "";
                     }
+                    else
+                        return "";
 
                 }
 
@@ -385,7 +388,8 @@ namespace ServerSide
                 {
                     while (reader.Read())
                     {
-                        CreationStrings.Add(reader.GetString(2));
+                        string decrypted = AesEncryption.DecryptDataToSqlToString(Convert.FromBase64String(reader.GetString(2)));
+                        CreationStrings.Add(decrypted);
                     }
                 }
 
@@ -395,6 +399,54 @@ namespace ServerSide
 
         }
 
+        public static void AddBlockedGuest(BadGuest c)
+        {
+            try
+            {
+                string SR = Convert.ToBase64String(AesEncryption.EncryptDataToSql(Encoding.UTF8.GetBytes(c.GEt_MotherBoard_SN())));
+
+                string BD = Convert.ToBase64String(AesEncryption.EncryptDataToSql(Encoding.UTF8.GetBytes(c.GetBlockedDate())));
+                string command = $"INSERT INTO BlockedGuest (MotherboardID, BlockDate) VALUES ('{SR}', '{BD}')";
+                SqlCommand builder = new SqlCommand(command, SqlConnection);
+                int rowsEffected = builder.ExecuteNonQuery();
+            }
+            catch (Exception e) 
+            { }
+        }
+        public static List<BadGuest> GetBlockedGuestFromSQL()
+        {
+            try
+            {
+                List<BadGuest> LBG = new List<BadGuest>();
+
+                string command = $"SELECT * FROM BlockedGuest";
+
+
+                SqlCommand builder = new SqlCommand(command, SqlConnection);
+                SqlDataReader BlockedGuests = builder.ExecuteReader();
+
+                while (BlockedGuests.Read())
+                {
+                    string SR = BlockedGuests.GetString(0);
+                    string BD = BlockedGuests.GetString(1);
+
+                    SR = Encoding.UTF8.GetString(AesEncryption.DecryptDataToSql(Convert.FromBase64String(SR)));
+                    BD = Encoding.UTF8.GetString(AesEncryption.DecryptDataToSql(Convert.FromBase64String(BD)));
+
+                    BadGuest BG = new BadGuest(SR, BD);
+                    LBG.Add(BG);
+                }
+
+                return LBG;
+
+
+            }
+            catch (Exception e) { }
+
+
+
+            return null;
+        }
 
 
 

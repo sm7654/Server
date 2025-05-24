@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ServerSide
 {
@@ -44,6 +46,7 @@ namespace ServerSide
             }
             catch (Exception e)
             {
+                MessageBox.Show("Cant remove the session");
                 return;
             }
         }
@@ -72,6 +75,12 @@ namespace ServerSide
                         ((sessionLayot)Control).UpdateControllerStatus_dis();
                 }
             } catch (Exception e) { }
+        }
+        public static void AddBlockedGuest(BlockedClient c)
+        {
+            form.BeginInvoke(new Action(() => {
+                form.AddBlockedClientToPanel(c);
+            }));
         }
 
     }

@@ -40,7 +40,13 @@ namespace ServerSide
             this.SessionSearch = new System.Windows.Forms.TextBox();
             this.MainContainer = new System.Windows.Forms.Panel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.SessionsViewPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.label2 = new System.Windows.Forms.Label();
             this.BlockedClients = new System.Windows.Forms.FlowLayoutPanel();
             this.HeaderPanel.SuspendLayout();
             this.SearchPanel.SuspendLayout();
@@ -49,6 +55,10 @@ namespace ServerSide
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.panel1.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // HeaderPanel
@@ -69,7 +79,7 @@ namespace ServerSide
             this.TezxtText.AutoSize = true;
             this.TezxtText.Location = new System.Drawing.Point(662, 23);
             this.TezxtText.Name = "TezxtText";
-            this.TezxtText.Size = new System.Drawing.Size(0, 13);
+            this.TezxtText.Size = new System.Drawing.Size(0, 16);
             this.TezxtText.TabIndex = 1;
             // 
             // TitleLabel
@@ -80,13 +90,13 @@ namespace ServerSide
             this.TitleLabel.ForeColor = System.Drawing.Color.White;
             this.TitleLabel.Location = new System.Drawing.Point(10, 10);
             this.TitleLabel.Name = "TitleLabel";
-            this.TitleLabel.Size = new System.Drawing.Size(281, 37);
+            this.TitleLabel.Size = new System.Drawing.Size(348, 46);
             this.TitleLabel.TabIndex = 0;
             this.TitleLabel.Text = "Server Control Panel";
             // 
             // SearchPanel
             // 
-            this.SearchPanel.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.SearchPanel.BackColor = System.Drawing.Color.White;
             this.SearchPanel.Controls.Add(this.button1);
             this.SearchPanel.Controls.Add(this.ShutServerButton);
             this.SearchPanel.Controls.Add(this.ShutSessionsButton);
@@ -101,7 +111,7 @@ namespace ServerSide
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(692, 13);
+            this.button1.Location = new System.Drawing.Point(813, 13);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 3;
@@ -148,7 +158,7 @@ namespace ServerSide
             this.SearchLabel.ForeColor = System.Drawing.Color.Black;
             this.SearchLabel.Location = new System.Drawing.Point(10, 11);
             this.SearchLabel.Name = "SearchLabel";
-            this.SearchLabel.Size = new System.Drawing.Size(124, 21);
+            this.SearchLabel.Size = new System.Drawing.Size(152, 28);
             this.SearchLabel.TabIndex = 1;
             this.SearchLabel.Text = "Search Sessions:";
             // 
@@ -158,7 +168,7 @@ namespace ServerSide
             this.SessionSearch.ForeColor = System.Drawing.Color.Black;
             this.SessionSearch.Location = new System.Drawing.Point(160, 8);
             this.SessionSearch.Name = "SessionSearch";
-            this.SessionSearch.Size = new System.Drawing.Size(300, 29);
+            this.SessionSearch.Size = new System.Drawing.Size(300, 34);
             this.SessionSearch.TabIndex = 2;
             this.SessionSearch.TextChanged += new System.EventHandler(this.SessionSearch_TextChanged);
             // 
@@ -176,41 +186,113 @@ namespace ServerSide
             // 
             // splitContainer1
             // 
-            this.splitContainer1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 109);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.SessionsViewPanel);
+            this.splitContainer1.Panel1.Controls.Add(this.tableLayoutPanel1);
             this.splitContainer1.Panel1MinSize = 370;
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.BlockedClients);
+            this.splitContainer1.Panel2.Controls.Add(this.tableLayoutPanel2);
             this.splitContainer1.Panel2MinSize = 370;
             this.splitContainer1.Size = new System.Drawing.Size(1456, 691);
             this.splitContainer1.SplitterDistance = 806;
             this.splitContainer1.TabIndex = 3;
             // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.SessionsViewPanel, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(10);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5.51524F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 94.48476F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(806, 691);
+            this.tableLayoutPanel1.TabIndex = 0;
+            // 
             // SessionsViewPanel
             // 
             this.SessionsViewPanel.AutoScroll = true;
+            this.SessionsViewPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(253)))), ((int)(((byte)(253)))), ((int)(((byte)(253)))));
             this.SessionsViewPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.SessionsViewPanel.Location = new System.Drawing.Point(0, 0);
+            this.SessionsViewPanel.Location = new System.Drawing.Point(3, 41);
             this.SessionsViewPanel.MinimumSize = new System.Drawing.Size(470, 0);
             this.SessionsViewPanel.Name = "SessionsViewPanel";
-            this.SessionsViewPanel.Size = new System.Drawing.Size(804, 689);
+            this.SessionsViewPanel.Size = new System.Drawing.Size(800, 647);
             this.SessionsViewPanel.TabIndex = 0;
+            // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(3, 3);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(800, 32);
+            this.panel1.TabIndex = 1;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(11, 7);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(113, 18);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Active Sessions";
+            // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.ColumnCount = 1;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Controls.Add(this.panel2, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.BlockedClients, 0, 1);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 2;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5.51524F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 94.48476F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(646, 691);
+            this.tableLayoutPanel2.TabIndex = 1;
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.panel2.Controls.Add(this.label2);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(3, 3);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(640, 32);
+            this.panel2.TabIndex = 1;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(11, 7);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(111, 18);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Blocked Clients";
             // 
             // BlockedClients
             // 
+            this.BlockedClients.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(253)))), ((int)(((byte)(253)))), ((int)(((byte)(253)))));
             this.BlockedClients.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.BlockedClients.Location = new System.Drawing.Point(0, 0);
+            this.BlockedClients.Location = new System.Drawing.Point(3, 41);
             this.BlockedClients.MinimumSize = new System.Drawing.Size(470, 0);
             this.BlockedClients.Name = "BlockedClients";
-            this.BlockedClients.Size = new System.Drawing.Size(644, 689);
+            this.BlockedClients.Size = new System.Drawing.Size(640, 647);
             this.BlockedClients.TabIndex = 0;
             // 
             // ServerConnectedForm
@@ -232,6 +314,12 @@ namespace ServerSide
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -247,6 +335,12 @@ namespace ServerSide
         private FlowLayoutPanel SessionsViewPanel;
         private FlowLayoutPanel BlockedClients;
         private Button button1;
+        private TableLayoutPanel tableLayoutPanel1;
+        private Panel panel1;
+        private Label label1;
+        private TableLayoutPanel tableLayoutPanel2;
+        private Panel panel2;
+        private Label label2;
     }
 }
 

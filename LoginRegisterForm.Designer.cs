@@ -40,6 +40,10 @@ namespace ServerSide
             this.RegisterButton = new System.Windows.Forms.Button();
             this.loginButton = new System.Windows.Forms.Button();
             this.RegisterStatus = new System.Windows.Forms.Label();
+            this.PasswordinfoButton = new System.Windows.Forms.PictureBox();
+            this.passwordinfoLabel = new System.Windows.Forms.Label();
+            this.ShowCodeButton = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.PasswordinfoButton)).BeginInit();
             this.SuspendLayout();
             // 
             // usernameTextbox
@@ -138,12 +142,63 @@ namespace ServerSide
             this.RegisterStatus.Size = new System.Drawing.Size(0, 20);
             this.RegisterStatus.TabIndex = 7;
             // 
+            // PasswordinfoButton
+            // 
+            this.PasswordinfoButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.PasswordinfoButton.Image = ((System.Drawing.Image)(resources.GetObject("PasswordinfoButton.Image")));
+            this.PasswordinfoButton.Location = new System.Drawing.Point(249, 185);
+            this.PasswordinfoButton.Name = "PasswordinfoButton";
+            this.PasswordinfoButton.Size = new System.Drawing.Size(15, 15);
+            this.PasswordinfoButton.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PasswordinfoButton.TabIndex = 10;
+            this.PasswordinfoButton.TabStop = false;
+            this.PasswordinfoButton.Click += new System.EventHandler(this.PasswordinfoButton_Click);
+            // 
+            // passwordinfoLabel
+            // 
+            this.passwordinfoLabel.AutoSize = true;
+            this.passwordinfoLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.passwordinfoLabel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.passwordinfoLabel.Font = new System.Drawing.Font("Microsoft JhengHei", 7.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.passwordinfoLabel.Location = new System.Drawing.Point(279, 89);
+            this.passwordinfoLabel.Name = "passwordinfoLabel";
+            this.passwordinfoLabel.Padding = new System.Windows.Forms.Padding(5);
+            this.passwordinfoLabel.Size = new System.Drawing.Size(259, 114);
+            this.passwordinfoLabel.TabIndex = 0;
+            this.passwordinfoLabel.Text = "Password must:\r\n- Be at least 8 characters long\r\n- Include 1 lowercase letter\r\n- " +
+    "Include 1 uppercase letter\r\n- Include 1 number\r\n- Include 1 special character ;\'" +
+    "/^#!#%&......\r\n";
+            this.passwordinfoLabel.Visible = false;
+            this.passwordinfoLabel.Click += new System.EventHandler(this.passwordinfoLabel_Click);
+            // 
+            // ShowCodeButton
+            // 
+            this.ShowCodeButton.BackColor = System.Drawing.Color.Transparent;
+            this.ShowCodeButton.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("ShowCodeButton.BackgroundImage")));
+            this.ShowCodeButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.ShowCodeButton.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ShowCodeButton.FlatAppearance.BorderSize = 0;
+            this.ShowCodeButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ShowCodeButton.Image = ((System.Drawing.Image)(resources.GetObject("ShowCodeButton.Image")));
+            this.ShowCodeButton.Location = new System.Drawing.Point(457, 210);
+            this.ShowCodeButton.Name = "ShowCodeButton";
+            this.ShowCodeButton.Padding = new System.Windows.Forms.Padding(10);
+            this.ShowCodeButton.Size = new System.Drawing.Size(28, 20);
+            this.ShowCodeButton.TabIndex = 11;
+            this.ShowCodeButton.UseVisualStyleBackColor = false;
+            this.ShowCodeButton.Click += new System.EventHandler(this.ShowCodeButton_Click);
+            this.ShowCodeButton.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ShowCodeButton_MouseDown);
+            this.ShowCodeButton.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ShowCodeButton_MouseUp);
+            // 
             // LoginRegisterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
             this.ClientSize = new System.Drawing.Size(600, 400);
+            this.Controls.Add(this.ShowCodeButton);
+            this.Controls.Add(this.passwordinfoLabel);
+            this.Controls.Add(this.PasswordinfoButton);
             this.Controls.Add(this.RegisterStatus);
             this.Controls.Add(this.loginButton);
             this.Controls.Add(this.RegisterButton);
@@ -156,6 +211,7 @@ namespace ServerSide
             this.Name = "LoginRegisterForm";
             this.Text = "Login / Register";
             this.Load += new System.EventHandler(this.LoginRegisterForm_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.PasswordinfoButton)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -169,5 +225,8 @@ namespace ServerSide
         private System.Windows.Forms.Button RegisterButton;
         private System.Windows.Forms.Button loginButton;
         private System.Windows.Forms.Label RegisterStatus;
+        private System.Windows.Forms.PictureBox PasswordinfoButton;
+        private System.Windows.Forms.Label passwordinfoLabel;
+        private System.Windows.Forms.Button ShowCodeButton;
     }
 }

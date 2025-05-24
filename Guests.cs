@@ -24,11 +24,12 @@ namespace ServerSide
         }
 
 
-        public Guest(string SN)
+        public Guest(string SN, bool RegularConnection)
         {
             logs = 1;
             Timer = 0;
-            new Thread(Count).Start();
+            if (RegularConnection)
+                new Thread(Count).Start();
             this.MotherBoard_SN = SN;
         }
 
