@@ -26,6 +26,7 @@ namespace ServerSide
         private Socket Controller = null;
         private string ControllerKnickname;
         private string ControllerPublicKey;
+        private bool MicroConnected = false;
 
         private Socket ClientConn = null;
         private string ClientKnickname;
@@ -56,23 +57,23 @@ namespace ServerSide
             this.sessionName = sessionName;
             this.ControllerPublicKey = publickeymicro;
             this.AEFS = AESForSession;
-
+            MicroConnected = true;
             AEFS.setSession(this);
 
             new Thread(MicroStream).Start();
 
-            //new Thread(KeepConnectionAlive).Start();
         }
         public session()
         {
             AEFS = new AesEncryprionForSession();
+            AEFS.setSession(this);
             this.ControllerPublicKey = "";
             this.Controller = null;
         }
 
 
 
-        private void MicroStream()
+        private void MicroStream()      
         {
             try
             {
@@ -154,38 +155,60 @@ namespace ServerSide
                     int bufferSize = 0;
                     try
                     {
-
+                        // קביעת זמן שהייה מקסימאלי לקבלת מידע 
+                        ClientConn.ReceiveTimeout = 5000;
+                        // קבלת הגודל של המידע לתוך המערך
                         byterec = ClientConn.Receive(buffer);
+                        //המרה של תוכן המערך למחרוזת ואז למספר המייצג את גודל המידע 
                         bufferSize = int.Parse(Encoding.UTF8.GetString(buffer, 0, byterec));
+                        //ויצירת מערך חדש לפי גודל המידע
                         buffer = new byte[bufferSize];
+                        // קבלת המידע עצמו
                         ClientConn.Receive(buffer);
-                        bufferoMicro = buffer;
-                        buffer = AEFS.DecryptDataForClient(buffer);
+                       
                     }
                     catch (SocketException SE)
                     {
+                        //כאשר לא מקבל שום דבר במשך יותר מ 5 שניות נכנס לפה
+                        //יצירת קוד חדש בשביל השיחה
                         string newCode = ServerServices.GenerateRandomString(5);
+                        //ניתוק הלקוח מהשיחה
                         disconnectClient(newCode);
+                        //שינוי הטופס כך שיראה שלקוח התנתק
                         FormController.disconnectClient(this, newCode);
 
                     }
                     new Thread(() =>
                     {
+
                         try
                         {
+                            //מתקשר עם הלקוח
+                            //
+                            //שומר את המידע למקרה וההצפנה לא מצליחה ומחזירה ריק
+                            bufferoMicro = buffer;
+                            //ניסיון לפענח את המידע עם המפתחות של השרת-לקוח
+                            buffer = AEFS.DecryptDataForClient(buffer);
                             if (ServerServices.IsItServerRelatedMessage(buffer))
                             {
+                                //במידע והשרת הצליח לפענח את המידע עם המפתחות וגם לזאת הוא משייך את ההודעה אליו ומטפל בה
                                 new Thread(() => ServerServices.HandleServerMessages(buffer, this)).Start();
                             }
                             else
                             {
+                                //במידה והשרת לא מזהה את המזהה הייחודי שלו מתבצעת שליחת המידע לבקר
                                 new Thread(() => SendToMicro(bufferoMicro, true)).Start();
                             }
                         }
                         catch (Exception e)
                         {
+                            //אם קראה שגיאה שליחת המידע לבקר
                             SendToMicro(bufferoMicro, true);
                         }
+
+
+
+
                         AddToBytesToCLient((uint)byterec + (uint)bufferSize);
                     }).Start();
                     
@@ -256,8 +279,10 @@ namespace ServerSide
 
 
             IsClientConnected = true;
-
+            
             new Thread(() => ClientStream()).Start();
+            new Thread(() => ChangeIvAndKeyForClient()).Start();
+            new Thread(() => ChangeIvAndKeyForMicro()).Start();
 
             AddToBytesToCLient((uint)AESIVSERVER.Length + (uint)AESKEYSERVER.Length);
             AddToBytesToCLient(128 * 2);
@@ -267,8 +292,6 @@ namespace ServerSide
 
 
 
-            new Thread(() => ChangeIvAndKeyForClient()).Start();
-            new Thread(() => ChangeIvAndKeyForMicro()).Start();
             return true;
         }
 
@@ -277,19 +300,29 @@ namespace ServerSide
         {
             if (ClientConn == null)
                 return;
+
+            //כדי לוודא שאין עוד תהליכון ששולח מידע במקביל ClientSendLock מבקש בעלות על האובייקט 
             lock (ClientSendLock) {
+                
+                //בודק האם יש לבצע הצפנה או לא
                 if (!Encrypted)
+                    //מבצע הצפנה למידע
                     data = AEFS.EncryptedDataToClient(data);
-                ClientConn.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));
-                Thread.Sleep(200);
-                ClientConn.Send(data);
 
 
+                ClientConn.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));// שליחת גודל במידע שנרצה לשלוח
+                Thread.Sleep(200);// דיליי קטן כדי לוודא שהצד המקבל מוכן לקבל את המידע עצמו
+                ClientConn.Send(data);// שליחת המידע עצמו
+
+                //הוספה של כמות המידע שעבר ללקוח לסכום הכללי 
                 AddToBytesToCLient((uint)Encoding.UTF8.GetBytes(data.Length.ToString()).Length + (uint)data.Length);
-
-
-
             }
+
+
+
+
+
+
         }
         public void SendToClientFromServer(byte[] data, bool Encrypted)
         {
@@ -305,9 +338,9 @@ namespace ServerSide
                 {
                     if (!Encrypted)
                         data = AEFS.EncryptedDataToMicro(data);
-                    Controller.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));
-                    Thread.Sleep(250);
-                    Controller.Send(data);
+                    Controller.Send(Encoding.UTF8.GetBytes(data.Length.ToString())); // שליחת גודל במידע שנרצה לשלוח
+                    Thread.Sleep(250); // דיליי קטן כדי לוודא שהצד המקבל מוכן לקבל את המידע עצמו
+                    Controller.Send(data); // שליחת המידע עצמו
 
                     AddToBytesToMicro((uint)Encoding.UTF8.GetBytes(data.ToString()).Length + (uint)data.Length);
 
@@ -320,23 +353,29 @@ namespace ServerSide
         {
             SendToMicro(ServerServices.GetServerRole().Concat(data).ToArray(), Encrypted);
         }
-        public void SendToMicroFromServerPing(byte[] data, bool Encrypted)
-        {
-            SendToMicro(data, Encrypted);
-        }
+
+
+
         private void AddToBytesToCLient(uint bytes)
         {
+            // ווידוי שעדכון של נתון לא יתבצע במקביל לעדכון אחר (יוביל לנתונים לא אמינים)צ
             lock ((object)BytesFromClient)
             {
+                //הוספת כמות מידע חדשה שהועברה מלקוח\ללקוח לכמות מידע שבערה\הועברה עד עכשיו
                 BytesFromClient += bytes;
-                
+                //מניעת שגיאות
                 if (SRD != null)
                 {
+                    //עדכון האובייקט המייצג את השיחה בכמות המידע שעברה מהלקוח\ללקוח
                     SRD.SetBytesToClient(BytesFromClient);
                 }
 
             }
         }
+
+
+
+
         
         private void AddToBytesToMicro(uint bytes)
         {
@@ -371,6 +410,7 @@ namespace ServerSide
 
         public void disconnectClient(string newcode)
         {
+            IsClientConnected = false;
             if (Controller != null)
             {
                 SRD.MakeNotLiveRecored();
@@ -467,12 +507,12 @@ namespace ServerSide
         public int GetRandomDelay()
         {
             Random _random = new Random();
-            return _random.Next(1000 * 60 * 1, 1000 * 60 * 3); // Random number between 60000 and 180000 (inclusive)
+            return _random.Next(1000 * 10, 1000 * 20); // Random number between 60000 and 180000 (inclusive)
         }
 
         public void ChangeIvAndKeyForClient()
         {
-            while (true)
+            while (IsClientConnected)
             {
                 int delay = GetRandomDelay();
                 Thread.Sleep(delay);
@@ -481,7 +521,7 @@ namespace ServerSide
         }
         public void ChangeIvAndKeyForMicro()
         {
-            while (true)
+            while (MicroConnected)
             {
                 int delay = GetRandomDelay();
                 Thread.Sleep(delay);
@@ -539,6 +579,13 @@ namespace ServerSide
         {
             return IsClientConnected;
         }
-
+        public void ClientGotKeys()
+        {
+            AEFS.ClientGotKeysSuccessfuly();
+        }
+        public void MicroGotKeys()
+        {
+            AEFS.MicroGotKeysSuccessfuly();
+        }
     }
 }

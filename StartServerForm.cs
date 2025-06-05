@@ -24,14 +24,6 @@ namespace ServerSide
             
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-        }
-
-        
-
-
-
 
         public bool StartServer()
         {
@@ -65,17 +57,12 @@ namespace ServerSide
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void StartServerButton_Click(object sender, EventArgs e)
         {
             bool Status = StartServer();
             if (Status)
                 this.Hide();
 
-        }
-
-        private void CloseButton_Click(object sender, EventArgs e)
-        {
-            ServerServices.CloseConnection();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)

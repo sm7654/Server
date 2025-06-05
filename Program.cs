@@ -26,8 +26,8 @@ namespace ServerSide
         [STAThread]
         static void Main()
         {
-            (string key, string iv) = ServerServices.GetKeysFromCredential();
-            if (key != "" && iv != "")
+            (byte[] key, byte[] iv) = ServerServices.GetKeysFromFile();
+            if (key != null && iv != null)
             {
                 AesEncryption.SetAESENVRkeys(key, iv);
             }    

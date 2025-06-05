@@ -1,8 +1,10 @@
 ﻿using CredentialManagement;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -20,39 +22,29 @@ namespace ServerSide
 
         private static byte[] ServerRole = Encoding.UTF8.GetBytes("%%ServerRelatedMessage%%");
 
-        public static void ChengeIvAndKeyToSessions(byte[] iv, byte[] key)
+        
+
+        public static bool IsBadGuest(string MotherBoard_SN)
         {
 
-            byte[] chageIv = ServerRole.Concat(Encoding.UTF8.GetBytes("&CHANGEIVANDKEY&").Concat(iv).Concat(key)).ToArray();
-            foreach (session Session in sessionsList)
-                Session.SendToClient(chageIv, false);
-        }
 
-        public static (bool, Guest) HasBennHere(string MotherBoard_SN)
-        {
+
             foreach (Guest guest in ConnectionRequests)
             {
                 if (MotherBoard_SN == guest.GEt_MotherBoard_SN())
                 {
-                    guest.RestartCount();
-                    return (true, guest);
+                    if (guest is BadGuest)
+                        return true;
                 }
             }
-            
-            Guest g = new Guest(MotherBoard_SN, true);
-            return (false, g);
+            return false;
         }
-        public static void StopCountToGuest(Guest g)
+        public static void RemoveGueast(Guest g)
         {
-            foreach (Guest guest in ConnectionRequests)
-            {
-                if (guest == g)
-                {
-                    guest.StopCount();
-                    break;
-                }
-            }
+            if (ConnectionRequests.Contains(g))
+                ConnectionRequests.Remove(g);
         }
+        
         public static void importBlockedGuestFromSQL()
         {
             List<BadGuest> l = SqlService.GetBlockedGuestFromSQL();
@@ -66,7 +58,7 @@ namespace ServerSide
             }
         }
         private static object lockedThread = new object();
-        public static BadGuest MakeGuestBlack(Guest g)
+        public static BadGuest MakeGuestBad(Guest g)
         {
             for (int i = 0; i < ConnectionRequests.Count; i++)
             {
@@ -75,6 +67,7 @@ namespace ServerSide
                 {
                     if (((Guest)item).GEt_MotherBoard_SN() == g.GEt_MotherBoard_SN())
                     {
+                        g.StopCount();
                         BadGuest bg = new BadGuest(g);
                         ConnectionRequests[i] = bg;
                         return bg;
@@ -92,22 +85,7 @@ namespace ServerSide
             }
         }
 
-        /*public static bool IsServerMassageFromMicro(byte[] data)
-        {
-            try
-            {
-                if (data.Take(ServerRole.Length).SequenceEqual(ServerRole))
-                {
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                
-                
-            }
-            return false;
-        }*/
+        
         public static bool IsItServerRelatedMessage(byte[] data)
         {
             try
@@ -126,38 +104,43 @@ namespace ServerSide
         }
 
 
-        public static (string, string) GetKeysFromCredential()
+        public static (byte[], byte[]) GetKeysFromFile()
         {
             try
             {
-
-                Credential cred = new Credential();
-                cred.Target = "ServerAes";
-                string user = "";
-                string password = "";
-                if (cred.Load())
+                byte[] key;
+                byte[] iv;
+                // קביעת הנתיב של הקובץ בו ישמרו המפתחות המוצפנים
+                string filepath = "ServerAppSettingsAESAlg.Encrypted";
+                //בדיקה האם הקובץ קיים
+                if (File.Exists(filepath))
                 {
-                    user = cred.Username;
-                    password = cred.Password;
-                } else
-                {
-                    Credential NewCred = new Credential();
-                    NewCred.Target = "ServerAes";
-                    (string aesKey, string AesIv) = AesEncryption.generate();
-                    NewCred.Username = aesKey;
-                    NewCred.Password = AesIv;
-                    NewCred.PersistanceType = PersistanceType.LocalComputer;
-                    NewCred.Type = CredentialType.Generic;
-
-                    NewCred.Save();
-
+                    //קריאה של כל המידע מהקובץ
+                    byte[] bytes = File.ReadAllBytes(filepath);
+                    //פענוח של המידע מהקבוץ
+                    byte[] decryptedBytes = ProtectedData.Unprotect(bytes, null, DataProtectionScope.CurrentUser);
+                    //שליפת המפתחות המפוענחים מהקובץ
+                    iv = decryptedBytes.Take(16).ToArray();        
+                    key = decryptedBytes.Skip(16).ToArray();
                 }
-
-                return (user, password);
+                else
+                {
+                    //יצירת מפתחות הצפנה חדשים
+                    (key, iv) = AesEncryption.generate();
+                    //שילוב של שני המפתחות למערך בייטים
+                    byte[] en = iv.Concat(key).ToArray();
+                    //הצפנת המפתחות
+                    en = ProtectedData.Protect(en, null, DataProtectionScope.CurrentUser);
+                    //כתיבת המפתחות המוצפנים לקובץ
+                    File.WriteAllBytes(filepath, en);
+                }
+                //החזרת המפתחות
+                return (key, iv);
             }
             catch (Exception e)
             {
-                return ("", "");
+                //החזרת ערכים ריקים או התגלתה שגיאה
+                return (null, null);
             }
         }
 
@@ -168,7 +151,6 @@ namespace ServerSide
                 string message = Encoding.UTF8.GetString(buffer);
                
                 string tempString = message.Split('&')[1];
-
 
 
                 switch (tempString.Split(';')[0])
@@ -194,15 +176,24 @@ namespace ServerSide
                             sendCreationStringsToClient(CS, curentSession);
 
                         break;
-                    case "Ping":
+                    case "MicroPing":
                         curentSession.SendToMicroFromServer(Encoding.UTF8.GetBytes("&Ping"), false);
+                        break;
+                    // קבלת הודעת הפינג מצד השרת ושליחת הודעת פינג חזרה
+                    case "ClientPing":
+                        curentSession.SendToClientFromServer(Encoding.UTF8.GetBytes("&Ping"), false);
+                        break;
+                    case "ClientGotKeys":
+                        curentSession.ClientGotKeys();
+                        break;
+                    case "MicroGotKeys":
+                        curentSession.MicroGotKeys();
                         break;
                     case "303":
 
                         sessionsList.Remove(curentSession);
                         FormController.RemoveSession(curentSession);
                         curentSession.disconnect();
-
                         break;
 
 
@@ -294,7 +285,6 @@ namespace ServerSide
             
             
             serverSocket.Close();
-            ClosingController.btnExit_Click();
         }
 
         public static void CloseAllConnection()
@@ -341,8 +331,6 @@ namespace ServerSide
 
             return $"{hours}h {minutes}m {seconds}s";
         }
-
-
 
         public static string MakeBytesString(double number)
         {

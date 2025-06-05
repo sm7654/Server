@@ -9,7 +9,6 @@ namespace ServerSide
 {
     public partial class LoginRegisterForm : Form
     {
-        SqlConnectionForm connection;
         public LoginRegisterForm()
         {
             InitializeComponent();
@@ -19,11 +18,7 @@ namespace ServerSide
         {
             ClosingController.btnExit_Click();
         }
-        private void LoginRegisterForm_Load(object sender, EventArgs e)
-        {
-            
-        }
-
+        
         
 
         private void loginButton_Click(object sender, EventArgs e)
@@ -34,7 +29,7 @@ namespace ServerSide
             string pass = passwordTextbox.Text;
 
             
-            if (User == "" || pass == "")
+            if (!IsValid())
                 return;
             
 
@@ -53,24 +48,46 @@ namespace ServerSide
         {
             if (SqlService.IsConnected()) 
                 return;
+
+
+            string User = usernameTextbox.Text;
+            string pass = passwordTextbox.Text;
+
+            if (!IsValid())
+                return;
+            if (SqlService.Register(User, pass, true).Item1)
+            {
+                RegisterStatus.Text = "User added!";
+                usernameTextbox.Text = "";
+                passwordTextbox.Text = "";
+            }
+            else
+            {
+                RegisterStatus.Text = "Cloud not add user...";
+            }
+           
+        }
+
+        private bool IsValid()
+        {
             string User = usernameTextbox.Text;
             string pass = passwordTextbox.Text;
 
             if (User == "" || pass == "")
             {
-                RegisterStatus.Text = "Invalid password.\nplease check pass role in the info button.";
-                return;
+                RegisterStatus.Text = "Username and password cant be blank!!";
+                return false;
             }
-                
+
             if (pass.Length < 8)
             {
                 RegisterStatus.Text = "Invalid password.\nplease check pass role in the info button.";
-                return;
+                return false;
             }
             if (User.Length < 4)
             {
-                RegisterStatus.Text = "Invalid username, must be at least 8 letter init.";
-                return;
+                RegisterStatus.Text = "Invalid username, must be at least 8 letter.";
+                return false;
             }
             int spaciel = 0;
             int regularEN = 0;
@@ -78,7 +95,8 @@ namespace ServerSide
             int num = 0;
             for (int i = 0; i < pass.Length; i++)
             {
-                if (spaciel < 1) {
+                if (spaciel < 1)
+                {
                     if (
                     (pass[i] > 32 && pass[i] < 48) ||
                     (pass[i] > 57 && pass[i] < 65) ||
@@ -103,28 +121,16 @@ namespace ServerSide
                         regularEN++;
                 }
             }
-            if (regularEN == 0 || CapitalEN == 0 || num == 0|| spaciel == 0)
+            if (regularEN == 0 || CapitalEN == 0 || num == 0 || spaciel == 0)
             {
 
                 RegisterStatus.Text = "Invalid password.\nplease check pass roles in the info button.";
-                return;
+                return false;
             }
-            
+            return true;
 
 
-            if (SqlService.Register(User, pass, true).Item1)
-            {
-                RegisterStatus.Text = "User added!";
-                usernameTextbox.Text = "";
-                passwordTextbox.Text = "";
-            }
-            else
-            {
-                RegisterStatus.Text = "Cloud not add user...";
-            }
-           
         }
-
         private void CloseButton_Click(object sender, EventArgs e)
         {
             ClosingController.btnExit_Click();
@@ -144,15 +150,6 @@ namespace ServerSide
         {
             passwordinfoLabel.Visible = !passwordinfoLabel.Visible;
         }
-
-        private void passwordinfoLabel_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ShowCodeButton_Click(object sender, EventArgs e)
-        {
-
-        }
+        
     }
 }

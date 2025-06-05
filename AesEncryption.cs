@@ -28,12 +28,12 @@ namespace ServerSide
             }
         }
 
-        public static void SetAESENVRkeys(string key, string iv)
+        public static void SetAESENVRkeys(byte[] key, byte[] iv)
         {
-            AESkeyCredentialVar = Convert.FromBase64String(key);
-            AESivCredentialVar = Convert.FromBase64String(iv);
+            AESkeyCredentialVar = key;
+            AESivCredentialVar = iv;
         }
-        public static (string, string) generate()
+        public static (byte[], byte[]) generate()
         {
             using (Aes aesServise = Aes.Create())
             {
@@ -44,7 +44,7 @@ namespace ServerSide
 
 
 
-            return (Convert.ToBase64String(AESkeyCredentialVar), Convert.ToBase64String(AESivCredentialVar));
+            return (AESkeyCredentialVar, AESivCredentialVar);
         }
 
 

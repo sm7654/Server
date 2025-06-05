@@ -19,6 +19,7 @@ namespace ServerSide
             using (RSA service = RSA.Create())
             {
                 publicKey = service.ToXmlString(false);
+                MessageBox.Show(Encoding.UTF8.GetBytes(publicKey).Length.ToString());
                 privateKey = service.ToXmlString(true);
                 return Encoding.UTF8.GetBytes(publicKey);
             }
@@ -26,10 +27,12 @@ namespace ServerSide
 
         public static byte[] Encrypt(string data, string key)
         {
+            // rsa  יצירת אובייקט זמני של 
             using (RSA service = RSA.Create())
             {
+                //יבוא 
                 service.FromXmlString(key);
-                return service.Encrypt(Encoding.UTF8.GetBytes(data), RSAEncryptionPadding.Pkcs1);
+                return service.Encrypt(Encoding.UTF8.GetBytes(data), RSAEncryptionPadding.OaepSHA1);
             }
         }
 
@@ -38,7 +41,7 @@ namespace ServerSide
             using (RSA service = RSA.Create())
             {
                 service.FromXmlString(key);
-                return service.Encrypt(data, RSAEncryptionPadding.Pkcs1);
+                return service.Encrypt(data, RSAEncryptionPadding.OaepSHA1);
             }
         }
 
@@ -47,7 +50,7 @@ namespace ServerSide
             using (RSA service = RSA.Create())
             {
                 service.FromXmlString(privateKey);
-                byte[] decryptedData = service.Decrypt(data, RSAEncryptionPadding.Pkcs1);
+                byte[] decryptedData = service.Decrypt(data, RSAEncryptionPadding.OaepSHA1);
                 return Encoding.UTF8.GetString(decryptedData);
             }
         }
@@ -57,7 +60,7 @@ namespace ServerSide
             using (RSA service = RSA.Create())
             {
                 service.FromXmlString(privateKey);
-                return service.Decrypt(data, RSAEncryptionPadding.Pkcs1);
+                return service.Decrypt(data, RSAEncryptionPadding.OaepSHA1);
             }
         }
 

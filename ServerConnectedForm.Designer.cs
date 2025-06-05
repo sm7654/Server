@@ -33,7 +33,6 @@ namespace ServerSide
             this.TezxtText = new System.Windows.Forms.Label();
             this.TitleLabel = new System.Windows.Forms.Label();
             this.SearchPanel = new System.Windows.Forms.Panel();
-            this.button1 = new System.Windows.Forms.Button();
             this.ShutServerButton = new System.Windows.Forms.Button();
             this.ShutSessionsButton = new System.Windows.Forms.Button();
             this.SearchLabel = new System.Windows.Forms.Label();
@@ -72,7 +71,6 @@ namespace ServerSide
             this.HeaderPanel.Padding = new System.Windows.Forms.Padding(10);
             this.HeaderPanel.Size = new System.Drawing.Size(1456, 60);
             this.HeaderPanel.TabIndex = 2;
-            this.HeaderPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.HeaderPanel_Paint);
             // 
             // TezxtText
             // 
@@ -97,7 +95,6 @@ namespace ServerSide
             // SearchPanel
             // 
             this.SearchPanel.BackColor = System.Drawing.Color.White;
-            this.SearchPanel.Controls.Add(this.button1);
             this.SearchPanel.Controls.Add(this.ShutServerButton);
             this.SearchPanel.Controls.Add(this.ShutSessionsButton);
             this.SearchPanel.Controls.Add(this.SearchLabel);
@@ -108,16 +105,6 @@ namespace ServerSide
             this.SearchPanel.Padding = new System.Windows.Forms.Padding(10);
             this.SearchPanel.Size = new System.Drawing.Size(1456, 49);
             this.SearchPanel.TabIndex = 1;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(813, 13);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // ShutServerButton
             // 
@@ -149,7 +136,7 @@ namespace ServerSide
             this.ShutSessionsButton.TabIndex = 1;
             this.ShutSessionsButton.Text = "Shut Sessions";
             this.ShutSessionsButton.UseVisualStyleBackColor = false;
-            this.ShutSessionsButton.Click += new System.EventHandler(this.button1_Click);
+            this.ShutSessionsButton.Click += new System.EventHandler(this.ShutSessionsButton_Click);
             // 
             // SearchLabel
             // 
@@ -334,7 +321,6 @@ namespace ServerSide
         private SplitContainer splitContainer1;
         private FlowLayoutPanel SessionsViewPanel;
         private FlowLayoutPanel BlockedClients;
-        private Button button1;
         private TableLayoutPanel tableLayoutPanel1;
         private Panel panel1;
         private Label label1;

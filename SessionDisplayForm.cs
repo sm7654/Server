@@ -10,6 +10,10 @@ namespace ServerSide
     {
         private List<SessionRecord> sessionRecords = new List<SessionRecord>();
         private uint TotalBytesFromMicro = 0;
+
+
+
+
         public SessionDisplayForm(session SessionToRepresent)
         {
             InitializeComponent();
@@ -27,10 +31,6 @@ namespace ServerSide
             }
             new Thread(new ThreadStart(() => KeepMicroBytesUpdated(SessionToRepresent))).Start();
             
-        }
-
-        private void panel2_Paint(object sender, PaintEventArgs e)
-        {
         }
 
         private void KeepMicroBytesUpdated(session S)
@@ -51,24 +51,12 @@ namespace ServerSide
             TotalBytesFromMicro = 0;
             this.flowLayoutPanel1.Controls.Clear();
         }
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
+        
 
         private void exitbutton_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
-        private void pictureBox2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
     }
 }

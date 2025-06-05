@@ -29,12 +29,15 @@ namespace ServerSide
                 string password = passwordTextBox.Text;
                 string dbName = dbNameTextBox.Text;
 
-                // Basic validation
-                /*if (username == "" || password == "" || dbName == "")
+                if (username == "" || password == "" || dbName == "")
                 {
+                    this.BeginInvoke(new Action(() =>
+                    {
+                        ErrorLabel.Text = "all inputs musnt be blank!";
+                    }));
                     return;
-                }*/
-                bool Connected = SqlService.ConnectToSql("shai", "1234", "DB");
+                }
+                bool Connected = SqlService.ConnectToSql(username, password, dbName);
 
                 if (Connected)
                 {

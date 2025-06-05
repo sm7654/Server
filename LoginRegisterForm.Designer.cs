@@ -160,16 +160,15 @@ namespace ServerSide
             this.passwordinfoLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.passwordinfoLabel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.passwordinfoLabel.Font = new System.Drawing.Font("Microsoft JhengHei", 7.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.passwordinfoLabel.Location = new System.Drawing.Point(279, 89);
+            this.passwordinfoLabel.Location = new System.Drawing.Point(279, 82);
             this.passwordinfoLabel.Name = "passwordinfoLabel";
             this.passwordinfoLabel.Padding = new System.Windows.Forms.Padding(5);
-            this.passwordinfoLabel.Size = new System.Drawing.Size(259, 114);
+            this.passwordinfoLabel.Size = new System.Drawing.Size(247, 108);
             this.passwordinfoLabel.TabIndex = 0;
             this.passwordinfoLabel.Text = "Password must:\r\n- Be at least 8 characters long\r\n- Include 1 lowercase letter\r\n- " +
     "Include 1 uppercase letter\r\n- Include 1 number\r\n- Include 1 special character ;\'" +
     "/^#!#%&......\r\n";
             this.passwordinfoLabel.Visible = false;
-            this.passwordinfoLabel.Click += new System.EventHandler(this.passwordinfoLabel_Click);
             // 
             // ShowCodeButton
             // 
@@ -186,7 +185,6 @@ namespace ServerSide
             this.ShowCodeButton.Size = new System.Drawing.Size(28, 20);
             this.ShowCodeButton.TabIndex = 11;
             this.ShowCodeButton.UseVisualStyleBackColor = false;
-            this.ShowCodeButton.Click += new System.EventHandler(this.ShowCodeButton_Click);
             this.ShowCodeButton.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ShowCodeButton_MouseDown);
             this.ShowCodeButton.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ShowCodeButton_MouseUp);
             // 
@@ -210,7 +208,6 @@ namespace ServerSide
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "LoginRegisterForm";
             this.Text = "Login / Register";
-            this.Load += new System.EventHandler(this.LoginRegisterForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.PasswordinfoButton)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

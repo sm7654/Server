@@ -34,39 +34,7 @@ namespace ServerSide
             this.startDate = DateTime.Now.ToString();
         }
 
-        
-/*
-         
-        public void SetStartDate(string startDate)
-        {
-            this.startDate = startDate;
-        }
-
-        public void SetSessionCode(string sessionCode)
-        {
-            this.sessionCode = sessionCode;
-        }
-
-        public void SetClientEndPoint(string clientEndPoint)
-        {
-            this.clientEndPoint = clientEndPoint;
-        }
-
-        public void SetClientName(string clientName)
-        {
-            this.clientKicname = clientName;
-        }
-*//*
-        public void SetMicroData(string microDataString)
-        {
-            this.microDataString = microDataString;
-        }*/
-
-        /*public void SetClientDataString(string clientDataString)
-        {
-            this.clientDataString = clientDataString;
-        }
-*/
+ 
         public void SetSessionDuration(uint sessionDuration)
         {
             this.sessionEnterTime = sessionDuration;
@@ -86,10 +54,16 @@ namespace ServerSide
 
         public void MakeNotLiveRecored()
         {
+            //הפיכת שיחה ללא פעילה
             IsLiveRecord = false;
             this.endDate = DateTime.Now.ToString();
             this.sessionTotalTime = ServerServices.GetTime() - sessionEnterTime;
         }
+
+
+
+
+
 
         public bool IsRecordLive()
         {

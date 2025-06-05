@@ -65,17 +65,7 @@ namespace ServerSide
             }
         }
 
-        public static void disconnectController(session s)
-        {
-            try
-            {
-                foreach (var Control in form.GetSessionLayoutControls())
-                {
-                    if (((sessionLayot)Control).GetSession().Equals(s))
-                        ((sessionLayot)Control).UpdateControllerStatus_dis();
-                }
-            } catch (Exception e) { }
-        }
+
         public static void AddBlockedGuest(BlockedClient c)
         {
             form.BeginInvoke(new Action(() => {

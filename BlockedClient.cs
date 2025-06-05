@@ -22,7 +22,7 @@ namespace ServerSide
         private BadGuest guest;
         public void AddAttempt()
         {
-            ConnetAttemps.Text = $"{guest.AddAttempt()}";
+            ConnetAttemps.Text = $"{guest.Log()}";
         }
         public string Get_MotherBoard_SN()
         {

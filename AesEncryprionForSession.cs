@@ -18,6 +18,15 @@ namespace ServerSide
         private byte[] aesIvMicro;
         private byte[] aesKeyMicro;
 
+        private byte[] TempClientKey;
+        private byte[] TempClientIv;
+
+
+        private byte[] TempMicroKey;
+        private byte[] TempMicroIv;
+
+
+
         private session currentSession;
 
         public AesEncryprionForSession()
@@ -64,8 +73,8 @@ namespace ServerSide
                 
                 currentSession.SendToClient(serverRole.Concat(messageToSend).ToArray(), false);
 
-                aesKeyClient = Key;
-                aesIvClient = Iv;
+                TempClientKey = Key;
+                TempClientIv = Iv;
             }
             catch (Exception ex)
             {
@@ -95,13 +104,14 @@ namespace ServerSide
                 string encrypted = Convert.ToBase64String(Key);
 
                 string encryptedIv = Convert.ToBase64String(Iv);
+
                 byte[] serverRole = ServerServices.GetServerRole();
-                byte[] messageToSend = Encoding.UTF8.GetBytes($"&CHANGEKEYIV&{encrypted}&{encryptedIv}");
                 
+                byte[] messageToSend = Encoding.UTF8.GetBytes($"&CHANGEKEYIV&{encrypted}&{encryptedIv}");
                 currentSession.SendToMicro(serverRole.Concat(messageToSend).ToArray(), false);
 
-                aesKeyMicro = Key;
-                aesIvMicro = Iv;
+                TempMicroKey = Key;
+                TempMicroIv = Iv;
             }
             catch (Exception ex)
             {
@@ -146,7 +156,10 @@ namespace ServerSide
         public byte[] DecryptDataForClient(byte[] encryptedData)
         {
             if (aesKeyClient == null || aesIvClient == null)
+            {
+                MessageBox.Show("they are null");
                 return null;
+            }
             try
             {
                 using (Aes aes = Aes.Create())
@@ -166,7 +179,6 @@ namespace ServerSide
             }
             catch (Exception e)
             {
-                // Handle the exception appropriately
                 Console.WriteLine();
             }
 
@@ -270,10 +282,25 @@ namespace ServerSide
             return (RsaEncryption.EncryptBytes(aesKeyClient, publickeyofclient), RsaEncryption.EncryptBytes(aesIvClient, publickeyofclient));
         }
 
-        public void SetNewIvAndKey(byte[] newiv, byte[] newkey)
+
+        public void ClientGotKeysSuccessfuly()
         {
-            this.aesIvClient = newiv; 
-            this.aesKeyClient = newkey;
+            aesIvClient = TempClientIv;
+            aesKeyClient = TempClientKey;
+
+            TempClientIv = null;
+            TempClientKey = null;
         }
+        public void MicroGotKeysSuccessfuly()
+        {
+            aesIvMicro = TempMicroIv;
+            aesKeyMicro = TempMicroKey;
+
+            TempMicroKey = null;
+            TempMicroIv = null;
+        }
+
+
+
     }
 }

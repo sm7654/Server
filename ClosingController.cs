@@ -12,12 +12,7 @@ namespace ServerSide
     {
         public static void btnExit_Click()
         {
-            string SolutionName = Assembly.GetExecutingAssembly().GetName().Name;
-            Process[] processes = Process.GetProcessesByName(SolutionName);
-            foreach (Process process in processes)
-            {
-                try { process.Kill(); } catch { }
-            }
+            Environment.Exit(0);
         }
     }
 }

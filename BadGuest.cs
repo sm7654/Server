@@ -6,29 +6,25 @@ namespace ServerSide
     {
         private int ConnectAttemps = 0;
         private string blockeDate;
-        public BadGuest(Guest g) : base(g)
+        public BadGuest(Guest g) : base(g.GEt_MotherBoard_SN())
         {
             blockeDate = DateTime.Now.GetDateTimeFormats().ToString();
         }
         public BadGuest() : base()
         {
         }
-        public BadGuest(string SR, string DT) : base(SR, false)
+        public BadGuest(string SR, string DT) : base(SR)
         {
             blockeDate=DT;
-        }
-        public int AddAttempt()
-        {
-            ConnectAttemps++;
-            return ConnectAttemps;
         }
         public string GetBlockedDate()
         {
             return blockeDate;
         }
-        public override void Log()
+        public override int Log()
         {
-            return;
+            ConnectAttemps++;
+            return ConnectAttemps;
         }
     }
 }

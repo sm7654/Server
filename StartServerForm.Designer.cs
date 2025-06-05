@@ -34,7 +34,7 @@ namespace ServerSide
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StartServerForm));
-            this.button1 = new System.Windows.Forms.Button();
+            this.StartServerButton = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.njlkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.klklToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,21 +43,21 @@ namespace ServerSide
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // button1
+            // StartServerButton
             // 
-            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
-            this.button1.FlatAppearance.BorderSize = 0;
-            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(468, 396);
-            this.button1.Margin = new System.Windows.Forms.Padding(4);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(180, 45);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "Start Server";
-            this.button1.UseVisualStyleBackColor = false;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.StartServerButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
+            this.StartServerButton.FlatAppearance.BorderSize = 0;
+            this.StartServerButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.StartServerButton.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.StartServerButton.ForeColor = System.Drawing.Color.White;
+            this.StartServerButton.Location = new System.Drawing.Point(468, 396);
+            this.StartServerButton.Margin = new System.Windows.Forms.Padding(4);
+            this.StartServerButton.Name = "StartServerButton";
+            this.StartServerButton.Size = new System.Drawing.Size(180, 45);
+            this.StartServerButton.TabIndex = 1;
+            this.StartServerButton.Text = "Start Server";
+            this.StartServerButton.UseVisualStyleBackColor = false;
+            this.StartServerButton.Click += new System.EventHandler(this.StartServerButton_Click);
             // 
             // contextMenuStrip1
             // 
@@ -103,21 +103,20 @@ namespace ServerSide
             this.ClientConnectedStatus.Size = new System.Drawing.Size(0, 23);
             this.ClientConnectedStatus.TabIndex = 3;
             // 
-            // Form1
+            // StartServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.ClientSize = new System.Drawing.Size(1092, 554);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.StartServerButton);
             this.Controls.Add(this.ClientConnectedStatus);
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.Name = "Form1";
+            this.Name = "StartServerForm";
             this.Text = "Server Control Panel";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -126,7 +125,7 @@ namespace ServerSide
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button StartServerButton;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem njlkToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem klklToolStripMenuItem;

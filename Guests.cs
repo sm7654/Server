@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace ServerSide
 {
@@ -8,28 +9,20 @@ namespace ServerSide
         protected string MotherBoard_SN;
         private int logs;
         private double Timer;
-        private bool HasEntered = false;
+        private bool Suspicius = false;
         List<double> gaps = new List<double>();
         private readonly object LockObject = new object();
 
         public Guest() { }
 
-        public Guest(Guest ForgainGuest)
-        {
-            this.MotherBoard_SN = ForgainGuest.GEt_MotherBoard_SN();
-            this.logs = ForgainGuest.GetLogs();
-            this.Timer = ForgainGuest.GetTimer();
-            this.HasEntered = ForgainGuest.GetHasEntered();
-            this.gaps = new List<double>(ForgainGuest.GetGaps()); 
-        }
+        
 
 
-        public Guest(string SN, bool RegularConnection)
+        public Guest(string SN)
         {
             logs = 1;
             Timer = 0;
-            if (RegularConnection)
-                new Thread(Count).Start();
+            new Thread(Count).Start();
             this.MotherBoard_SN = SN;
         }
 
@@ -48,112 +41,98 @@ namespace ServerSide
             return this.logs;
         }
 
-        public void SetLogs(int logCount)
-        {
-            this.logs = logCount;
-        }
-
-        public double GetTimer()
-        {
-            return this.Timer;
-        }
-
-        public void SetTimer(double time)
-        {
-            this.Timer = time;
-        }
-
-        public bool GetHasEntered()
-        {
-            return this.HasEntered;
-        }
-
-        public void SetHasEntered(bool hasEntered)
-        {
-            this.HasEntered = hasEntered;
-        }
-
-        public List<double> GetGaps()
-        {
-            return this.gaps;
-        }
-
-        public void SetGaps(List<double> gapList)
-        {
-            this.gaps = gapList;
-        }
-
+        
+        
         private void Count()
         {
             double tempTimer = 0;
-            while (!HasEntered)
+            //נכנס רק אם הלקוח לא חשוד
+            while (!Suspicius)
             {
-                Thread.Sleep(100);
-                tempTimer += 0.1;
+                Thread.Sleep(10);
+                tempTimer += 0.01;
+                //מחשיב 10 שניות כניסון
+                
                 if (tempTimer > 10)
                 {
+                    //מוסיף את הזמן לזמן הכללי רשימת ההפרשים
                     Timer += tempTimer;
+                    gaps.Add(tempTimer);
+                    //מוסיף ניסיון כושל ומאפס את הטיימר
+                    logs++;
                     tempTimer = 0;
                 }
             }
-            gaps.Add(tempTimer);
             Timer += tempTimer;
+            gaps.Add(tempTimer);
+            logs++;
         }
 
-        public virtual void Log()
+        public virtual int Log()
         {
             lock (LockObject)
             {
-                logs++;
-                HasEntered = true;
-                Thread.Sleep(100);
-                HasEntered = false;
+                Suspicius = true;
+                Thread.Sleep(10);
+                Suspicius = false;
                 new Thread(Count).Start();
+                return 0;
             }
         }
 
         public double AvrageLogTime()
         {
-            lock (LockObject)
-            {
-                HasEntered = true;
-                double t = Timer / (logs);
-                Thread.Sleep(100);
-                HasEntered = false;
-                return t;
-            }
+            //חישוב ממוצע זמן של כל ניסיון
+            double t = Timer / (logs);
+            //החזרת הממוצע
+            return t;
         }
 
         public void StopCount()
         {
-            HasEntered = true;
+            //לוודא שהנתונים עדכניים
+            lock (LockObject)
+            {
+                MessageBox.Show("stoped time");
+                //הגדרת מתשנה כאמת בכדי להפסיק את הטיימר
+                Suspicius = true;
+                //דיליי קטן כדי לוודא שהתיעוד של הפעולה המוצלחת תועד
+                
+            }
         }
         public void RestartCount()
         {
-            HasEntered = false;
+            Suspicius = false;
             new Thread(Count).Start();
         }
 
         public bool IsConssistent()
         {
+            //לוודא שהנתונים עדכניים
             lock (LockObject)
             {
-                double tempgap = 0;
-                foreach (double item in gaps)
-                    tempgap += item;
-
-                double AvrageGap = tempgap / gaps.Count;
+                //חישוב הפרש ממוצע
+                double AvrageGap = Timer / gaps.Count;
+                //הגדרת מתשנה המייצג את כמות הפעמים שהוהת עקביות
                 double FoundCon = 0;
-                foreach (double item in gaps)
+                //ריצה על הכל ההפרשים
+                foreach (double gap in gaps)
                 {
-                    if ((-1 <= item - AvrageGap) && (1 >= item - AvrageGap))
+                    //בדיקת עקביות
+                    if ((-1.5 <= gap - AvrageGap) && (1.5 >= gap - AvrageGap))
                     {
+                        //אם נמצא עקביות מגדיל את משתנה עקביות-נמצא באחד
                         FoundCon++;
                     }
-                    if (FoundCon / gaps.Count > 0.5)
+                    //בודקת אם עד עכשיו כמות הפעמים שנמצא קביעות בהפרשים גדולה גדולה או שווה ל75% מכמות ההפרשים
+                    if (FoundCon / gaps.Count >= 0.75)
+                    {
+                        //מחזירה אחת אם כן
                         return true;
+                    }
                 }
-
+                //אם לא נמצא עקביות מחזירה שקר
+                
                 return false;
             }
         }

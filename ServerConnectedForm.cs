@@ -13,7 +13,6 @@ namespace ServerSide
     public partial class ServerConnectedForm : Form
     {
         Socket ServerSock;
-        Socket UdpClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         sessionLayot Layout;
 
 
@@ -24,19 +23,12 @@ namespace ServerSide
         {
             this.ServerSock = serverSock;
             ServerServices.AddServerSock(serverSock);
-            UdpClientSocket.Bind(new IPEndPoint(IPAddress.Any, 65000));
             InitializeComponent();
             FormController.SetForm(this);
             ServerServices.StartTimer();
 
         }
 
-        public ServerConnectedForm()
-        {
-            InitializeComponent();
-
-
-        }
         private void ServerConnectedForm_Load(object sender, EventArgs e)
         {
 
@@ -56,29 +48,31 @@ namespace ServerSide
             ServerSock.Listen(100);
 
 
-
             while (true)
             {
-                
-
+                // קבלת חיבורים חדשים ושמירתם בתוך משתנה המייצג את החיבור
                 Socket Conn = ServerSock.Accept();
-
-
-                new Thread(() => SelectionOfConnections(Conn)).Start();
-                
-
-
+                // חדש כדי שהשרת יוכל לקבל לקוחות חדשים ובמקביל יטפל בחיבור החדש thread פתיחת
+                new Thread(() => SelectionOfConnections(Conn)).Start();    
             }
+
+
+
+
         }
+
+
+
+
         public void SelectionOfConnections(Socket Conn)
         {
-            
 
+
+            Guest TempG = null;
             try
             {
 
                 bool IsMicro = false;
-                Guest TempG = null;
                 byte[] PublicKeyBytes = new byte[1024];
                 int Keylength = Conn.Receive(PublicKeyBytes);
                 string PublicKey = Encoding.UTF8.GetString(PublicKeyBytes, 0, Keylength);
@@ -90,14 +84,9 @@ namespace ServerSide
                 string re = RsaEncryption.Decrypt(recognition);
                 if (re == "Micro")
                     IsMicro = true;
-                //////////////////////////////
+                
 
-                /*(byte[] AesKey, byte[] AesIV) = AesEncryption.GetAesEncryptedTempKeys(PublicKey);
-                Conn.Send(AesKey);
-                Thread.Sleep(200);
-                Conn.Send(AesIV);
-*/
-                //////////////////////////////
+
 
                 if (!IsMicro)
                 {
@@ -112,29 +101,26 @@ namespace ServerSide
 
                         MotherBoardSerialNumber = RsaEncryption.Decrypt(bytes);
 
-                        (bool NC, Guest g) = ServerServices.HasBennHere(MotherBoardSerialNumber);
-
+                        bool NC = ServerServices.IsBadGuest(MotherBoardSerialNumber);
+                        Guest g;
                         Thread.Sleep(200);
 
                         if (NC)
                         {
-                            if (g is BadGuest)
-                            {
-                                Conn.Send(Encoding.UTF8.GetBytes("NoOk"));
-                                foreach (BlockedClient badGuest in BlockedClients.Controls)
-                                    if (badGuest.Get_MotherBoard_SN() == MotherBoardSerialNumber)
-                                    {
-                                        badGuest.AddAttempt();
-                                        break;
-                                    }
+                            Conn.Send(Encoding.UTF8.GetBytes("NoOk"));
+                            foreach (BlockedClient badGuest in BlockedClients.Controls)
+                                if (badGuest.Get_MotherBoard_SN() == MotherBoardSerialNumber)
+                                {
+                                    badGuest.AddAttempt();
+                                    break;
+                                }
 
-                                return;
-                            }
-                            Conn.Send(Encoding.UTF8.GetBytes("Ok"));
+                            return;
                         }
                         else
                         {
                             Conn.Send(Encoding.UTF8.GetBytes("Ok"));
+                            g = new Guest(MotherBoardSerialNumber);
                             ServerServices.AddGuest(g);
                         }
                         TempG = g;
@@ -146,8 +132,6 @@ namespace ServerSide
                 }
 
 
-
-                //string[] CodeAndKnickname = reciveIdentifiers(Conn);
                 string[] SessionAndMicroName;
                 if (IsMicro)
                 {
@@ -225,10 +209,11 @@ namespace ServerSide
                             string username = CodeAndKnickname[1];
                             bool success = false;
                             bool LoginRequest = false;
+                            bool NewClientRequest = false;
                             string personalCode = "";
                             if (CodeAndKnickname[0] == "RESETPASS")
                             {
-                                success = SqlService.RestPass(username, CodeAndKnickname[2], CodeAndKnickname[3], false);
+                                success = SqlService.RestPass(username, CodeAndKnickname[2], CodeAndKnickname[3]);
                             } else if (CodeAndKnickname[0] == "CONNECTOSESSION")
                             {
                                 success = SqlService.LoginSql(username, CodeAndKnickname[2], false);
@@ -237,6 +222,7 @@ namespace ServerSide
                             {
 
                                 (success, personalCode) = SqlService.Register(username, CodeAndKnickname[2], false);
+                                NewClientRequest = true;
                             }
 
                             if (success)
@@ -245,6 +231,8 @@ namespace ServerSide
                                 {
                                     if (sessoinSearch(Conn, CodeAndKnickname, PublicKey))
                                     {
+                                        TempG.StopCount();
+                                        ServerServices.RemoveGueast(TempG);
                                         return;
                                     }
                                     else
@@ -253,9 +241,12 @@ namespace ServerSide
                                         TempG.Log();
                                     }
                                 }
-                                else
+                                else if (NewClientRequest)
                                 {
                                     SendToClient(Conn, $"201&{personalCode}");
+                                } else
+                                {
+                                    SendToClient(Conn, $"202&");
                                 }
                             }
                             else
@@ -265,11 +256,12 @@ namespace ServerSide
                             }
 
                             CodeAndKnickname = reciveIdentifiers(Conn);
-
-                            if (TempG.GetLogs() > 8 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 1))
+                            new Thread(() => { MessageBox.Show(TempG.AvrageLogTime().ToString()); }).Start();
+                            if (TempG.GetLogs() > 8 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 4))
                             {
+                                TempG.StopCount();
                                 SendToClient(Conn, $"999&");
-                                BadGuest BG = ServerServices.MakeGuestBlack(TempG);
+                                BadGuest BG = ServerServices.MakeGuestBad(TempG);
                                 BlockedClient NewBad = new BlockedClient(BG);
                                 SqlService.AddBlockedGuest(BG);
                                 this.BeginInvoke(new Action(() => {
@@ -284,15 +276,11 @@ namespace ServerSide
 
                         }
                         catch (Exception ex) {
-                            SendToClient(Conn, $"400&");
-                            if (CodeAndKnickname[0] == null)
-                            {
-                                ServerServices.StopCountToGuest(TempG);
-                                Conn.Close();
-                                return;
-                            }
-                            CodeAndKnickname = reciveIdentifiers(Conn);
-                            
+                            SendToClient(Conn, $"800&");
+                            TempG.StopCount();
+                            ServerServices.RemoveGueast(TempG);
+                            Conn.Close();
+                            return;
                         }
 
 
@@ -305,7 +293,14 @@ namespace ServerSide
                 
                 
             }
-            catch (Exception e) { }
+            catch (Exception e) { 
+                Conn.Close();
+                if (TempG != null)
+                {
+                    TempG.StopCount();
+                    ServerServices.RemoveGueast(TempG);
+                }
+            }
         }
         private void SendToClient(Socket Conn, string message)
         {
@@ -421,19 +416,16 @@ namespace ServerSide
             }
         }     
 
-        private void CloseButton_Click(object sender, EventArgs e)
-        {
-            SessionsViewPanel.Controls.Clear();
-            ServerServices.CloseConnection();
-        }
+        
 
 
         private void DisconnectServerButton_Click(object sender, EventArgs e)
         {
             ServerServices.CloseConnection();
+            ClosingController.btnExit_Click();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void ShutSessionsButton_Click(object sender, EventArgs e)
         {
             ServerServices.CloseAllConnection();
         }
@@ -555,22 +547,12 @@ namespace ServerSide
 
         private void ServerConnectedForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            ServerServices.CloseAllConnection();
             ClosingController.btnExit_Click();
         }
 
-        private void button1_Click_1(object sender, EventArgs e)
-        {
-            //MessageBox.Show(
-            //ServerServices.EV()
-            //); 
-            //AesEncryption.ChengeIvAndKey();
 
-        }
-
-        private void HeaderPanel_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
+        
     }
 
 
