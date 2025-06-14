@@ -71,10 +71,13 @@ namespace ServerSide
 
         private void pictureBox2_Click(object sender, EventArgs e)
         {
-            ServerServices.removeSession(this.ConnectedSession);
-            FormController.RemoveSession(this);
-            this.ConnectedSession.disconnect();
-
+            try
+            {
+                ServerServices.removeSession(this.ConnectedSession);
+                FormController.RemoveSession(this);
+                this.ConnectedSession.disconnect();
+            }
+            catch (Exception ex) { }
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
@@ -98,10 +101,6 @@ namespace ServerSide
             SDF = sessionDisplayForm;
             sessionDisplayForm.ShowDialog();
         }
-        public void Closeform()
-        {
-            SDF.CleanForm();
-            SDF.Close();
-        }
+        
     }
 }

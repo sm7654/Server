@@ -93,7 +93,6 @@ namespace ServerSide
             //לוודא שהנתונים עדכניים
             lock (LockObject)
             {
-                MessageBox.Show("stoped time");
                 //הגדרת מתשנה כאמת בכדי להפסיק את הטיימר
                 Suspicius = true;
                 //דיליי קטן כדי לוודא שהתיעוד של הפעולה המוצלחת תועד

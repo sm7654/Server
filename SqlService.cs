@@ -282,22 +282,96 @@
             }
 
 
-            public static string GetExpererimentOfUser(string request)
+        public static string GetExpererimentOfUser(string request)
+        {
+            try
             {
-                try
+
+                string username = request.Split('&')[2];
+                string[] Filtters = request.Split('&')[3].Split(',');
+
+                string command = $"SELECT * FROM Experiments WHERE username = @user;";
+
+                string hh = "";
+                using (SqlCommand sqlCommand = new SqlCommand(command, SqlConnection))
                 {
-
-                    string username = request.Split('&')[2];
-                    string[] Filtters = request.Split('&')[3].Split(',');
-
-                    string command = $"SELECT * FROM Experiments WHERE username = @user;";
-
-                    string hh = "";
-                    using (SqlCommand sqlCommand = new SqlCommand(command, SqlConnection))
+                    sqlCommand.Parameters.AddWithValue("@user", username);
+                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
                     {
-                        sqlCommand.Parameters.AddWithValue("@user", username);
-                        using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                        bool MinCalc = false;
+                        if (request.Contains("min") || request.Contains("max"))
                         {
+                            if (request.Contains("min"))
+                                MinCalc = true;
+                            string Par = request.Split('&')[request.Split('&').Length - 1].Replace("min", "");
+                            Par = Par.Replace("max", "");
+                            reader.Read();
+
+                            string TempCreationstring = AesEncryption.DecryptDataToSqlToString(Convert.FromBase64String(reader.GetString(2)));
+                            string[] TempParameters = TempCreationstring.Split(';');
+                            double MaxOrMin = 0;
+                            try
+                            {
+                                foreach (string item in TempParameters)
+                                {
+                                    if (item.Contains(Par))
+                                    {
+                                        MaxOrMin = double.Parse(item.Split(':')[1].Split('|')[0]);
+                                        hh = $"&{TempCreationstring}";
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show(e.Message);
+                            }
+                            while (reader.Read())
+                            {
+                                string creationstring = AesEncryption.DecryptDataToSqlToString(Convert.FromBase64String(reader.GetString(2)));
+                                string[] parameters = creationstring.Split(';');
+
+                                foreach (string item in parameters)
+                                {
+                                    if (item.Contains(Par))
+                                    {
+                                        double val = double.Parse(item.Split(':')[1].Split('|')[0]);
+                                        if (!MinCalc)
+                                        {
+                                            if (val > MaxOrMin)
+                                            {
+                                                hh = $"&{creationstring}";
+                                                MaxOrMin = val;
+                                            }
+                                            else if (val == MaxOrMin)
+                                            {
+                                                hh += $"&{creationstring}";
+                                                MaxOrMin = val;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (val < MaxOrMin)
+                                            {
+                                                hh = $"&{creationstring}";
+                                                MaxOrMin = val;
+                                            }
+                                            else if (val == MaxOrMin)
+                                            {
+                                                hh += $"&{creationstring}";
+                                                MaxOrMin = val;
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                            return hh;
+                        }
+                        else
+                        {
+
+
                             while (reader.Read())
                             {
                                 string de = AesEncryption.DecryptDataToSqlToString(Convert.FromBase64String(reader.GetString(2)));
@@ -308,13 +382,16 @@
                             return hh;
                         }
                     }
-
                 }
-                catch (Exception ex)
-                { }
 
-                return "";
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show (ex.Message );
+            }
+
+            return "";
+        }
 
             private static string GetCreationStringIfExperStandConditions(string[] Filtters, string CreationString)
             {

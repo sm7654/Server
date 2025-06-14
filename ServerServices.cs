@@ -19,6 +19,7 @@ namespace ServerSide
         private static List<session> sessionsList = new List<session>();
         private static List<Guest> ConnectionRequests = new List<Guest>();
         private static uint timer = 0;
+        private static SessionDisplayForm sessionDisplayForm = null;
 
         private static byte[] ServerRole = Encoding.UTF8.GetBytes("%%ServerRelatedMessage%%");
 
@@ -289,8 +290,14 @@ namespace ServerSide
 
         public static void CloseAllConnection()
         {
-            foreach (session session in sessionsList)
-                session.disconnect();
+            foreach (session session in sessionsList.ToList())
+            {
+                try
+                {
+                    session.disconnect();
+                }
+                catch (Exception e) { }
+            }
             
             sessionsList.Clear();
         }
@@ -323,11 +330,12 @@ namespace ServerSide
             minutes = (timeinsec - hours * 3600) / 60;
             seconds = timeinsec - hours * 3600 - minutes * 60;
 
+            /*
             if (minutes < 0)
                 minutes = 0;
             if (seconds < 0)
                 seconds = 0;
-
+            */
 
             return $"{hours}h {minutes}m {seconds}s";
         }
@@ -358,7 +366,15 @@ namespace ServerSide
             }
             return (Math.Round(number, 2)).ToString() + " " + Unit;
         }
-        
+        public static void setDisplayFrom(SessionDisplayForm SDF)
+        {
+            sessionDisplayForm = SDF;
+        }
+        public static void AddNewSessionToForm(SessionRecord SD)
+        {
+            if (sessionDisplayForm != null)
+                sessionDisplayForm.AddSessoinToFrom(SD);
+        }
 
 
     }

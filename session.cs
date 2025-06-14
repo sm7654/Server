@@ -215,8 +215,9 @@ namespace ServerSide
                     
                 }
             }
-            catch (Exception e) {
-
+            catch (Exception e) 
+            {
+                 
             }
 
 
@@ -240,6 +241,7 @@ namespace ServerSide
 
                 SRD = new SessionRecord(Code, Client_endpoint, ClientKnickname, BytesFromClient,  BytesFromMicro,  EnterTime, EnterDate);
                 SessionsRecoeds.Add(SRD);
+                ServerServices.AddNewSessionToForm(SRD);
 
             }
 
@@ -298,26 +300,30 @@ namespace ServerSide
 
         public void SendToClient(byte[] data, bool Encrypted)
         {
-            if (ClientConn == null)
-                return;
+            try
+            {
+                if (ClientConn == null)
+                    return;
 
-            //כדי לוודא שאין עוד תהליכון ששולח מידע במקביל ClientSendLock מבקש בעלות על האובייקט 
-            lock (ClientSendLock) {
-                
-                //בודק האם יש לבצע הצפנה או לא
-                if (!Encrypted)
-                    //מבצע הצפנה למידע
-                    data = AEFS.EncryptedDataToClient(data);
+                //כדי לוודא שאין עוד תהליכון ששולח מידע במקביל ClientSendLock מבקש בעלות על האובייקט 
+                lock (ClientSendLock)
+                {
+
+                    //בודק האם יש לבצע הצפנה או לא
+                    if (!Encrypted)
+                        //מבצע הצפנה למידע
+                        data = AEFS.EncryptedDataToClient(data);
 
 
-                ClientConn.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));// שליחת גודל במידע שנרצה לשלוח
-                Thread.Sleep(200);// דיליי קטן כדי לוודא שהצד המקבל מוכן לקבל את המידע עצמו
-                ClientConn.Send(data);// שליחת המידע עצמו
+                    ClientConn.Send(Encoding.UTF8.GetBytes(data.Length.ToString()));// שליחת גודל במידע שנרצה לשלוח
+                    Thread.Sleep(200);// דיליי קטן כדי לוודא שהצד המקבל מוכן לקבל את המידע עצמו
+                    ClientConn.Send(data);// שליחת המידע עצמו
 
-                //הוספה של כמות המידע שעבר ללקוח לסכום הכללי 
-                AddToBytesToCLient((uint)Encoding.UTF8.GetBytes(data.Length.ToString()).Length + (uint)data.Length);
+                    //הוספה של כמות המידע שעבר ללקוח לסכום הכללי 
+                    AddToBytesToCLient((uint)Encoding.UTF8.GetBytes(data.Length.ToString()).Length + (uint)data.Length);
+                }
             }
-
+            catch (Exception e) { }
 
 
 

@@ -50,10 +50,13 @@ namespace ServerSide
 
             while (true)
             {
-                // קבלת חיבורים חדשים ושמירתם בתוך משתנה המייצג את החיבור
-                Socket Conn = ServerSock.Accept();
-                // חדש כדי שהשרת יוכל לקבל לקוחות חדשים ובמקביל יטפל בחיבור החדש thread פתיחת
-                new Thread(() => SelectionOfConnections(Conn)).Start();    
+                try
+                {
+                    // קבלת חיבורים חדשים ושמירתם בתוך משתנה המייצג את החיבור
+                    Socket Conn = ServerSock.Accept();
+                    // חדש כדי שהשרת יוכל לקבל לקוחות חדשים ובמקביל יטפל בחיבור החדש thread פתיחת
+                    new Thread(() => SelectionOfConnections(Conn)).Start();
+                } catch (Exception e){ }
             }
 
 
@@ -256,8 +259,7 @@ namespace ServerSide
                             }
 
                             CodeAndKnickname = reciveIdentifiers(Conn);
-                            new Thread(() => { MessageBox.Show(TempG.AvrageLogTime().ToString()); }).Start();
-                            if (TempG.GetLogs() > 8 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 4))
+                            if (TempG.GetLogs() > 200 && (TempG.IsConssistent() || TempG.AvrageLogTime() < 4))
                             {
                                 TempG.StopCount();
                                 SendToClient(Conn, $"999&");
@@ -521,7 +523,7 @@ namespace ServerSide
                 case "cip":
                     foreach (var Control in SessionsViewPanel.Controls)
                     {
-                        if (((sessionLayot)Control).GetSession().GetControllerEndPoint().Item1 != advSearch[1])
+                        if (((sessionLayot)Control).GetSession().GetControllerEndPoint().Item1.StartsWith(advSearch[1]))
                             ((sessionLayot)Control).Hide();
                         else
                             ((sessionLayot)Control).Show();
